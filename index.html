@@ -182,14 +182,16 @@ textarea.input{min-height:72px;resize:vertical}
 .listhead .sub{color:var(--ink2);font-size:.9rem}
 .listhead .bar{grid-column:1/-1;margin-top:6px}
 .listhead .meta{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.88rem;color:var(--ink2)}
-.cartrow{display:grid;grid-template-columns:auto auto 1fr;gap:6px 12px;align-items:center;padding:12px 0;position:relative;border-bottom:1px solid var(--hair)}
+.cartrow{display:grid;grid-template-columns:auto auto 1fr auto;gap:2px 12px;align-items:center;padding:11px 0;position:relative;border-bottom:1px solid var(--hair)}
 .cartrow.got .name{text-decoration:line-through;color:var(--ink2)}
 .cartrow.got .thumb{opacity:.45}
-.cartrow .name{font-weight:600;font-size:1rem;letter-spacing:-.01em}
-.cartrow .sub{font-size:.84rem;color:var(--ink2)}
-.cartrow .controls{grid-column:3/4;display:flex;align-items:center;gap:10px}
-.cartrow .pricebtn{font-size:.9rem;color:var(--ink2);padding:6px 2px;font-variant-numeric:tabular-nums;text-decoration:underline dotted var(--ink3);text-underline-offset:3px}
-.cartrow .linetotal{margin-left:auto;font-weight:600;color:var(--ink);font-size:.95rem}
+.cartrow .body{min-width:0}
+.cartrow .name{font-weight:600;font-size:1rem;letter-spacing:-.01em;line-height:1.25}
+.cartrow .sub{font-size:.84rem;color:var(--ink2);margin-top:3px;line-height:1.35}
+.cartrow .sub b{font-weight:600} .cartrow .sub .c2{color:var(--limit)} .cartrow .sub .c3{color:var(--avoid)}
+.cartrow .act{display:flex;flex-direction:column;align-items:flex-end;gap:5px;justify-self:end}
+.cartrow .pricebtn{font:inherit;color:var(--ink2);padding:0;font-variant-numeric:tabular-nums;text-decoration:underline dotted var(--ink3);text-underline-offset:3px}
+.cartrow .linetotal{font-weight:600;color:var(--ink);font-size:.9rem;font-variant-numeric:tabular-nums;line-height:1}
 .cartrow .qty{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
 .cartrow .money{width:104px}
 .cartrow .money .input{min-height:32px;padding-block:3px;border-radius:999px;padding-left:22px}
@@ -1307,7 +1309,7 @@ function renderCart(){
   if (st) $("#titleAside").innerHTML = `<span class="lozenge">${esc(st.name)}</span>`;
   sc.innerHTML = `
     <div class="listhead" style="--h:${personHue(p)}">
-      <div><div class="row nowrap" style="gap:8px"><span class="pdot"></span><h2>${esc(p.name)}'s list</h2></div><div class="sub"><span class="num">${got}/${items.length}</span> checked · ${items.length} item${items.length === 1 ? "" : "s"}</div></div>
+      <div><div class="row nowrap" style="gap:8px"><span class="pdot"></span><h2>${esc(p.name)}'s list</h2></div><div class="sub"><span class="num">${got}</span> of <span class="num">${items.length}</span> checked</div></div>
       <div class="row nowrap" style="gap:6px"><button class="btn sm ghost" data-act="checkall">${items.every(i => i.got) ? "Uncheck all" : "Check all"}</button><button class="btn sm" data-act="trip">Change</button></div>
       ${avoid.length ? `<div class="warn">⚠ Marked Avoid for ${esc(p.name)}: ${esc(avoid.map(x => x.f.name).join(", "))}</div>` : ""}
     </div>
@@ -1316,11 +1318,10 @@ function renderCart(){
       return `<div class="cartrow ${i.got ? "got" : ""}" data-id="${esc(i.id)}">
         <label class="check"><input type="checkbox" data-act="got" ${i.got ? "checked" : ""} aria-label="Got ${esc(i.name || (f && f.name) || "item")}"></label>
         ${f ? tileHTML(f, g.lvl, `${f.na.toLocaleString()} mg`, "sm") : "<span></span>"}
-        <div class="grow"><div class="name">${esc(i.name || (f && f.name) || "Item")}</div><div class="sub">${g.lvl ? `<b class="c${g.lvl}">${L.label}</b> · ` : ""}${f ? esc(unitFor(f, st)) : ""}</div></div>
-        <div class="controls">
+        <div class="body"><div class="name">${esc(i.name || (f && f.name) || "Item")}</div><div class="sub">${g.lvl >= 2 ? `<b class="c${g.lvl}">${L.label}</b> · ` : ""}${f ? esc(unitFor(f, st)) + " · " : ""}<button class="pricebtn" data-act="editprice" aria-label="Change price">${money(i.price)} each</button></div></div>
+        <div class="act">
           <div class="qty"><button data-act="dec" aria-label="One less">−</button><span>${i.qty}</span><button data-act="inc" aria-label="One more">+</button></div>
-          <button class="pricebtn" data-act="editprice" aria-label="Change price">${money(i.price)} each</button>
-          <span class="num linetotal">${money(i.qty * i.price)}</span>
+          ${i.qty > 1 ? `<span class="num linetotal">${money(i.qty * i.price)}</span>` : ""}
         </div>
       </div>`;
     }).join("")}</div>
