@@ -1,0 +1,1680 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}</style>
+<title>Tray Card Grocer</title>
+<meta name="theme-color" content="#F3EEE4">
+<meta name="description" content="A grocery list that checks every food against a person's diet order — sodium, fluids, breathing and more — with real product photos. Made for Houston stores."><meta property="og:title" content="Tray Card Grocer"><meta property="og:description" content="Shop for someone with a diet order. Every food graded OK / Limit / Avoid, with the reason."><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" href="icon-64.png"><meta name="apple-mobile-web-app-title" content="Tray Card">
+<style>
+/* Calm ground. Vivid, countable, self-contained units made of real material, carrying their own small
+   badges, named by their own tabs. Paper by default; a glass (dark) option under More → Appearance. */
+:root{
+  --bg:#F3EEE4; --paper2:#E9E3D6; --surface:#FBF8F2; --field:#FFFFFF; --tile:#FFFFFF;
+  --ink:#141412; --ink2:#615D55; --ink3:#9B968C; --hair:rgba(20,20,18,.14); --hair2:rgba(20,20,18,.07);
+  --sand:#E8B84A; --sand-ink:#141412;
+  --ok:#1D8F43; --fluid:#1B6FA8; --limit:#B37A00; --avoid:#C8302A;
+  --ok-fill:#1E9E4A; --fluid-fill:#1E7FBF; --limit-fill:#E0A100; --avoid-fill:#D0342C;
+  --ok-soft:rgba(30,158,74,.12); --fluid-soft:rgba(30,127,191,.12); --limit-soft:rgba(224,161,0,.16); --avoid-soft:rgba(208,52,44,.12);
+  --tile-edge:rgba(20,20,18,.14); --tile-shadow:0 1px 0 rgba(20,20,18,.05),0 2px 6px rgba(40,30,10,.18);
+  --island:#101012; --island-ink:#FFFFFF;
+  --sat:52%; --lit:46%;
+  --r:10px;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --emoji:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif;
+}
+:root[data-theme="glass"]{
+  color-scheme:dark;
+  --bg:#0B0B0D; --paper2:#18181B; --surface:#161618; --field:#1C1C1E; --tile:#FFFFFF;
+  --ink:#FFFFFF; --ink2:rgba(255,255,255,.62); --ink3:rgba(255,255,255,.38); --hair:rgba(255,255,255,.14); --hair2:rgba(255,255,255,.07);
+  --sand:#E8D5A8; --sand-ink:#141412;
+  --ok:#30D158; --fluid:#64D2FF; --limit:#FFD60A; --avoid:#FF453A;
+  --ok-fill:#30D158; --fluid-fill:#64D2FF; --limit-fill:#FFD60A; --avoid-fill:#FF453A;
+  --ok-soft:rgba(48,209,88,.16); --fluid-soft:rgba(100,210,255,.16); --limit-soft:rgba(255,214,10,.16); --avoid-soft:rgba(255,69,58,.16);
+  --tile-edge:rgba(255,255,255,.10); --tile-shadow:0 3px 10px rgba(0,0,0,.65);
+  --island:#000000; --island-ink:#FFFFFF;
+  --sat:60%; --lit:62%;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.35;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0;text-align:inherit}
+h1,h2,h3{font-weight:700;letter-spacing:-.02em;margin:0;color:var(--ink)}
+h1{font-size:2.6rem;letter-spacing:-.035em;line-height:1;font-weight:800} h2{font-size:1.35rem} h3{font-size:1.05rem;font-weight:600}
+p{margin:0}
+a{color:var(--ink)}
+::placeholder{color:var(--ink3)}
+.app{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:0 calc(110px + env(safe-area-inset-bottom,0px));min-height:100%}
+/* poster header: huge title flush left, one lozenge, the legend at right */
+.poster{display:flex;align-items:flex-end;gap:12px;padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:14px;min-height:76px}
+.lozenge{border:1.5px solid var(--ink);border-radius:999px;padding:5px 11px;font-size:.9rem;font-weight:600;line-height:1;color:var(--ink);margin-bottom:6px;white-space:nowrap}
+.legend{margin-left:auto;display:flex;gap:9px;align-items:center;margin-bottom:8px;font-size:.76rem;color:var(--ink2);font-weight:600;white-space:nowrap}
+.legend span{display:inline-flex;align-items:center;gap:4px} .legend b{color:var(--ink);font-variant-numeric:tabular-nums}
+.legend:empty{display:none}
+.screen{display:flex;flex-direction:column;gap:16px}
+.muted{color:var(--ink2)} .small{font-size:.94rem} .tiny{font-size:.8rem}
+.num,.mono{font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.row.between{justify-content:space-between}
+.row.nowrap{flex-wrap:nowrap}
+.grow{flex:1 1 auto;min-width:0}
+.stack{display:flex;flex-direction:column;gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+/* rows, not cards */
+.panel,.foods{border-top:1px solid var(--hair)}
+.card{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);padding:14px 16px}
+.panel-row{display:grid;gap:4px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--hair);position:relative}
+.section{font-size:1.05rem;color:var(--ink);font-weight:700;letter-spacing:-.01em}
+.rule{height:1px;background:var(--hair)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field > label{font-size:.85rem;color:var(--ink2);padding-left:2px}
+.input,select.input,textarea.input{width:100%;background:var(--field);border:1px solid var(--hair);border-radius:var(--r);padding:10px 12px;min-height:46px;color:var(--ink)}
+textarea.input{min-height:72px;resize:vertical}
+.input:focus,button:focus-visible,.chip:focus-visible,.check input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.money{position:relative}
+.money::before{content:"$";position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink2)}
+.money .input{padding-left:24px;font-variant-numeric:tabular-nums}
+/* buttons: ink on paper, outlined pill as the quiet action */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid var(--ink);background:transparent;border-radius:999px;padding:10px 16px;min-height:44px;font-weight:600;color:var(--ink);transition:transform .08s ease,opacity .1s;line-height:1.1;white-space:nowrap}
+.btn:active{transform:scale(.98);opacity:.85}
+.btn.primary{background:var(--ink);color:var(--bg)}
+.btn.danger{color:var(--avoid);border-color:var(--avoid)}
+.btn.ghost{border-color:transparent;padding-inline:8px}
+.btn.sm{min-height:32px;padding:4px 12px;font-size:.88rem}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+/* text chips (used in sheets/forms) */
+.chips{display:flex;gap:8px;overflow-x:auto;padding-block:2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:-16px;padding-inline:16px}
+.chips::-webkit-scrollbar{display:none}
+.chips.wrap{flex-wrap:wrap;overflow:visible;margin-inline:0;padding-inline:0}
+.chip{flex:0 0 auto;border:1.5px solid var(--hair);background:transparent;color:var(--ink);border-radius:999px;padding:7px 13px;min-height:36px;font-size:.92rem;white-space:nowrap;display:inline-flex;align-items:center;gap:7px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .em{font-family:var(--emoji);font-size:1.05rem;line-height:1}
+/* ruled text index (aisles) */
+.index{display:flex;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:16px;white-space:nowrap;border-bottom:1px solid var(--hair)}
+.index::-webkit-scrollbar{display:none}
+.index .chip{border:0;border-radius:0;border-left:1px solid var(--hair);padding:9px 14px 11px;min-height:0;font-size:.95rem;font-weight:600;color:var(--ink2);background:transparent;position:relative}
+.index .chip:first-child{border-left:0;padding-left:0}
+.index .chip.on{color:var(--ink);background:transparent}
+.index .chip.on::after{content:"";position:absolute;left:14px;right:14px;bottom:-1px;height:2px;background:var(--ink)}
+.index .chip:first-child.on::after{left:0}
+.index .chip .em{display:none}
+/* segmented filter: an Apple component, kept small and quiet */
+.seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--hair);border-radius:8px;padding:2px;gap:2px;background:var(--surface)}
+.seg button{padding:5px 10px;min-height:30px;font-size:.84rem;border-radius:6px;color:var(--ink2);font-weight:600;white-space:nowrap}
+.seg button.on{background:var(--ink);color:var(--bg)}
+.tag{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:3px 8px;font-size:.82rem;background:var(--paper2);color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.tag.ok{color:var(--ok);background:var(--ok-soft)} .tag.fluid{color:var(--fluid);background:var(--fluid-soft)} .tag.limit{color:var(--limit);background:var(--limit-soft)} .tag.avoid{color:var(--avoid);background:var(--avoid-soft)}
+.pill{display:inline-flex;align-items:center;border:1px solid var(--hair);border-radius:999px;padding:3px 9px;font-size:.82rem;color:var(--ink2);white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:6px;padding:3px 8px;font-size:.85rem;white-space:nowrap;background:var(--paper2)}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.badge.l0{color:var(--ok)} .badge.l1{color:var(--fluid)} .badge.l2{color:var(--limit)} .badge.l3{color:var(--avoid)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ink3);margin-right:6px;vertical-align:1px;flex:0 0 auto}
+.dot.l0{background:var(--ok-fill)} .dot.l1{background:var(--fluid-fill)} .dot.l2{background:var(--limit-fill)} .dot.l3{background:var(--avoid-fill)}
+.c0{color:var(--ok)} .c1{color:var(--fluid)} .c2{color:var(--limit)} .c3{color:var(--avoid)}
+/* HUD readouts: monospace, corner brackets — the diet order as an instrument reading */
+.hud{display:inline-flex;align-items:center;gap:5px;position:relative;padding:5px 8px;font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);white-space:nowrap;line-height:1}
+.hud b{color:var(--ink);font-weight:600;letter-spacing:.02em;font-size:.74rem}
+.hud::before,.hud::after{content:"";position:absolute;width:6px;height:6px;border:1px solid var(--ink3)}
+.hud::before{left:0;top:0;border-right:0;border-bottom:0}
+.hud::after{right:0;bottom:0;border-left:0;border-top:0}
+.hud.l2 b{color:var(--limit)} .hud.l3 b{color:var(--avoid)}
+/* the tray card: one object — a stock card with a colour stripe, a folder tab naming the store, a budget badge */
+.tray{width:100%;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:start;background:var(--field);border:1px solid var(--hair);border-radius:6px 10px 10px 10px;padding:14px 14px 12px 20px;position:relative;margin-top:14px;box-shadow:var(--tile-shadow);color:var(--ink);text-align:left}
+.tray::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;border-radius:5px 0 0 9px;background:hsl(var(--h) var(--sat) var(--lit))}
+.tray .tab{position:absolute;left:-1px;top:-15px;height:22px;padding:0 12px 0 14px;background:var(--paper2);border:1px solid var(--hair);border-bottom:0;border-radius:6px 6px 0 0;font-size:.74rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);display:flex;align-items:center;line-height:1}
+.tray .who{font-size:1.25rem;font-weight:700;letter-spacing:-.02em;line-height:1.15;padding-top:2px}
+.tray .budget{justify-self:end;background:var(--sand);color:var(--sand-ink);border-radius:6px;padding:4px 8px;font-size:.8rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;transform:translate(6px,-6px);white-space:nowrap}
+.tray .budget.none{background:var(--paper2);color:var(--ink2);font-weight:600}
+.tray .orders{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:8px}
+.tray .chev{position:absolute;right:12px;bottom:10px;color:var(--ink3);font-size:1.3rem;line-height:1;font-weight:300}
+.tray .note{grid-column:1/-1;font-size:.84rem;color:var(--ink2)}
+/* search */
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--ink2);pointer-events:none}
+.search .input{padding-left:38px;border-radius:var(--r)}
+/* product tiles: white stock with an edge and a shadow — an object, with its badge on the corner */
+.thumb{width:56px;height:56px;border-radius:12px;background:var(--tile);border:1px solid var(--tile-edge);display:inline-grid;place-items:center;font-family:var(--emoji);font-size:30px;line-height:1;flex:0 0 auto;overflow:hidden;position:relative;color:#111}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.ph img{position:absolute;inset:0;background:#fff;object-fit:cover}
+.thumb .em{font-style:normal}
+.thumb.ph .em{display:none}
+.thumb.lg{width:76px;height:76px;font-size:40px;border-radius:16px}
+.thumb.sm{width:44px;height:44px;font-size:24px;border-radius:10px}
+.tile{position:relative;display:inline-block;flex:0 0 auto;line-height:0}
+.tile .thumb{box-shadow:var(--tile-shadow)}
+.tbadge{position:absolute;right:-7px;bottom:-7px;background:#111214;color:#fff;border-radius:999px;font-size:.66rem;font-weight:700;padding:3px 6px 3px 5px;line-height:1;display:inline-flex;align-items:center;gap:4px;border:1.5px solid var(--bg);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbadge i{width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--ok-fill)}
+.tbadge.l1 i{background:var(--fluid-fill)} .tbadge.l2 i{background:var(--limit-fill)} .tbadge.l3 i{background:var(--avoid-fill)}
+.pdot{display:inline-block;width:12px;height:12px;border-radius:50%;background:hsl(var(--h) var(--sat) var(--lit));flex:0 0 auto}
+.avatar{width:12px;height:12px;border-radius:50%;background:hsl(var(--h) var(--sat) var(--lit));display:inline-block;flex:0 0 auto;font-size:0;color:transparent}
+.avatar.lg{width:14px;height:14px}
+/* food rows */
+.food{display:grid;grid-template-columns:64px 1fr 92px;gap:2px 14px;align-items:center;padding:11px 0;position:relative;border-bottom:1px solid var(--hair)}
+.food.l3 .thumb{opacity:.55}
+.food .body{min-width:0;cursor:pointer}
+.food .name{font-weight:600;font-size:1.02rem;letter-spacing:-.01em;line-height:1.25}
+.food .sub{font-size:.84rem;color:var(--ink2);margin-top:3px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.food .sub.c3{color:var(--avoid)} .food .sub.c2{color:var(--limit)} .food .sub.c1{color:var(--fluid)}
+.food .sub b{font-weight:600}
+.food .act{display:flex;flex-direction:column;align-items:flex-end;gap:6px;justify-self:end;width:92px}
+.food .price{font-size:.82rem;color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right;line-height:1.2}
+.food .price b{color:var(--ink);font-weight:600}
+.add{height:32px;min-width:64px;padding:0 14px;border-radius:999px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);font-weight:700;font-size:.88rem;display:inline-grid;place-items:center;transition:transform .08s ease}
+.add:active{transform:scale(.96)}
+.qty{display:inline-flex;align-items:center;border-radius:999px;overflow:hidden;background:var(--ink);color:var(--bg);height:32px}
+.qty button{width:32px;height:32px;font-size:1.1rem;color:inherit;line-height:1;display:grid;place-items:center}
+.qty span{min-width:20px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;font-size:.92rem}
+.food .detail{grid-column:1/-1;margin-top:8px;padding-top:10px;border-top:1px dashed var(--hair);display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.detail .reason{display:flex;gap:8px;align-items:flex-start}
+.detail .reason .dot{flex:0 0 9px;height:9px;margin:6px 0 0}
+.nutri{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px}
+.nutri div{background:var(--surface);border:1px solid var(--hair2);border-radius:8px;padding:7px 9px;font-size:.74rem;color:var(--ink2)}
+.nutri b{display:block;font-size:.95rem;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* list */
+.listhead{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--hair)}
+.listhead .sub{color:var(--ink2);font-size:.9rem}
+.listhead .bar{grid-column:1/-1;margin-top:6px}
+.listhead .meta{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.88rem;color:var(--ink2)}
+.cartrow{display:grid;grid-template-columns:auto auto 1fr auto;gap:6px 12px;align-items:center;padding:11px 0;position:relative;border-bottom:1px solid var(--hair)}
+.cartrow.got .name{text-decoration:line-through;color:var(--ink2)}
+.cartrow.got .thumb{opacity:.45}
+.cartrow .name{font-weight:600;font-size:1rem;letter-spacing:-.01em}
+.cartrow .sub{font-size:.84rem;color:var(--ink2)}
+.cartrow .controls{grid-column:3/5;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.cartrow .qty{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.cartrow .money{width:104px}
+.cartrow .money .input{min-height:32px;padding-block:3px;border-radius:999px;padding-left:22px}
+.cartrow .money::before{left:10px}
+.linetotal{font-variant-numeric:tabular-nums}
+.check{display:inline-flex;align-items:center;gap:8px}
+.check input{appearance:none;-webkit-appearance:none;width:26px;height:26px;margin:0;border:1.5px solid var(--ink3);border-radius:50%;background:transparent;display:grid;place-items:center;cursor:pointer}
+.check input:checked{background:var(--ink);border-color:var(--ink)}
+.check input:checked::after{content:"";width:6px;height:11px;border:solid var(--bg);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+/* the island: one black lozenge, one line of truth, the thing to do next */
+.sumbar{position:fixed;left:0;right:0;bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:25;display:flex;justify-content:center;padding-inline:12px;pointer-events:none}
+.island{pointer-events:auto;background:var(--island);color:var(--island-ink);border-radius:999px;padding:10px 12px 10px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 28px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);font-variant-numeric:tabular-nums;font-size:.95rem;font-weight:600;max-width:100%;white-space:nowrap;color:var(--island-ink)}
+.island i{width:8px;height:8px;border-radius:50%;background:var(--sand);display:inline-block;flex:0 0 auto}
+.island .dim{color:rgba(255,255,255,.55);font-weight:500}
+.island .dim.over{color:#FF6B6B}
+.island .go{background:#fff;color:#000;border-radius:999px;padding:7px 12px;font-size:.86rem;font-weight:700;margin-left:4px;line-height:1}
+.bar{height:2px;background:var(--hair);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ink);transition:width .3s ease}
+.bar.warn i{background:var(--limit-fill)} .bar.over i{background:var(--avoid-fill)}
+.total{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+/* tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--bg);border-top:1px solid var(--hair);padding:7px 8px calc(4px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.tabbar button{padding:4px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.64rem;font-weight:600;color:var(--ink3);min-height:52px;position:relative}
+.tabbar button.on{color:var(--ink)}
+.tabbar svg{width:26px;height:26px;stroke-width:2.2}
+.tabbar .count{position:absolute;top:0;right:calc(50% - 24px);background:var(--ink);color:var(--bg);border-radius:999px;font-size:.62rem;padding:1px 6px;font-weight:700;font-variant-numeric:tabular-nums}
+@media (min-width:900px){
+  .tabbar{position:sticky;top:0;bottom:auto;border:0;border-bottom:1px solid var(--hair);margin-bottom:8px;max-width:760px;margin-inline:auto;padding:8px 6px 6px;background:var(--bg)}
+  .app{padding-bottom:120px}
+  .sumbar{bottom:16px}
+  .poster{padding-top:8px}
+}
+.empty{text-align:center;padding:28px 16px;color:var(--ink2);display:flex;flex-direction:column;gap:10px;align-items:center}
+/* sheets */
+.overlay{position:fixed;inset:0;background:rgba(20,20,18,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:640px){.overlay{align-items:center}}
+.sheet{background:var(--bg);color:var(--ink);border-radius:18px 18px 0 0;padding:8px 16px calc(16px + env(safe-area-inset-bottom,0px));width:100%;max-width:560px;max-height:92vh;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.sheet::before{content:"";display:block;width:36px;height:5px;border-radius:3px;background:var(--hair);margin:4px auto 4px}
+@media (min-width:640px){.sheet{border-radius:18px;padding-top:18px}.sheet::before{display:none}}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--island);color:var(--island-ink);padding:9px 16px;border-radius:999px;font-size:.9rem;z-index:60;box-shadow:0 10px 30px -12px rgba(0,0,0,.4);max-width:90vw;text-align:center;border:1px solid rgba(255,255,255,.14)}
+body.has-sum .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+.confirm{background:var(--avoid-soft);border-radius:10px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.confirm .small{color:var(--ink)}
+/* people: each person is a tray card */
+.people{display:flex;flex-direction:column;gap:22px;padding-top:6px}
+.tray.person{margin-top:0;cursor:default}
+.tray.person .count{justify-self:end;background:var(--paper2);color:var(--ink2);border-radius:6px;padding:4px 8px;font-size:.78rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1;transform:translate(6px,-6px);white-space:nowrap}
+.tray.person .note{margin-top:2px}
+.tray.person .foot{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--hair2)}
+.tray.person .foot .actions{display:flex;gap:8px}
+.person{grid-template-columns:auto 1fr auto}
+.person h3{font-size:1.1rem}
+.person .orders{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:2px}
+.person .meta{grid-column:1/-1;color:var(--ink2);font-size:.86rem}
+.person .actions{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.pick{display:flex;flex-direction:column}
+.pick button{display:flex;align-items:center;gap:12px;width:100%;border-bottom:1px solid var(--hair);padding:12px 4px;min-height:56px;color:var(--ink)}
+.pick button.on .lbl::after{content:"  ✓";font-weight:700}
+.pick .lbl{font-weight:600}
+.pick .sub{display:block;color:var(--ink2);font-size:.85rem;font-weight:400}
+/* conditions form */
+.condlist{display:flex;flex-direction:column}
+.cond{padding:10px 4px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--hair)}
+.cond.on .top label{font-weight:600}
+.cond .top{display:flex;align-items:center;gap:10px}
+.cond .top label{flex:1;cursor:pointer}
+.cond .param{display:flex;align-items:center;gap:8px;padding-left:36px;font-size:.92rem}
+.cond .param .input{width:120px;min-height:36px;padding-block:5px;font-variant-numeric:tabular-nums}
+/* trips */
+.monthhead{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 6px;font-weight:700;font-size:1.15rem;letter-spacing:-.02em}
+.monthhead span{font-weight:500;color:var(--ink2);font-size:.85rem;font-variant-numeric:tabular-nums}
+.trip{grid-template-columns:auto 1fr auto;cursor:pointer}
+.trip .when{font-weight:600}
+.trip .sub{color:var(--ink2);font-size:.86rem}
+.trip .amt{font-weight:600;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.trip .actions{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.trip .actions .danger{margin-left:auto}
+.trip .items{grid-column:1/-1;margin-top:6px;border-top:1px dashed var(--hair);padding-top:8px;display:flex;flex-direction:column;gap:4px;font-size:.92rem}
+.trip .items .line{display:flex;justify-content:space-between;gap:8px}
+.trip .items .miss{color:var(--ink2);text-decoration:line-through}
+.stats{display:flex;flex-wrap:wrap;gap:8px 10px}
+.stat{display:inline-flex;flex-direction:column;gap:3px;position:relative;padding:8px 12px 9px;min-width:100px}
+.stat::before,.stat::after{content:"";position:absolute;width:8px;height:8px;border:1px solid var(--ink3)}
+.stat::before{left:0;top:0;border-right:0;border-bottom:0} .stat::after{right:0;bottom:0;border-left:0;border-top:0}
+.stat .k{font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.stat b{font-size:1.25rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1}
+.stat .s{font-size:.78rem;color:var(--ink2)}
+details.guide{border-bottom:1px solid var(--hair)}
+details.guide summary{padding:12px 0;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.guide summary::-webkit-details-marker{display:none}
+details.guide summary::after{content:"›";color:var(--ink3);font-size:1.4rem;line-height:1;transform:rotate(90deg);transition:transform .15s}
+details.guide[open] summary::after{transform:rotate(-90deg)}
+details.guide .body{padding:0 0 14px;font-size:.95rem;display:flex;flex-direction:column;gap:8px;max-width:65ch;color:var(--ink2)}
+details.guide .body b{color:var(--ink)}
+details.guide ul{margin:0;padding-left:18px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.92rem}
+.kv b{white-space:nowrap}
+.emojigrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+.emojigrid button{border:1px solid var(--hair);background:var(--field);border-radius:10px;height:44px;font-family:var(--emoji);font-size:22px;display:grid;place-items:center}
+.emojigrid button.on{box-shadow:inset 0 0 0 2px var(--ink)}
+/* settings rows (More) */
+.srow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--hair);width:100%;color:var(--ink);min-height:50px}
+.srow .grow b{font-weight:600}
+.srow .sub{display:block;color:var(--ink2);font-size:.85rem}
+.srow .chev{color:var(--ink3);font-size:1.3rem;line-height:1;font-weight:300}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div class="app" id="app">
+  <nav class="tabbar" id="tabbar" aria-label="Sections">
+    <button data-tab="shop" class="on" aria-label="Shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.6 12.4a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg>Shop</button>
+    <button data-tab="cart" aria-label="List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>List<span class="count" id="cartCount" hidden>0</span></button>
+    <button data-tab="history" aria-label="Trips"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Trips</button>
+    <button data-tab="people" aria-label="People"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21v-1a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v1"/><path d="M17 4a4 4 0 0 1 0 8"/><path d="M22 21v-1a5 5 0 0 0-3-4.6"/></svg>People</button>
+    <button data-tab="more" aria-label="More"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>More</button>
+  </nav>
+
+  <header class="poster">
+    <h1 id="pageTitle">Shop</h1>
+    <span id="titleAside"></span>
+    <div class="legend" id="legend" aria-live="polite"></div>
+  </header>
+
+  <main>
+    <section class="screen" id="screen-shop"></section>
+    <section class="screen" id="screen-cart" hidden></section>
+    <section class="screen" id="screen-history" hidden></section>
+    <section class="screen" id="screen-people" hidden></section>
+    <section class="screen" id="screen-more" hidden></section>
+  </main>
+</div>
+<div id="sumRoot"></div>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+<script>
+// ===== Food database =====
+// Per-serving values are typical label/USDA numbers for a generic version of the item.
+// Brands differ — the app always tells the shopper which number to check on the real label.
+// Row: [id, name, category, serving, sodium mg, potassium mg, carbs g, sugar g, fiber g, protein g, sat fat g, fluid mL, tags, price, unit, bulk price, bulk unit, notAtWarehouse]
+const CATS = ["Produce","Meat & Seafood","Dairy & Eggs","Bread & Grains","Pantry & Canned","Frozen","Beverages","Snacks & Sweets","Deli & Prepared","Condiments & Seasonings"];
+const cP="Produce",cM="Meat & Seafood",cD="Dairy & Eggs",cG="Bread & Grains",cC="Pantry & Canned",cZ="Frozen",cB="Beverages",cS="Snacks & Sweets",cL="Deli & Prepared",cK="Condiments & Seasonings";
+const FOOD_ROWS = [
+// ---- Produce ----
+["bananas","Bananas",cP,"1 medium",1,422,27,14,3,1.3,0,0,"soft",0.59,"per lb",1.98,"3 lb bag",0],
+["apples","Apples",cP,"1 medium",2,195,25,19,4,0.5,0,0,"hard",1.49,"per lb",6.98,"5 lb bag",0],
+["oranges","Oranges (navel)",cP,"1 medium",0,237,15,12,3,1,0,0,"acid",1.29,"per lb",8.48,"8 lb bag",0],
+["clementines","Clementines (Cuties / Halos)",cP,"2 clementines",2,262,18,14,3,1,0,0,"acid soft",4.99,"3 lb bag",6.98,"5 lb bag",0],
+["strawberries","Strawberries",cP,"1 cup",2,233,12,7,3,1,0,0,"soft",2.99,"1 lb",4.98,"2 lb",0],
+["blueberries","Blueberries",cP,"1 cup",1,114,21,15,4,1,0,0,"soft",3.49,"pint",5.98,"18 oz",0],
+["raspberries","Raspberries",cP,"1 cup",1,186,15,5,8,1.5,0,0,"soft fiber",3.99,"6 oz",5.98,"12 oz",0],
+["grapes","Grapes",cP,"1 cup",3,288,27,23,1,1,0,0,"soft",2.49,"per lb",6.98,"3 lb",0],
+["watermelon","Watermelon",cP,"1 cup diced",2,170,12,9,1,1,0,0,"melon soft wet",4.99,"each",5.98,"each",0],
+["cantaloupe","Cantaloupe",cP,"1 cup",26,427,13,13,1,1,0,0,"melon soft wet",2.99,"each",4.98,"2 pack",0],
+["peaches","Peaches",cP,"1 medium",0,285,14,13,2,1,0,0,"soft",1.99,"per lb",6.98,"4 lb",0],
+["pears","Pears",cP,"1 medium",2,206,27,17,6,1,0,0,"soft fiber",1.79,"per lb",5.98,"4 lb",0],
+["plums","Plums",cP,"1 plum",0,104,8,7,1,0.5,0,0,"soft acid",1.99,"per lb",null,null,1],
+["cherries","Cherries",cP,"1 cup",0,306,22,18,3,1.5,0,0,"",4.99,"per lb",8.98,"2 lb",0],
+["mango","Mango",cP,"1 cup",2,277,25,23,3,1,0,0,"soft",1.25,"each",5.98,"6 ct",0],
+["pineapple","Pineapple",cP,"1 cup chunks",2,180,22,16,2,1,0,0,"acid",2.99,"each",3.98,"each",0],
+["grapefruit","Grapefruit",cP,"1/2 fruit",0,166,13,8,2,1,0,0,"acid grapefruit",0.99,"each",5.98,"5 lb bag",0],
+["avocado","Avocado",cP,"1/2 fruit",7,487,9,0,7,2,2.1,0,"soft fiber",1.25,"each",4.98,"5 ct",0],
+["tomatoes","Tomatoes",cP,"1 medium",6,292,5,3,1.5,1,0,0,"acid soft",1.99,"per lb",5.98,"2 lb",0],
+["potatoes","Potatoes (russet)",cP,"1 medium, baked",17,926,37,2,4,4,0,0,"soft",0.99,"per lb",5.48,"10 lb bag",0],
+["sweetpot","Sweet potatoes",cP,"1 medium, baked",41,542,24,7,4,2,0,0,"soft fiber",1.29,"per lb",4.98,"5 lb",0],
+["butternut","Butternut squash",cP,"1 cup cubed, baked",8,582,22,4,7,2,0,0,"soft fiber",1.29,"per lb",null,null,1],
+["onions","Onions",cP,"1/2 cup chopped",3,117,8,3,1.4,0.5,0,0,"gas acid",1.29,"per lb",4.48,"5 lb",0],
+["garlic","Fresh garlic",cP,"1 clove",1,12,1,0,0,0,0,0,"flavor",0.79,"head",3.98,"6 ct",0],
+["carrots","Carrots",cP,"1 cup chopped, raw",88,410,12,6,3.6,1,0,0,"hard",1.19,"per lb",4.48,"5 lb",0],
+["celery","Celery",cP,"1 cup chopped",81,263,3,1,1.6,0.7,0,0,"hard",1.99,"bunch",3.98,"2 pack",0],
+["broccoli","Broccoli",cP,"1 cup chopped",30,288,6,1.5,2.4,2.6,0,0,"gas vitk",1.99,"per lb",4.98,"2 lb florets",0],
+["cauliflower","Cauliflower",cP,"1 cup",32,320,5,2,2,2,0,0,"gas",2.99,"head",4.98,"2 lb",0],
+["cabbage","Cabbage",cP,"1 cup shredded",13,119,4,2,1.8,1,0,0,"gas vitk",0.89,"per lb",null,null,1],
+["brussels","Brussels sprouts",cP,"1 cup",22,342,8,2,3,3,0,0,"gas vitk",2.99,"per lb",4.98,"2 lb",0],
+["spinach","Spinach (fresh)",cP,"2 cups raw",47,335,2,0,1.3,1.7,0,0,"vitk soft",2.99,"bag",4.98,"1 lb",0],
+["kale","Kale",cP,"1 cup chopped, raw",25,79,1,0,1,0.7,0,0,"vitk hard",2.49,"bunch",4.98,"1 lb",0],
+["lettuce","Romaine lettuce",cP,"2 cups",8,232,3,1,2,1,0,0,"vitk",2.49,"head",4.98,"6 hearts",0],
+["cucumber","Cucumber",cP,"1 cup sliced",2,152,4,2,1,1,0,0,"wet",0.79,"each",3.98,"3 pack",0],
+["bellpep","Bell peppers",cP,"1 medium",4,251,7,5,2.5,1,0,0,"gas acid",1.29,"each",6.98,"6 ct",0],
+["jalapeno","Jalapeño peppers",cP,"1 pepper",0,35,1,0.5,0.4,0.1,0,0,"spicy acid",1.49,"per lb",null,null,1],
+["greenbeans","Green beans (fresh)",cP,"1 cup",7,211,7,3,2.7,2,0,0,"",2.49,"per lb",4.98,"2 lb",0],
+["zucchini","Zucchini / yellow squash",cP,"1 cup sliced",10,295,4,3,1,1.5,0,0,"soft",1.49,"per lb",null,null,1],
+["eggplant","Eggplant",cP,"1 cup cubed",2,189,5,3,3,1,0,0,"soft",1.49,"per lb",null,null,1],
+["mushrooms","Mushrooms",cP,"1 cup sliced",4,223,2,1,0.7,2,0,0,"soft",2.49,"8 oz",4.98,"24 oz",0],
+["corn","Corn on the cob",cP,"1 ear",15,275,27,6,3,3,0,0,"gas",0.5,"each",3.98,"8 ct",0],
+["asparagus","Asparagus",cP,"1 cup",3,271,5,3,3,3,0,0,"vitk",3.49,"per lb",5.98,"2 lb",0],
+["lemons","Lemons / limes",cP,"1 lemon",1,80,6,2,2,0.6,0,0,"acid flavor thirst",0.59,"each",4.98,"2 lb bag",0],
+["herbs","Fresh herbs",cP,"1/4 cup",8,83,1,0,0.5,0.5,0,0,"flavor vitk",0.99,"bunch",null,null,1],
+["fruittray","Pre-cut fruit tray / cup",cP,"1 cup",5,250,15,12,2,1,0,0,"soft wet",6.99,"tray",8.98,"large tray",0],
+["saladkit","Bagged salad kit",cP,"1.5 cups",220,200,10,4,2,2,1.5,0,"gluten wheat dairy vitk",3.99,"bag",5.98,"2 pack",0],
+// ---- Meat & Seafood ----
+["chickenbreast","Chicken breast, boneless",cM,"3 oz cooked",64,220,0,0,0,26,1,0,"protein checkinj",3.49,"per lb",2.98,"per lb (6 lb pack)",0],
+["chickenthigh","Chicken thighs (skinless)",cM,"3 oz cooked",75,200,0,0,0,22,2.6,0,"protein checkinj soft",1.99,"per lb",1.98,"per lb",0],
+["drumsticks","Chicken drumsticks",cM,"3 oz cooked, no skin",80,220,0,0,0,24,1.5,0,"protein checkinj",1.29,"per lb",1.18,"per lb",0],
+["wholechicken","Whole chicken",cM,"3 oz roasted, no skin",73,200,0,0,0,25,1.8,0,"protein checkinj",1.49,"per lb",1.28,"per lb",0],
+["groundturkey","Ground turkey (93/7)",cM,"3 oz cooked",70,230,0,0,0,22,2.5,0,"protein soft",4.49,"per lb",3.48,"per lb (3 lb)",0],
+["groundbeef90","Ground beef (90% lean)",cM,"3 oz cooked",72,300,0,0,0,22,4,0,"protein soft",6.99,"per lb",5.48,"per lb (5 lb)",0],
+["groundbeef80","Ground beef (80/20)",cM,"3 oz cooked",75,270,0,0,0,21,6,0,"protein soft",4.99,"per lb",3.98,"per lb (5 lb)",0],
+["sirloin","Beef steak (sirloin)",cM,"3 oz cooked",55,320,0,0,0,26,2.5,0,"protein chew",9.99,"per lb",8.98,"per lb",0],
+["chuckroast","Chuck roast",cM,"3 oz cooked",60,250,0,0,0,22,5,0,"protein",7.99,"per lb",6.98,"per lb",0],
+["brisket","Beef brisket",cM,"3 oz cooked",60,250,0,0,0,24,5,0,"protein",5.99,"per lb",4.98,"per lb",0],
+["porkchop","Pork loin chops",cM,"3 oz cooked",50,340,0,0,0,24,2.5,0,"protein chew",3.49,"per lb",2.98,"per lb",0],
+["porktender","Pork tenderloin",cM,"3 oz cooked",48,355,0,0,0,22,1,0,"protein",4.99,"per lb",3.98,"per lb",0],
+["porkribs","Pork ribs",cM,"3 oz cooked",80,250,0,0,0,20,5,0,"protein chew",3.99,"per lb",3.48,"per lb",0],
+["bacon","Bacon",cM,"2 slices",380,100,0,0,0,6,3.5,0,"proc phos fried",6.99,"12 oz",13.98,"3 lb",0],
+["turkeybacon","Turkey bacon",cM,"2 slices",330,90,1,0,0,5,1,0,"proc phos",4.49,"12 oz",null,null,0],
+["hotdogs","Hot dogs",cM,"1 frank",500,90,2,1,0,5,5,0,"proc phos soft",3.99,"8 ct",8.98,"3 lb",0],
+["sausage","Breakfast sausage links",cM,"2 links",380,100,1,0,0,7,4.5,0,"proc phos fried",4.49,"12 oz",9.98,"3 lb",0],
+["smokedsausage","Smoked sausage / kielbasa",cM,"2 oz",560,130,2,1,0,7,5,0,"proc phos",4.99,"13 oz",9.98,"3 lb",0],
+["salmon","Salmon (fresh)",cM,"3 oz cooked",50,330,0,0,0,19,2,0,"fish protein omega soft",9.99,"per lb",8.98,"per lb (2.5 lb)",0],
+["tilapia","Tilapia",cM,"3 oz cooked",48,300,0,0,0,22,0.8,0,"fish protein soft",5.99,"per lb",4.98,"per lb",0],
+["cod","Cod",cM,"3 oz cooked",66,350,0,0,0,20,0.1,0,"fish protein soft",8.99,"per lb",7.98,"per lb",0],
+["catfish","Catfish",cM,"3 oz cooked",60,300,0,0,0,18,1.5,0,"fish protein soft",6.99,"per lb",5.98,"per lb",0],
+["shrimp","Shrimp (raw, frozen)",cM,"3 oz cooked",200,150,0,0,0,20,0.1,0,"shell purine protein checkinj",7.99,"per lb",8.48,"per lb (2 lb)",0],
+["tuna","Canned tuna (regular)",cM,"3 oz",320,200,0,0,0,20,0.2,0,"fish purine protein soft",1.19,"5 oz can",11.98,"8 pack",0],
+["tunans","Canned tuna, no salt added",cM,"3 oz",50,200,0,0,0,20,0.2,0,"fish purine protein soft",1.49,"5 oz can",null,null,1],
+["cannedsalmon","Canned salmon",cM,"3 oz",310,280,0,0,0,18,1,0,"fish protein omega soft",3.49,"5 oz can",8.98,"4 pack",0],
+["sardines","Sardines (canned in oil)",cM,"3 oz",280,340,0,0,0,21,1.5,0,"fish purine2 omega soft",1.99,"can",null,null,1],
+["beefliver","Beef liver",cM,"3 oz cooked",66,300,4,0,0,25,1.5,0,"purine2 protein",3.99,"per lb",null,null,1],
+// ---- Dairy & Eggs ----
+["eggs","Eggs",cD,"1 large",70,63,0,0,0,6,1.6,0,"egg protein soft",3.49,"dozen",6.48,"2 dozen",0],
+["eggwhites","Liquid egg whites (carton)",cD,"3 tbsp",75,75,0,0,0,5,0,0,"egg protein soft",3.99,"16 oz",7.98,"3 pack",0],
+["milk2","Milk, 2%",cD,"1 cup",115,366,12,12,0,8,3,240,"dairy lactose hiphos",3.29,"gallon",5.98,"2 gallons",0],
+["milkwhole","Whole milk",cD,"1 cup",105,322,12,12,0,8,4.5,240,"dairy lactose hiphos",3.29,"gallon",5.98,"2 gallons",0],
+["milkskim","Skim (fat-free) milk",cD,"1 cup",103,382,12,12,0,8,0.1,240,"dairy lactose hiphos",3.29,"gallon",5.98,"2 gallons",0],
+["lactaid","Lactose-free milk (Lactaid)",cD,"1 cup",125,370,12,12,0,8,3,240,"dairy hiphos",4.49,"half gallon",6.98,"2 half gallons",0],
+["almondmilk","Almond milk (unsweetened)",cD,"1 cup",170,160,1,0,1,1,0,240,"nut",3.29,"half gallon",5.98,"3 pack",0],
+["oatmilk","Oat milk",cD,"1 cup",100,390,16,7,2,3,0.5,240,"oats",4.29,"half gallon",null,null,0],
+["soymilk","Soy milk (unsweetened)",cD,"1 cup",80,300,4,1,2,7,0.5,240,"soy",3.49,"half gallon",null,null,1],
+["greekyogurt","Greek yogurt, plain nonfat",cD,"3/4 cup (170 g)",60,240,6,6,0,17,0,170,"dairy protein soft hiphos",4.99,"32 oz tub",7.98,"48 oz",0],
+["yogurtflav","Yogurt, flavored (fruit)",cD,"6 oz cup",100,300,30,25,0,6,1.5,170,"dairy lactose soft hiphos",0.79,"6 oz cup",11.98,"18 pack",0],
+["cottage","Cottage cheese",cD,"1/2 cup",370,100,4,3,0,12,2.5,0,"dairy protein soft hiphos",3.49,"16 oz",5.98,"3 lb",0],
+["cheddar","Cheddar cheese",cD,"1 oz",180,28,1,0,0,7,6,0,"dairy hiphos",4.99,"8 oz block",8.98,"2 lb block",0],
+["swiss","Swiss cheese",cD,"1 oz",55,22,1,0,0,8,5,0,"dairy hiphos",5.49,"8 oz",7.98,"1.5 lb",0],
+["mozz","Mozzarella (part-skim)",cD,"1 oz",175,24,1,0,0,7,3,0,"dairy soft hiphos",4.99,"8 oz",8.98,"2 lb",0],
+["freshmozz","Fresh mozzarella",cD,"1 oz",85,20,1,0,0,6,3,0,"dairy soft",5.99,"8 oz",7.98,"1 lb",0],
+["parmesan","Parmesan (grated)",cD,"1 tbsp",75,5,0,0,0,2,1,0,"dairy flavor",4.49,"8 oz",9.98,"1.5 lb",0],
+["american","American cheese singles",cD,"1 slice",350,50,2,1,0,4,3.5,0,"dairy phos proc soft",4.49,"16 slices",8.98,"72 slices",0],
+["creamcheese","Cream cheese",cD,"2 tbsp",100,40,2,1,0,2,5,0,"dairy soft",2.99,"8 oz",5.98,"3 lb",0],
+["butter","Butter (salted)",cD,"1 tbsp",90,3,0,0,0,0,7,0,"dairy",4.99,"1 lb",14.98,"4 lb",0],
+["butterus","Butter (unsalted)",cD,"1 tbsp",0,3,0,0,0,0,7,0,"dairy",4.99,"1 lb",14.98,"4 lb",0],
+["sourcream","Sour cream",cD,"2 tbsp",15,40,1,1,0,1,3,0,"dairy lactose soft",2.49,"16 oz",4.98,"3 lb",0],
+["halfhalf","Half & half / coffee creamer",cD,"1 tbsp",6,20,1,1,0,0,1,15,"dairy",3.49,"quart",4.98,"half gallon",0],
+["icecream","Ice cream (vanilla)",cD,"2/3 cup",70,150,20,17,0,3,5,160,"dairy lactose soft hiphos",4.99,"48 oz",6.98,"1 gallon",0],
+["sherbet","Sherbet / sorbet",cD,"2/3 cup",40,60,30,25,0,1,1,160,"soft",3.99,"48 oz",null,null,1],
+["fruitbars","Frozen fruit bars (popsicles)",cD,"1 bar",5,40,16,15,0,0,0,75,"soft",4.49,"6 pack",9.98,"18 pack",0],
+["sfpops","Sugar-free popsicles",cD,"1 pop",5,0,4,0,0,0,0,45,"soft",3.99,"18 pack",null,null,0],
+["pudding","Pudding cups",cD,"1 cup (99 g)",150,150,22,17,0,1,1,100,"dairy soft",2.99,"4 pack",7.98,"12 pack",0],
+["jello","Gelatin cups (Jell-O)",cD,"1 cup (99 g)",55,0,17,17,0,1,0,100,"soft",2.49,"4 pack",null,null,0],
+["jellosf","Sugar-free gelatin cups",cD,"1 cup (99 g)",45,0,0,0,0,1,0,100,"soft",2.49,"4 pack",null,null,0],
+// ---- Bread & Grains ----
+["whitebread","White bread",cG,"1 slice",150,30,14,1.5,0.7,2,0,0,"gluten wheat soft",2.49,"loaf",3.98,"2 loaves",0],
+["wheatbread","Whole wheat bread",cG,"1 slice",130,70,12,2,2,4,0,0,"gluten wheat soft",3.29,"loaf",4.98,"2 loaves",0],
+["lowsodbread","Low-sodium bread (Ezekiel, Nature's Own)",cG,"1 slice",20,80,15,0,3,4,0,0,"gluten wheat",5.49,"loaf",null,null,1],
+["flourtort","Flour tortillas",cG,"1 medium (8 in)",380,60,25,1,1,4,1,0,"gluten wheat soft",2.99,"10 ct",4.98,"20 ct",0],
+["corntort","Corn tortillas",cG,"1 (6 in)",12,40,11,0,1.5,1,0,0,"soft",2.49,"30 ct",3.98,"80 ct",0],
+["buns","Hamburger buns",cG,"1 bun",230,50,26,3,1,5,0.5,0,"gluten wheat soft",2.79,"8 ct",3.98,"16 ct",0],
+["rolls","Dinner rolls",cG,"1 roll",190,40,18,2,1,3,1,0,"gluten wheat soft",3.49,"12 ct",5.98,"24 ct",0],
+["biscuits","Canned biscuits",cG,"1 biscuit",520,60,20,3,0,3,3,0,"gluten wheat soft",2.99,"8 ct",5.98,"4 pack",0],
+["bagels","Bagels (plain)",cG,"1 bagel",450,90,55,6,2,10,0,0,"gluten wheat chew",4.49,"6 ct",5.98,"12 ct",0],
+["engmuffin","English muffins",cG,"1 muffin",240,70,26,2,2,5,0,0,"gluten wheat",3.29,"6 ct",4.98,"12 ct",0],
+["cornbread","Cornbread mix",cG,"1 piece prepared",400,50,28,10,1,3,1,0,"gluten wheat soft",0.99,"box",null,null,0],
+["oats","Oatmeal, old-fashioned",cG,"1/2 cup dry",0,150,27,1,4,5,0.5,0,"oats soft fiber",3.99,"42 oz",8.98,"10 lb",0],
+["instantoat","Instant oatmeal packets",cG,"1 packet",200,100,32,12,3,4,0.5,0,"oats soft",3.49,"10 ct",9.98,"52 ct",0],
+["granola","Granola",cG,"1/2 cup",60,180,32,12,4,5,1.5,0,"oats nut hard fiber",4.49,"bag",9.98,"2 pack",0],
+["cheerios","Cheerios / toasted-oat cereal",cG,"1.5 cups",200,250,29,2,4,5,0,0,"oats",3.99,"box",7.98,"2 pack",0],
+["shreddedwheat","Shredded wheat / Grape-Nuts",cG,"1 cup",5,200,47,0,8,6,0,0,"gluten wheat fiber hard",4.29,"box",null,null,1],
+["raisinbran","Raisin Bran",cG,"1 cup",210,350,46,17,7,5,0,0,"gluten wheat fiber hiphos",4.29,"box",7.98,"2 pack",0],
+["sugarcereal","Sugary cereal (Frosted Flakes)",cG,"1 cup",190,30,34,14,1,1,0,0,"gluten",3.99,"box",7.98,"2 pack",0],
+["brownrice","Brown rice (dry)",cG,"1/4 cup dry",5,100,35,0,2,4,0,0,"soft",2.49,"2 lb",5.98,"5 lb",0],
+["whiterice","White rice (dry)",cG,"1/4 cup dry",0,50,36,0,0.5,3,0,0,"soft",1.99,"2 lb",13.98,"20 lb",0],
+["pasta","Pasta (dry)",cG,"2 oz",0,60,42,2,2.5,7,0,0,"gluten wheat soft",1.49,"16 oz",6.98,"6 pack",0],
+["wwpasta","Whole wheat pasta (dry)",cG,"2 oz",5,120,40,2,6,8,0,0,"gluten wheat fiber soft",1.99,"16 oz",null,null,1],
+["quinoa","Quinoa (dry)",cG,"1/4 cup dry",4,240,27,0,3,6,0,0,"soft",6.99,"1 lb",11.98,"4 lb",0],
+["grits","Grits (plain, dry)",cG,"1/4 cup dry",0,50,31,0,1,3,0,0,"soft",2.99,"24 oz",null,null,0],
+["creamofwheat","Cream of Wheat / farina",cG,"3 tbsp dry",5,40,24,0,1,3,0,0,"gluten wheat soft",3.99,"28 oz",null,null,1],
+["saltines","Saltine crackers",cG,"5 crackers",140,20,11,0,0.5,1,0,0,"gluten wheat hard",2.99,"16 oz",4.98,"2 pack",0],
+["saltinesus","Unsalted-top saltines",cG,"5 crackers",65,20,11,0,0.5,1,0,0,"gluten wheat hard",2.99,"16 oz",null,null,1],
+["triscuit","Whole-grain crackers (Triscuit)",cG,"6 crackers",160,70,20,0,3,3,0,0,"gluten wheat hard",3.99,"box",6.98,"2 pack",0],
+["ricecakes","Rice cakes (plain)",cG,"1 cake",29,26,7,0,0.3,1,0,0,"hard dry",2.99,"bag",null,null,1],
+["pancakemix","Pancake / waffle mix",cG,"1/3 cup dry",450,100,30,5,1,4,0.5,0,"gluten wheat",3.29,"32 oz",5.98,"5 lb",0],
+["flour","All-purpose flour",cG,"1/4 cup",0,30,23,0,1,3,0,0,"gluten wheat",3.49,"5 lb",4.98,"10 lb",0],
+// ---- Pantry & Canned ----
+["cannedbeans","Canned beans (regular)",cC,"1/2 cup",450,300,20,0,7,7,0,0,"gas fiber soft hiphos",1.19,"15 oz can",7.98,"8 pack",0],
+["beansns","Canned beans, no salt added",cC,"1/2 cup",20,300,20,0,7,7,0,0,"gas fiber soft hiphos",1.29,"15 oz can",null,null,1],
+["refried","Canned refried beans",cC,"1/2 cup",500,400,20,1,6,7,1,0,"gas fiber soft hiphos",1.19,"16 oz can",7.98,"8 pack",0],
+["drybeans","Dried beans",cC,"1/2 cup cooked",5,375,22,0,8,8,0,0,"gas fiber soft hiphos",1.79,"1 lb bag",7.98,"8 lb",0],
+["lentils","Lentils (dry)",cC,"1/2 cup cooked",3,365,20,2,8,9,0,0,"gas fiber soft hiphos",1.99,"1 lb bag",null,null,1],
+["cannedveg","Canned vegetables (regular)",cC,"1/2 cup",320,150,6,2,2,1,0,0,"soft",0.99,"15 oz can",8.98,"12 pack",0],
+["cannedvegns","Canned vegetables, no salt added",cC,"1/2 cup",15,150,6,2,2,1,0,0,"soft",1.09,"15 oz can",null,null,1],
+["cannedcorn","Canned corn (regular)",cC,"1/2 cup",270,170,15,4,2,2,0,0,"gas soft",0.99,"15 oz can",8.98,"12 pack",0],
+["cannedtom","Canned diced tomatoes (regular)",cC,"1/2 cup",220,230,5,3,1,1,0,0,"acid soft",1.29,"14.5 oz can",7.98,"8 pack",0],
+["cannedtomns","Canned tomatoes, no salt added",cC,"1/2 cup",20,230,5,3,1,1,0,0,"acid soft",1.39,"14.5 oz can",null,null,1],
+["pastasauce","Pasta sauce (jarred)",cC,"1/2 cup",450,400,10,8,2,2,0.5,0,"acid soft",2.49,"24 oz jar",6.98,"3 pack",0],
+["pastasaucens","Pasta sauce, no salt added",cC,"1/2 cup",40,400,10,7,2,2,0.5,0,"acid soft",3.49,"24 oz jar",null,null,1],
+["cannedfruit","Canned fruit in juice",cC,"1/2 cup",5,150,15,12,1,0,0,0,"soft",1.49,"15 oz can",11.98,"12 pack",0],
+["applesauce","Applesauce (unsweetened)",cC,"1/2 cup",0,90,14,11,1,0,0,0,"soft",2.49,"6 pack",7.98,"36 pack",0],
+["raisins","Raisins / dried fruit",cC,"1/4 cup",5,300,33,25,2,1,0,0,"sticky",3.99,"12 oz",8.98,"3 lb",0],
+["peanutbutter","Peanut butter (regular)",cC,"2 tbsp",140,200,7,3,2,7,3,0,"peanut nut soft hiphos",3.49,"16 oz",11.98,"2 × 40 oz",0],
+["pbunsalted","Peanut butter, unsalted natural",cC,"2 tbsp",5,200,6,1,2,8,2.5,0,"peanut nut soft hiphos",4.49,"16 oz",null,null,1],
+["almonds","Almonds (unsalted)",cC,"1 oz (23 nuts)",0,200,6,1,3.5,6,1,0,"nut hard hiphos",8.99,"1 lb",16.98,"3 lb",0],
+["saltednuts","Mixed nuts (salted)",cC,"1 oz",150,180,7,1,2,5,1.5,0,"nut hard hiphos",9.99,"1 lb",13.98,"2.5 lb",0],
+["walnuts","Walnuts",cC,"1 oz",1,125,4,1,2,4,1.7,0,"nut hard omega hiphos",8.99,"1 lb",12.98,"3 lb",0],
+["broth","Chicken broth (regular)",cC,"1 cup",860,200,1,1,0,1,0,240,"soft",2.99,"32 oz",9.98,"6 pack",0],
+["brothls","Chicken broth, low sodium",cC,"1 cup",140,200,1,1,0,1,0,240,"soft",3.29,"32 oz",null,null,0],
+["soup","Canned soup (regular)",cC,"1 cup",890,100,10,1,1,4,0.5,240,"gluten wheat soft",1.79,"can",11.98,"8 pack",0],
+["souphr","Canned soup, reduced sodium",cC,"1 cup",410,200,12,3,1,4,0.5,240,"gluten wheat soft",2.29,"can",null,null,0],
+["soupls","Canned soup, low sodium",cC,"1 cup",140,300,12,3,2,5,0.5,240,"soft",2.79,"can",null,null,1],
+["creamsoup","Cream of mushroom soup",cC,"1/2 cup condensed",870,100,9,1,1,2,1.5,120,"gluten wheat dairy soft",1.49,"can",9.98,"8 pack",0],
+["ramen","Instant ramen noodles",cC,"1 package with broth",1590,150,52,1,2,9,7,300,"gluten wheat fried soft",0.39,"package",7.98,"24 pack",0],
+["macncheese","Boxed mac & cheese",cC,"1 cup prepared",700,200,47,7,1,10,3,0,"gluten wheat dairy phos soft",1.29,"box",9.98,"12 pack",0],
+["ricemix","Rice-A-Roni / Zatarain's mix",cC,"1 cup prepared",900,150,45,2,1,6,1,0,"gluten wheat soft",1.99,"box",null,null,0],
+["instantpotato","Instant mashed potatoes",cC,"1/2 cup prepared",350,250,18,1,1,2,1,0,"soft",2.49,"box",7.98,"large box",0],
+["chili","Canned chili",cC,"1 cup",990,500,30,5,8,15,5,0,"gas proc soft hiphos",2.29,"15 oz can",null,null,0],
+["cannedchicken","Canned chicken breast",cC,"2 oz",240,100,0,0,0,10,0.5,0,"protein soft",2.49,"12.5 oz can",11.98,"6 pack",0],
+["spam","Spam / canned luncheon meat",cC,"2 oz",790,160,1,0,0,7,6,0,"proc phos soft",3.49,"12 oz can",13.98,"8 pack",0],
+["gravy","Jarred gravy",cC,"1/4 cup",300,30,3,0,0,1,0.5,60,"soft",1.99,"jar",null,null,0],
+["oliveoil","Olive oil",cC,"1 tbsp",0,0,0,0,0,0,2,0,"omega",8.99,"17 oz",15.98,"2 L",0],
+["vegoil","Vegetable / canola oil",cC,"1 tbsp",0,0,0,0,0,0,1,0,"",4.49,"48 oz",8.98,"1 gal",0],
+["honey","Honey",cC,"1 tbsp",0,10,17,17,0,0,0,0,"soft",5.99,"12 oz",8.98,"3 lb",0],
+["maplesyrup","Pancake syrup",cC,"2 tbsp",5,80,27,24,0,0,0,0,"soft",8.99,"12 oz",12.98,"32 oz",0],
+["sugar","Sugar",cC,"1 tsp",0,0,4,4,0,0,0,0,"",3.49,"4 lb",5.98,"10 lb",0],
+["jam","Jam / jelly",cC,"1 tbsp",5,10,13,10,0,0,0,0,"soft",3.29,"jar",5.98,"large jar",0],
+["proteinpowder","Whey protein powder",cC,"1 scoop",100,150,3,1,0,25,0.5,0,"dairy protein",24.99,"2 lb",34.98,"5 lb",0],
+// ---- Frozen ----
+["frozenveg","Frozen vegetables, plain",cZ,"1 cup",30,250,10,4,3,2,0,0,"soft",1.49,"12 oz bag",7.98,"5 lb bag",0],
+["frozenvegsauce","Frozen vegetables in sauce",cZ,"3/4 cup",420,200,10,3,2,3,2,0,"dairy soft",2.49,"10 oz",null,null,0],
+["frozenbroc","Frozen broccoli florets",cZ,"1 cup",20,200,5,1,3,3,0,0,"gas vitk soft",1.99,"12 oz",6.98,"4 lb",0],
+["frozenberries","Frozen mixed berries",cZ,"1 cup",0,150,18,10,4,1,0,0,"soft fiber",8.99,"3 lb bag",9.98,"4 lb bag",0],
+["frozenfruit","Frozen peaches / mango",cZ,"1 cup",0,250,20,15,3,1,0,0,"soft",3.49,"16 oz",8.98,"4 lb",0],
+["frozendinner","Frozen dinner (regular)",cZ,"1 tray",960,400,45,6,3,20,6,0,"proc gluten wheat soft",3.99,"each",15.98,"6 pack",0],
+["frozendinnerlite","Frozen dinner, lighter (Lean Cuisine)",cZ,"1 tray",520,400,40,8,4,18,2,0,"gluten wheat soft",3.49,"each",null,null,0],
+["frozenpizza","Frozen pizza",cZ,"1/4 pizza",700,250,38,5,2,14,6,0,"gluten wheat dairy proc",5.99,"each",9.98,"3 pack",0],
+["nuggets","Frozen chicken nuggets",cZ,"5 pieces",480,200,15,0,1,14,3,0,"proc fried gluten wheat",6.99,"25 oz bag",14.98,"5 lb",0],
+["fishsticks","Frozen fish sticks",cZ,"6 sticks",400,150,20,1,1,12,1,0,"fish fried gluten wheat",5.99,"box",11.98,"3 lb",0],
+["frozenfish","Frozen fish fillets, plain",cZ,"4 oz",120,350,0,0,0,22,0.5,0,"fish protein soft checkinj",8.99,"2 lb bag",16.98,"3 lb",0],
+["burritos","Frozen burritos",cZ,"1 burrito",580,300,45,2,5,12,4,0,"gas gluten wheat proc",0.99,"each",8.98,"12 pack",0],
+["waffles","Frozen waffles",cZ,"2 waffles",400,80,30,4,1,4,1,0,"gluten wheat egg soft",3.29,"10 ct",7.98,"48 ct",0],
+["fries","Frozen French fries",cZ,"3 oz (about 12 fries)",260,300,20,0,2,2,0.5,0,"fried",4.49,"32 oz",7.98,"5 lb",0],
+["edamame","Frozen edamame",cZ,"1/2 cup shelled",5,340,8,2,4,8,0.5,0,"soy gas soft protein",2.49,"12 oz",6.98,"3 lb",0],
+["turkeyburger","Frozen turkey burgers",cZ,"1 patty",260,250,1,0,0,22,3,0,"protein",9.99,"box of 8",11.98,"12 ct",0],
+["veggieburger","Veggie burgers",cZ,"1 patty",380,200,10,1,4,15,1,0,"soy gluten wheat proc soft",4.99,"4 ct",10.98,"12 ct",0],
+["bfastsandwich","Frozen breakfast sandwiches",cZ,"1 sandwich",700,200,30,3,1,15,6,0,"proc gluten wheat egg dairy",6.99,"4 ct",11.98,"12 ct",0],
+// ---- Beverages ----
+["water","Bottled water",cB,"1 bottle (16.9 oz)",0,0,0,0,0,0,0,500,"",3.99,"24 pack",4.98,"40 pack",0],
+["sparklingwater","Sparkling water (Topo Chico)",cB,"1 can / bottle (12 oz)",0,0,0,0,0,0,0,355,"carb",4.99,"8 pack",9.98,"24 pack",0],
+["clubsoda","Club soda",cB,"12 oz",75,5,0,0,0,0,0,355,"carb",0.99,"1 L",null,null,0],
+["soda","Soda (cola)",cB,"12 oz can",45,0,39,39,0,0,0,355,"carb caff phos",7.99,"12 pack",17.98,"36 pack",0],
+["dietsoda","Diet soda",cB,"12 oz can",40,0,0,0,0,0,0,355,"carb caff phos",7.99,"12 pack",17.98,"36 pack",0],
+["oj","Orange juice",cB,"8 oz",2,450,26,21,0,2,0,240,"acid",4.49,"52 oz",6.98,"89 oz",0],
+["applejuice","Apple juice",cB,"8 oz",10,250,28,24,0,0,0,240,"",2.99,"64 oz",5.98,"2 pack",0],
+["cranjuice","Cranberry juice cocktail",cB,"8 oz",5,40,30,28,0,0,0,240,"acid",3.49,"64 oz",6.98,"2 pack",0],
+["v8","V8 / tomato juice (regular)",cB,"8 oz",640,470,10,8,2,2,0,240,"acid",3.99,"46 oz",8.98,"12 pack",0],
+["v8ls","V8 Low Sodium",cB,"8 oz",140,900,10,8,2,2,0,240,"acid",3.99,"46 oz",null,null,1],
+["coffee","Coffee",cB,"8 oz brewed",5,116,0,0,0,0,0,240,"caff acid",8.99,"12 oz",17.98,"48 oz",0],
+["tea","Black / green tea bags",cB,"8 oz brewed",7,88,0,0,0,0,0,240,"caff",3.99,"100 ct",6.98,"312 ct",0],
+["herbaltea","Herbal tea (no caffeine)",cB,"8 oz brewed",2,20,0,0,0,0,0,240,"",3.49,"20 ct",null,null,1],
+["sweettea","Sweet tea",cB,"8 oz",10,30,22,22,0,0,0,240,"caff",2.99,"gallon",5.98,"2 gallons",0],
+["lemonade","Lemonade",cB,"8 oz",10,30,26,25,0,0,0,240,"acid",2.49,"52 oz",null,null,0],
+["drinkmix","Crystal Light drink mix",cB,"8 oz prepared",35,0,0,0,0,0,0,240,"",2.99,"box",6.98,"3 pack",0],
+["gatorade","Sports drink (Gatorade)",cB,"20 oz bottle",270,80,36,34,0,0,0,590,"",1.79,"bottle",21.98,"28 pack",0],
+["gatoradezero","Gatorade Zero / Powerade Zero",cB,"20 oz bottle",270,80,1,0,0,0,0,590,"",1.79,"bottle",19.98,"28 pack",0],
+["pedialyte","Pedialyte",cB,"12 oz",370,280,9,9,0,0,0,355,"",5.99,"1 L",null,null,0],
+["coconutwater","Coconut water",cB,"8 oz",65,600,10,9,0,0,0,240,"",2.49,"16.9 oz",13.98,"12 pack",0],
+["smoothie","Bottled smoothie (Naked)",cB,"15.2 oz bottle",20,600,60,53,1,2,0,450,"acid",3.99,"bottle",null,null,0],
+["chocmilk","Chocolate milk",cB,"8 oz",150,420,26,24,1,8,3,240,"dairy lactose caff hiphos",2.99,"half gallon",null,null,0],
+["ensure","Ensure / Boost shake",cB,"8 oz bottle",200,370,33,15,0,9,0.5,240,"dairy protein soft",9.99,"6 pack",31.98,"24 pack",0],
+["premierprotein","Premier Protein shake",cB,"11 oz",230,240,4,1,1,30,1,325,"dairy protein soft",12.99,"4 pack",31.98,"18 pack",0],
+["glucerna","Glucerna shake",cB,"8 oz",210,400,16,6,4,10,0.5,240,"dairy protein soft",9.99,"6 pack",29.98,"24 pack",0],
+["nepro","Nepro shake (kidney)",cB,"8 oz",250,250,37,7,0,19,1,240,"dairy protein soft",14.99,"4 pack",null,null,1],
+["energydrink","Energy drink (Red Bull)",cB,"16 oz can",370,20,54,54,0,0,0,470,"caff carb",2.99,"can",37.98,"24 pack",0],
+["beer","Beer",cB,"12 oz",14,96,13,0,0,1,0,355,"carb alc purine gluten",9.99,"6 pack",21.98,"30 pack",0],
+["wine","Wine",cB,"5 oz glass",5,190,4,1,0,0,0,150,"alc acid",8.99,"750 mL",null,null,0],
+// ---- Snacks & Sweets ----
+["chips","Potato chips (regular)",cS,"1 oz (about 15 chips)",170,350,15,0,1,2,1.5,0,"fried hard",3.99,"8 oz bag",5.98,"party size",0],
+["chipsus","Potato chips, unsalted",cS,"1 oz",10,350,15,0,1,2,1.5,0,"fried hard",3.99,"bag",null,null,1],
+["tortillachips","Tortilla chips",cS,"1 oz",115,50,18,0,1,2,1,0,"fried hard",3.99,"bag",5.98,"party size",0],
+["pretzels","Pretzels",cS,"1 oz",385,40,23,1,1,3,0,0,"gluten wheat hard",3.49,"16 oz",4.98,"40 oz",0],
+["pretzelsus","Pretzels, unsalted",cS,"1 oz",75,40,23,1,1,3,0,0,"gluten wheat hard",3.49,"16 oz",null,null,1],
+["popcornmw","Microwave popcorn (butter)",cS,"about 3.5 cups popped",220,60,17,0,3,2,3,0,"hard",4.99,"6 pack",9.98,"24 pack",0],
+["popcornkernels","Popcorn kernels, plain",cS,"3 cups popped",2,80,19,0,3.5,3,0,0,"hard fiber",2.49,"32 oz",null,null,0],
+["cheesepuffs","Cheese puffs (Cheetos)",cS,"1 oz",250,50,15,1,1,2,1.5,0,"proc fried dairy",3.99,"bag",5.98,"party size",0],
+["porkrinds","Pork rinds",cS,"0.5 oz",280,20,0,0,0,9,1,0,"fried proc hard",2.49,"bag",null,null,0],
+["jerky","Beef jerky",cS,"1 oz",590,150,6,5,0,11,1,0,"proc chew",6.99,"3 oz bag",14.98,"16 oz",0],
+["trailmix","Trail mix",cS,"1/4 cup",60,200,17,12,2,4,1.5,0,"nut hard hiphos",6.99,"bag",12.98,"2.5 lb",0],
+["granolabar","Granola bars (Nature Valley)",cS,"2 bars",150,100,29,11,2,3,0.5,0,"oats nut hard",3.99,"12 ct",13.98,"48 ct",0],
+["proteinbar","Protein bars (Quest)",cS,"1 bar",230,150,22,2,10,20,2,0,"dairy nut protein chew",2.29,"bar",18.98,"12 pack",0],
+["cookies","Cookies (Oreo)",cS,"3 cookies",135,40,25,14,1,1,2,0,"gluten wheat soy",3.99,"package",7.98,"family 2 pack",0],
+["grahams","Graham crackers",cS,"2 full sheets",170,40,24,8,1,2,0,0,"gluten wheat",3.49,"box",5.98,"2 pack",0],
+["donuts","Donuts (glazed)",cS,"1 donut",200,60,25,12,1,3,4,0,"gluten wheat fried egg dairy soft",6.99,"dozen",null,null,0],
+["angelfood","Angel food cake",cS,"1 slice",255,70,29,15,0,3,0,0,"gluten wheat egg soft",5.99,"cake",null,null,0],
+["chocolatebar","Milk chocolate bar",cS,"1.5 oz bar",35,160,26,24,1,3,8,0,"dairy caff hiphos soft",1.29,"bar",31.98,"36 pack",0],
+["darkchoc","Dark chocolate (70%)",cS,"1 oz",6,200,13,7,3,2,7,0,"caff hiphos",2.99,"bar",null,null,0],
+["nutella","Nutella / hazelnut spread",cS,"2 tbsp",15,150,22,21,1,2,4,0,"nut dairy soft",4.99,"13 oz",8.98,"2 pack",0],
+["fruitsnacks","Fruit snacks (gummies)",cS,"1 pouch",30,10,20,12,0,0,0,0,"sticky soft",2.99,"10 ct",9.98,"40 ct",0],
+["hardcandy","Hard candy (lemon drops)",cS,"3 pieces",10,0,17,14,0,0,0,0,"thirst",2.49,"bag",null,null,0],
+["sfcandy","Sugar-free hard candy / mints",cS,"1 piece",0,0,2,0,0,0,0,0,"thirst",2.99,"bag",null,null,0],
+["gum","Sugar-free gum",cS,"1 piece",0,0,1,0,0,0,0,0,"thirst",2.49,"pack",9.98,"multi pack",0],
+// ---- Deli & Prepared ----
+["rotisserie","Rotisserie chicken",cL,"3 oz",460,250,1,0,0,24,2,0,"proc protein soft",6.99,"each",4.98,"each",0],
+["deliturkey","Deli turkey breast (regular)",cL,"2 oz",520,150,2,1,0,10,0.5,0,"proc phos soft",7.99,"per lb",8.98,"2 lb",0],
+["deliturkeyns","Deli turkey, no salt added",cL,"2 oz",55,180,0,0,0,12,0.5,0,"soft protein",9.99,"per lb",null,null,1],
+["deliham","Deli ham",cL,"2 oz",620,190,2,1,0,10,1.5,0,"proc phos soft",5.99,"per lb",8.98,"2 lb",0],
+["deliroastbeef","Deli roast beef",cL,"2 oz",480,200,1,0,0,12,1.5,0,"proc phos soft",9.99,"per lb",9.98,"2 lb",0],
+["chickensalad","Deli chicken salad",cL,"1/2 cup",450,150,5,3,0,12,3,0,"egg soft",6.99,"per lb",7.98,"2 lb",0],
+["delisalad","Deli potato salad / coleslaw",cL,"1/2 cup",350,250,18,10,1,2,2,0,"egg soft",4.99,"per lb",6.98,"3 lb",0],
+["hummus","Hummus",cL,"2 tbsp",130,60,5,0,1.5,2,0.5,0,"gas sesame soft",3.99,"10 oz",5.98,"32 oz",0],
+["guac","Guacamole (store-made)",cL,"2 tbsp",120,150,3,0,2,0.5,0.5,0,"soft",4.99,"8 oz",7.98,"2 pack",0],
+["sushi","Store sushi rolls",cL,"8 pieces",590,150,60,10,2,12,0.5,0,"fish shell soy gluten wheat soft",8.99,"tray",null,null,0],
+// ---- Condiments & Seasoning ----
+["salt","Table salt",cK,"1/4 tsp",590,0,0,0,0,0,0,0,"",0.99,"26 oz",null,null,0],
+["saltsub","Salt substitute (NoSalt)",cK,"1/4 tsp",0,650,0,0,0,0,0,0,"ksub flavor",4.49,"jar",null,null,1],
+["mrsdash","Mrs. Dash salt-free seasoning",cK,"1/4 tsp",0,10,0,0,0,0,0,0,"flavor",3.49,"jar",null,null,0],
+["garlicpowder","Garlic / onion powder",cK,"1/4 tsp",0,10,1,0,0,0,0,0,"flavor",2.99,"jar",5.98,"large jar",0],
+["pepper","Black pepper & salt-free spices",cK,"1/4 tsp",0,10,0,0,0,0,0,0,"flavor",2.99,"jar",6.98,"large",0],
+["garlicsalt","Garlic salt / seasoned salt",cK,"1/4 tsp",370,5,0,0,0,0,0,0,"",2.99,"jar",null,null,0],
+["creole","Tony Chachere's Creole seasoning",cK,"1/4 tsp",200,5,0,0,0,0,0,0,"spicy",2.99,"jar",5.98,"large",0],
+["creolens","Tony Chachere's No Salt seasoning",cK,"1/4 tsp",0,5,0,0,0,0,0,0,"spicy flavor",3.49,"jar",null,null,1],
+["tacoseasoning","Taco seasoning packet",cK,"2 tsp",420,20,3,0,0,0,0,0,"spicy",0.99,"packet",null,null,0],
+["tacoseasoningsf","Salt-free taco / fajita seasoning",cK,"1/4 tsp",0,10,0,0,0,0,0,0,"flavor spicy",3.49,"jar",null,null,1],
+["bouillon","Bouillon cubes (regular)",cK,"1 cube",1000,20,1,0,0,1,0,0,"",2.49,"jar",null,null,0],
+["bouillonsf","Sodium-free bouillon (Herb-Ox)",cK,"1 packet",0,20,1,0,0,0,0,0,"flavor",3.49,"box",null,null,1],
+["vinegar","Vinegar",cK,"1 tbsp",0,10,0,0,0,0,0,0,"acid flavor",2.99,"bottle",null,null,0],
+["lemonjuice","Lemon juice (bottled)",cK,"1 tbsp",0,15,1,0,0,0,0,0,"acid flavor",2.49,"bottle",null,null,0],
+["hotsauce","Hot sauce (Tabasco)",cK,"1 tsp",35,5,0,0,0,0,0,0,"spicy acid flavor",2.49,"bottle",null,null,0],
+["ketchup","Ketchup",cK,"1 tbsp",160,50,5,4,0,0,0,0,"acid soft",3.29,"32 oz",5.98,"2 pack",0],
+["ketchupns","Ketchup, no salt added (Heinz)",cK,"1 tbsp",5,50,5,4,0,0,0,0,"acid soft",3.99,"14 oz",null,null,1],
+["mustard","Yellow mustard",cK,"1 tsp",55,5,0,0,0,0,0,0,"acid",1.99,"20 oz",null,null,0],
+["mayo","Mayonnaise",cK,"1 tbsp",90,5,0,0,0,0,1.5,0,"egg soy soft",4.49,"30 oz",7.98,"64 oz",0],
+["relish","Sweet pickle relish",cK,"1 tbsp",125,10,5,4,0,0,0,0,"acid soft",2.49,"jar",null,null,0],
+["soysauce","Soy sauce (regular)",cK,"1 tbsp",920,40,1,0,0,1,0,0,"soy gluten wheat",2.99,"15 oz",null,null,0],
+["soysaucels","Soy sauce, reduced sodium",cK,"1 tbsp",575,40,1,0,0,1,0,0,"soy gluten wheat",3.29,"15 oz",null,null,0],
+["salsa","Salsa (jarred)",cK,"2 tbsp",200,80,3,1,0,0,0,0,"acid spicy soft",3.29,"16 oz",5.98,"38 oz",0],
+["bbqsauce","BBQ sauce",cK,"2 tbsp",350,50,16,14,0,0,0,0,"acid soft",2.99,"18 oz",5.98,"2 pack",0],
+["ranch","Ranch dressing",cK,"2 tbsp",270,20,2,1,0,0,2.5,0,"dairy egg soft",3.49,"16 oz",6.98,"40 oz",0],
+["italiandressing","Italian dressing",cK,"2 tbsp",380,20,3,2,0,0,1.5,0,"acid",3.29,"16 oz",null,null,0],
+["pickles","Pickles",cK,"1 spear",330,20,1,0,0,0,0,0,"acid hard",3.49,"jar",5.98,"1 gal",0],
+["olives","Olives",cK,"5 olives",280,5,1,0,0,0,0,0,"soft",3.99,"jar",null,null,0],
+];
+const FOODS = FOOD_ROWS.map(r => ({id:r[0], name:r[1], cat:r[2], serving:r[3], na:r[4], k:r[5], carb:r[6], sugar:r[7], fiber:r[8], prot:r[9], sf:r[10], fl:r[11], tags:(r[12]||"").split(" ").filter(Boolean), price:r[13], unit:r[14], bp:r[15], bu:r[16], nw:!!r[17], builtin:true}));
+// ===== Visuals: aisle colors and a picture for every food =====
+const AISLES = {
+  "Produce":                 {emoji:"🥬", cls:"a-produce"},
+  "Meat & Seafood":          {emoji:"🥩", cls:"a-meat"},
+  "Dairy & Eggs":            {emoji:"🥛", cls:"a-dairy"},
+  "Bread & Grains":          {emoji:"🍞", cls:"a-grain"},
+  "Pantry & Canned":         {emoji:"🥫", cls:"a-pantry"},
+  "Frozen":                  {emoji:"🧊", cls:"a-frozen"},
+  "Beverages":               {emoji:"🥤", cls:"a-bev"},
+  "Snacks & Sweets":         {emoji:"🍪", cls:"a-snack"},
+  "Deli & Prepared":         {emoji:"🥪", cls:"a-deli"},
+  "Condiments & Seasonings": {emoji:"🧂", cls:"a-cond"},
+};
+const EMOJI = {
+  bananas:"🍌", apples:"🍎", oranges:"🍊", clementines:"🍊", strawberries:"🍓", blueberries:"🫐", raspberries:"🫐", grapes:"🍇", watermelon:"🍉", cantaloupe:"🍈",
+  peaches:"🍑", pears:"🍐", plums:"🍑", cherries:"🍒", mango:"🥭", pineapple:"🍍", grapefruit:"🍊", avocado:"🥑", tomatoes:"🍅", potatoes:"🥔", sweetpot:"🍠",
+  butternut:"🎃", onions:"🧅", garlic:"🧄", carrots:"🥕", celery:"🥬", broccoli:"🥦", cauliflower:"🥦", cabbage:"🥬", brussels:"🥦", spinach:"🥬", kale:"🥬",
+  lettuce:"🥬", cucumber:"🥒", bellpep:"🫑", jalapeno:"🌶️", greenbeans:"🫛", zucchini:"🥒", eggplant:"🍆", mushrooms:"🍄", corn:"🌽", asparagus:"🌿", lemons:"🍋",
+  herbs:"🌿", fruittray:"🍓", saladkit:"🥗",
+  chickenbreast:"🍗", chickenthigh:"🍗", drumsticks:"🍗", wholechicken:"🍗", groundturkey:"🥩", groundbeef90:"🥩", groundbeef80:"🥩", sirloin:"🥩", chuckroast:"🥩",
+  brisket:"🥩", porkchop:"🥩", porktender:"🥩", porkribs:"🍖", bacon:"🥓", turkeybacon:"🥓", hotdogs:"🌭", sausage:"🌭", smokedsausage:"🌭", salmon:"🐟", tilapia:"🐟",
+  cod:"🐟", catfish:"🐟", shrimp:"🦐", tuna:"🥫", tunans:"🥫", cannedsalmon:"🥫", sardines:"🐟", beefliver:"🥩",
+  eggs:"🥚", eggwhites:"🥚", milk2:"🥛", milkwhole:"🥛", milkskim:"🥛", lactaid:"🥛", almondmilk:"🥛", oatmilk:"🥛", soymilk:"🥛", greekyogurt:"🥣", yogurtflav:"🥣",
+  cottage:"🧀", cheddar:"🧀", swiss:"🧀", mozz:"🧀", freshmozz:"🧀", parmesan:"🧀", american:"🧀", creamcheese:"🧀", butter:"🧈", butterus:"🧈", sourcream:"🥛",
+  halfhalf:"☕", icecream:"🍨", sherbet:"🍧", fruitbars:"🍧", sfpops:"🍧", pudding:"🍮", jello:"🍮", jellosf:"🍮",
+  whitebread:"🍞", wheatbread:"🍞", lowsodbread:"🍞", flourtort:"🫓", corntort:"🫓", buns:"🍔", rolls:"🥐", biscuits:"🥐", bagels:"🥯", engmuffin:"🥯", cornbread:"🍞",
+  oats:"🥣", instantoat:"🥣", granola:"🥣", cheerios:"🥣", shreddedwheat:"🥣", raisinbran:"🥣", sugarcereal:"🥣", brownrice:"🍚", whiterice:"🍚", pasta:"🍝", wwpasta:"🍝",
+  quinoa:"🍚", grits:"🥣", creamofwheat:"🥣", saltines:"🍘", saltinesus:"🍘", triscuit:"🍘", ricecakes:"🍘", pancakemix:"🥞", flour:"🌾",
+  cannedbeans:"🥫", beansns:"🥫", refried:"🥫", drybeans:"🫘", lentils:"🫘", cannedveg:"🥫", cannedvegns:"🥫", cannedcorn:"🥫", cannedtom:"🥫", cannedtomns:"🥫",
+  pastasauce:"🫙", pastasaucens:"🫙", cannedfruit:"🥫", applesauce:"🍎", raisins:"🍇", peanutbutter:"🥜", pbunsalted:"🥜", almonds:"🌰", saltednuts:"🥜", walnuts:"🌰",
+  broth:"🍲", brothls:"🍲", soup:"🥫", souphr:"🥫", soupls:"🥫", creamsoup:"🥫", ramen:"🍜", macncheese:"🧀", ricemix:"🍚", instantpotato:"🥔", chili:"🍲",
+  cannedchicken:"🥫", spam:"🥫", gravy:"🫙", oliveoil:"🫒", vegoil:"🫗", honey:"🍯", maplesyrup:"🥞", sugar:"🍬", jam:"🫙", proteinpowder:"🥤",
+  frozenveg:"🥦", frozenvegsauce:"🥦", frozenbroc:"🥦", frozenberries:"🫐", frozenfruit:"🍑", frozendinner:"🍱", frozendinnerlite:"🍱", frozenpizza:"🍕", nuggets:"🍗",
+  fishsticks:"🐟", frozenfish:"🐟", burritos:"🌯", waffles:"🧇", fries:"🍟", edamame:"🫛", turkeyburger:"🍔", veggieburger:"🍔", bfastsandwich:"🥪",
+  water:"💧", sparklingwater:"🫧", clubsoda:"🥤", soda:"🥤", dietsoda:"🥤", oj:"🧃", applejuice:"🧃", cranjuice:"🧃", v8:"🧃", v8ls:"🧃", coffee:"☕", tea:"🍵",
+  herbaltea:"🍵", sweettea:"🥤", lemonade:"🍋", drinkmix:"🥤", gatorade:"🥤", gatoradezero:"🥤", pedialyte:"🍼", coconutwater:"🥥", smoothie:"🥤", chocmilk:"🥛",
+  ensure:"🥤", premierprotein:"🥤", glucerna:"🥤", nepro:"🥤", energydrink:"⚡", beer:"🍺", wine:"🍷",
+  chips:"🥔", chipsus:"🥔", tortillachips:"🫓", pretzels:"🥨", pretzelsus:"🥨", popcornmw:"🍿", popcornkernels:"🍿", cheesepuffs:"🧀", porkrinds:"🥓", jerky:"🥩",
+  trailmix:"🥜", granolabar:"🍫", proteinbar:"🍫", cookies:"🍪", grahams:"🍪", donuts:"🍩", angelfood:"🍰", chocolatebar:"🍫", darkchoc:"🍫", nutella:"🍫",
+  fruitsnacks:"🍬", hardcandy:"🍬", sfcandy:"🍬", gum:"🍬",
+  rotisserie:"🍗", deliturkey:"🥪", deliturkeyns:"🥪", deliham:"🍖", deliroastbeef:"🥩", chickensalad:"🥗", delisalad:"🥗", hummus:"🥙", guac:"🥑", sushi:"🍣",
+  salt:"🧂", saltsub:"🧂", mrsdash:"🌿", garlicpowder:"🧄", pepper:"🌿", garlicsalt:"🧂", creole:"🌶️", creolens:"🌶️", tacoseasoning:"🌮", tacoseasoningsf:"🌮",
+  bouillon:"🍲", bouillonsf:"🍲", vinegar:"🍶", lemonjuice:"🍋", hotsauce:"🌶️", ketchup:"🍅", ketchupns:"🍅", mustard:"🌭", mayo:"🥚", relish:"🥒", soysauce:"🍶",
+  soysaucels:"🍶", salsa:"🍅", bbqsauce:"🍖", ranch:"🥗", italiandressing:"🥗", pickles:"🥒", olives:"🫒",
+};
+// Emoji the user can pick for foods they add
+const EMOJI_CHOICES = ["🍎","🍌","🍊","🍓","🫐","🍇","🍉","🍑","🍐","🍒","🥭","🍍","🥑","🍅","🥔","🍠","🧅","🧄","🥕","🥦","🥬","🥒","🫑","🌶️","🍄","🌽","🍋","🌿","🥗",
+  "🍗","🥩","🍖","🥓","🌭","🐟","🦐","🥚","🥛","🧀","🧈","🥣","🍨","🍮","🍞","🫓","🥐","🥯","🍚","🍝","🍘","🥞","🥫","🫙","🫘","🥜","🌰","🍲","🍜","🍯","🫒",
+  "🍱","🍕","🌯","🧇","🍟","🍔","🥪","🍣","🥙","💧","🥤","🧃","☕","🍵","🍺","🍷","🥥","🥨","🍿","🍪","🍩","🍰","🍫","🍬","🧂","🌮","🍶"];
+function foodEmoji(f){ return f.emoji || EMOJI[f.id] || (AISLES[f.cat] || {}).emoji || "🛒"; }
+function aisleClass(cat){ return (AISLES[cat] || {}).cls || "a-pantry"; }
+// Built-in product photos (Adobe Stock, licensed) — food id -> tile key in img/
+const PHOTO = {"bananas":"bananas","apples":"apples","oranges":"oranges","clementines":"clementines","strawberries":"strawberries","blueberries":"blueberries","raspberries":"raspberries","grapes":"grapes","watermelon":"watermelon","cantaloupe":"cantaloupe","peaches":"peaches","pears":"pears","plums":"plums","cherries":"cherries","mango":"mango","pineapple":"pineapple","grapefruit":"grapefruit","avocado":"avocado","tomatoes":"tomatoes","potatoes":"potatoes","sweetpot":"sweetpot","butternut":"butternut","onions":"onions","garlic":"garlic","carrots":"carrots","celery":"celery","broccoli":"broccoli","frozenbroc":"broccoli","cauliflower":"cauliflower","cabbage":"cabbage","brussels":"brussels","spinach":"spinach","kale":"kale","lettuce":"lettuce","cucumber":"cucumber","bellpep":"bellpep","jalapeno":"jalapeno","greenbeans":"greenbeans","zucchini":"zucchini","eggplant":"eggplant","mushrooms":"mushrooms","corn":"corn","asparagus":"asparagus","lemons":"lemons","herbs":"herbs","fruittray":"fruittray","saladkit":"saladkit","chickenbreast":"chickenbreast","chickenthigh":"chickenthigh","drumsticks":"drumsticks","wholechicken":"wholechicken","groundturkey":"groundturkey","groundbeef90":"groundbeef","groundbeef80":"groundbeef","sirloin":"sirloin","chuckroast":"chuckroast","brisket":"brisket","porkchop":"porkchop","porktender":"porktender","porkribs":"porkribs","bacon":"bacon","turkeybacon":"turkeybacon","hotdogs":"hotdogs","sausage":"sausage","smokedsausage":"smokedsausage","salmon":"salmon","tilapia":"tilapia","cod":"cod","catfish":"catfish","shrimp":"shrimp","tuna":"tuna","tunans":"tuna","cannedsalmon":"cannedsalmon","sardines":"sardines","beefliver":"beefliver","eggs":"eggs","eggwhites":"eggwhites","milk2":"milk","milkwhole":"milk","milkskim":"milk","lactaid":"milk","almondmilk":"almondmilk","oatmilk":"oatmilk","soymilk":"soymilk","greekyogurt":"greekyogurt","yogurtflav":"yogurtflav","cottage":"cottage","cheddar":"cheddar","swiss":"swiss","mozz":"mozz","freshmozz":"freshmozz","parmesan":"parmesan","american":"american","creamcheese":"creamcheese","butter":"butter","butterus":"butter","sourcream":"sourcream","halfhalf":"halfhalf","icecream":"icecream","sherbet":"sherbet","fruitbars":"fruitbars","sfpops":"fruitbars","pudding":"pudding","jello":"jello","jellosf":"jello","whitebread":"whitebread","wheatbread":"wheatbread","lowsodbread":"wheatbread","flourtort":"flourtort","corntort":"corntort","buns":"buns","rolls":"rolls","biscuits":"biscuits","bagels":"bagels","engmuffin":"engmuffin","cornbread":"cornbread","oats":"oats","instantoat":"instantoat","granola":"granola","cheerios":"cheerios","shreddedwheat":"shreddedwheat","raisinbran":"raisinbran","sugarcereal":"sugarcereal","brownrice":"brownrice","whiterice":"whiterice","pasta":"pasta","wwpasta":"wwpasta","quinoa":"quinoa","grits":"grits","creamofwheat":"creamofwheat","saltines":"saltines","saltinesus":"saltines","triscuit":"triscuit","ricecakes":"ricecakes","pancakemix":"pancakemix","flour":"flour","cannedbeans":"beans","beansns":"beans","refried":"refried","drybeans":"drybeans","lentils":"lentils","cannedveg":"cannedveg","cannedvegns":"cannedveg","cannedcorn":"cannedcorn","cannedtom":"cannedtom","cannedtomns":"cannedtom","pastasauce":"pastasauce","pastasaucens":"pastasauce","cannedfruit":"cannedfruit","applesauce":"applesauce","raisins":"raisins","peanutbutter":"peanutbutter","pbunsalted":"peanutbutter","almonds":"almonds","saltednuts":"saltednuts","walnuts":"walnuts","broth":"broth","brothls":"broth","soup":"soup","souphr":"soup","soupls":"soup","creamsoup":"creamsoup","ramen":"ramen","macncheese":"macncheese","ricemix":"ricemix","instantpotato":"instantpotato","chili":"chili","cannedchicken":"cannedchicken","spam":"spam","gravy":"gravy","oliveoil":"oliveoil","vegoil":"vegoil","honey":"honey","maplesyrup":"maplesyrup","sugar":"sugar","jam":"jam","proteinpowder":"proteinpowder","frozenveg":"frozenveg","frozenvegsauce":"frozenveg","frozenberries":"frozenberries","frozenfruit":"frozenfruit","frozendinner":"frozendinner","frozendinnerlite":"frozendinner","frozenpizza":"frozenpizza","nuggets":"nuggets","fishsticks":"fishsticks","frozenfish":"frozenfish","burritos":"burritos","waffles":"waffles","fries":"fries","edamame":"edamame","turkeyburger":"turkeyburger","veggieburger":"veggieburger","bfastsandwich":"bfastsandwich","water":"water","sparklingwater":"sparklingwater","clubsoda":"sparklingwater","soda":"soda","dietsoda":"soda","oj":"oj","applejuice":"applejuice","cranjuice":"cranjuice","v8":"v8","v8ls":"v8","coffee":"coffee","tea":"tea","herbaltea":"tea","sweettea":"sweettea","lemonade":"lemonade","drinkmix":"drinkmix","gatorade":"gatorade","gatoradezero":"gatorade","pedialyte":"gatorade","coconutwater":"coconutwater","smoothie":"smoothie","chocmilk":"chocmilk","ensure":"shake","premierprotein":"shake","glucerna":"shake","nepro":"shake","energydrink":"energydrink","beer":"beer","wine":"wine","chips":"chips","chipsus":"chips","tortillachips":"tortillachips","pretzels":"pretzels","pretzelsus":"pretzels","popcornmw":"popcorn","popcornkernels":"popcornkernels","cheesepuffs":"cheesepuffs","porkrinds":"porkrinds","jerky":"jerky","trailmix":"trailmix","granolabar":"granolabar","proteinbar":"proteinbar","cookies":"cookies","grahams":"grahams","donuts":"donuts","angelfood":"angelfood","chocolatebar":"chocolatebar","darkchoc":"darkchoc","nutella":"nutella","fruitsnacks":"fruitsnacks","hardcandy":"hardcandy","sfcandy":"sfcandy","gum":"gum","rotisserie":"rotisserie","deliturkey":"deliturkey","deliturkeyns":"deliturkey","deliham":"deliham","deliroastbeef":"deliroastbeef","chickensalad":"chickensalad","delisalad":"delisalad","hummus":"hummus","guac":"guac","sushi":"sushi","salt":"salt","saltsub":"saltsub","mrsdash":"mrsdash","garlicpowder":"garlicpowder","pepper":"pepper","garlicsalt":"garlicsalt","creole":"creole","creolens":"creole","tacoseasoning":"tacoseasoning","tacoseasoningsf":"tacoseasoning","bouillon":"bouillon","bouillonsf":"bouillon","vinegar":"vinegar","lemonjuice":"lemonjuice","hotsauce":"hotsauce","ketchup":"ketchup","ketchupns":"ketchup","mustard":"mustard","mayo":"mayo","relish":"relish","soysauce":"soysauce","soysaucels":"soysauce","salsa":"salsa","bbqsauce":"bbqsauce","ranch":"ranch","italiandressing":"italiandressing","pickles":"pickles","olives":"olives"};
+const PHOTO_BASE = "img/";
+function thumbHTML(f, size){
+  const cls = "thumb " + aisleClass(f.cat) + (size ? " " + size : "");
+  if (f.img) return `<span class="${cls}"><img src="${f.img}" alt=""></span>`;
+  const key = PHOTO[f.id];
+  if (key) return `<span class="${cls} ph" aria-hidden="true"><img src="${PHOTO_BASE}${key}.webp" alt="" loading="lazy" decoding="async" onerror="this.parentNode.classList.remove('ph');this.remove()"><i class="em">${foodEmoji(f)}</i></span>`;
+  return `<span class="${cls}" aria-hidden="true">${foodEmoji(f)}</span>`;
+}
+const AVATAR_HUES = [152, 24, 205, 280, 340, 45, 190, 110];
+function personHue(p){
+  const name = (p && p.name) || "?"; let h = 0; for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) % 997;
+  return AVATAR_HUES[h % AVATAR_HUES.length];
+}
+// A person is a colour — a dot on rows, a stripe on their tray card. No initials bubbles.
+function avatarHTML(p, size){
+  return `<span class="avatar ${size || ""}" style="--h:${personHue(p)}" aria-hidden="true"></span>`;
+}
+// Product tile with its badge on the corner: the status dot and the number that matters (sodium per serving).
+function tileHTML(f, lvl, value, size){
+  return `<span class="tile">${thumbHTML(f, size)}<span class="tbadge l${lvl}"><i></i>${esc(value)}</span></span>`;
+}
+// ===== Conditions (diet orders) and the grading rules =====
+const CONDITIONS = [
+  {id:"sodium", name:"Low sodium (heart failure, high blood pressure)", short:"Sodium", param:{label:"Daily sodium limit", unit:"mg", def:2000, min:500, max:4000, step:100}},
+  {id:"fluid", name:"Fluid restriction", short:"Fluid", param:{label:"Daily fluid limit", unit:"mL", def:1500, min:500, max:4000, step:50}},
+  {id:"resp", name:"Chronic respiratory failure / COPD", short:"Breathing"},
+  {id:"diabetes", name:"Diabetes (sugar & carb control)", short:"Diabetes", param:{label:"Sugar per serving that gets flagged", unit:"g", def:12, min:5, max:30, step:1}},
+  {id:"ckd", name:"Kidney disease (potassium & phosphorus)", short:"Kidney"},
+  {id:"hik", name:"High potassium / on potassium-raising meds (spironolactone, lisinopril, losartan)", short:"High K"},
+  {id:"lok", name:"Needs extra potassium (on water pills like furosemide / Lasix)", short:"Needs K"},
+  {id:"heart", name:"Cholesterol / heart-healthy fats", short:"Cholesterol"},
+  {id:"warfarin", name:"On warfarin (Coumadin) — steady vitamin K", short:"Warfarin"},
+  {id:"gerd", name:"Acid reflux (GERD)", short:"Reflux"},
+  {id:"gout", name:"Gout", short:"Gout"},
+  {id:"soft", name:"Soft / easy-chew diet (swallowing or dental trouble)", short:"Soft diet"},
+  {id:"lactose", name:"Lactose intolerance", short:"Lactose"},
+  {id:"gluten", name:"Gluten-free (celiac)", short:"Gluten-free"},
+  {id:"noalc", name:"No alcohol", short:"No alcohol"},
+  {id:"fiber", name:"Constipation (needs fiber)", short:"Fiber"},
+];
+const COND = Object.fromEntries(CONDITIONS.map(c => [c.id, c]));
+const ALLERGENS = [
+  {id:"peanut", name:"peanuts"}, {id:"nut", name:"tree nuts"}, {id:"shell", name:"shellfish"}, {id:"fish", name:"fish"},
+  {id:"egg", name:"eggs"}, {id:"soy", name:"soy"}, {id:"wheat", name:"wheat"}, {id:"dairy", name:"milk / dairy"}, {id:"sesame", name:"sesame"},
+];
+const ALLERGEN_NAME = Object.fromEntries(ALLERGENS.map(a => [a.id, a.name]));
+const LEVELS = [
+  {cls:"l0", label:"OK", word:"ok"},
+  {cls:"l1", label:"Counts as fluid", word:"fluid"},
+  {cls:"l2", label:"Limit", word:"limit"},
+  {cls:"l3", label:"Avoid", word:"avoid"},
+];
+
+// Grade one food against one person's diet order.
+// Returns {lvl 0..3, reasons:[{lvl,text}], goods:[text], infos:[text]}
+function gradeFood(f, p){
+  const c = (p && p.conds) || {};
+  const al = (p && p.allergies) || [];
+  const R = [], G = [], I = [];
+  const has = t => f.tags.includes(t);
+  const pct = (v, lim) => Math.round(v / lim * 100);
+  const fmt = n => Number(n).toLocaleString();
+
+  al.forEach(a => { if (has(a)) R.push({lvl:3, text:`Contains ${ALLERGEN_NAME[a]} — allergy.`}); });
+
+  if (c.sodium){
+    const L = +c.sodium || 2000, hi = Math.round(L * 0.2);
+    if (f.na > hi) R.push({lvl:3, text:`High sodium: ${fmt(f.na)} mg per ${f.serving} — ${pct(f.na, L)}% of the ${fmt(L)} mg day. Look for a "no salt added" version.`});
+    else if (has("proc") && f.na > 250) R.push({lvl:3, text:`Cured / processed meat: ${fmt(f.na)} mg per ${f.serving}, and salt is the preservative — a real portion is usually double. Fresh or "no salt added" instead.`});
+    else if (f.na > 140) R.push({lvl:2, text:`Moderate sodium: ${f.na} mg per ${f.serving} (${pct(f.na, L)}% of the day). One serving, keep the rest of the day low.`});
+    else if (f.na === 0) G.push("Sodium-free");
+    else G.push(`Low sodium (${f.na} mg)`);
+    if (has("checkinj")) I.push('Check the package: "enhanced", "seasoned" or "contains up to 15% solution" means salt water was added — pick plain.');
+    if (has("ksub")) I.push("Potassium-based. Fine for many people, but ask the doctor first if there is any kidney trouble or a potassium-raising medicine (spironolactone, lisinopril, losartan).");
+    if (has("grapefruit")) R.push({lvl:2, text:"Grapefruit interacts with many heart, blood-pressure and cholesterol medicines (amiodarone, statins, some BP pills). Ask the pharmacist first."});
+    if (has("alc")) R.push({lvl:2, text:"Alcohol strains a weak heart and clashes with heart medicines. Most heart-failure plans say little or none."});
+  }
+
+  if (c.fluid){
+    const F = +c.fluid || 1500;
+    if (f.fl > 0){
+      const pc = pct(f.fl, F);
+      if (f.fl >= F / 3) R.push({lvl:2, text:`Big pour: ${fmt(f.fl)} mL is ${pc}% of the whole day's ${fmt(F)} mL. Pour a small cup instead of drinking the whole thing.`});
+      else R.push({lvl:1, text:`Counts as fluid: ${fmt(f.fl)} mL per ${f.serving} = ${pc}% of the ${fmt(F)} mL day.`});
+    }
+    if (has("wet")) I.push("Very watery food. Most fluid plans don't count it, but some do — ask the dietitian.");
+    if (has("thirst") && f.fl === 0) G.push("Helps thirst without adding fluid");
+    if (!c.sodium && f.na > 400) R.push({lvl:2, text:`Salty (${fmt(f.na)} mg) — salt makes you thirsty and hold water.`});
+  }
+
+  if (c.resp){
+    if (has("carb")) R.push({lvl:2, text:"Carbonation bloats the stomach and pushes on the diaphragm — breathing gets harder."});
+    if (has("gas")) R.push({lvl:2, text:"Gas-forming food. Bloating crowds the lungs — small portions, cooked soft."});
+    if (has("fried")) R.push({lvl:2, text:"Greasy / fried food sits heavy and causes bloating."});
+    if (f.sugar >= 20) R.push({lvl:2, text:`High sugar (${f.sugar} g). A load of simple carbs makes extra CO₂ for tired lungs to clear.`});
+    if (has("chew")) R.push({lvl:2, text:"Tough to chew — tiring when short of breath. Choose tender or ground cuts."});
+    if (!c.sodium && f.na > 400) R.push({lvl:2, text:`Salty (${fmt(f.na)} mg) — salt holds fluid, which strains breathing.`});
+    if (has("protein")) G.push("Good protein — breathing muscles need it");
+    if (has("caff")) I.push("Caffeine can clash with some breathing medicines — check with the pharmacist.");
+  }
+
+  if (c.diabetes){
+    const Sg = +c.diabetes || 12;
+    if (f.fl > 0 && f.sugar >= 10) R.push({lvl:3, text:`Sugary drink (${f.sugar} g sugar) — hits the blood sugar fast.`});
+    else if (f.sugar >= Sg * 2) R.push({lvl:3, text:`Very high sugar: ${f.sugar} g per ${f.serving}.`});
+    else if (f.sugar >= Sg) R.push({lvl:2, text:`Sugar: ${f.sugar} g per ${f.serving} — small portion, with a meal.`});
+    if (f.carb >= 45) R.push({lvl:2, text:`Heavy carbs: ${f.carb} g per serving (about ${Math.round(f.carb / 15)} carb choices).`});
+    if (f.fiber >= 4) G.push(`Fiber (${f.fiber} g) slows the sugar rise`);
+    if (f.sugar === 0 && f.carb <= 5 && f.fl === 0 && (has("protein") || f.prot >= 10)) G.push("Protein, no sugar");
+  }
+
+  if (c.ckd){
+    if (f.k >= 400) R.push({lvl:3, text:`High potassium: ${fmt(f.k)} mg per ${f.serving}.`});
+    else if (f.k >= 250) R.push({lvl:2, text:`Moderate potassium: ${f.k} mg — small portion.`});
+    if (has("phos")) R.push({lvl:3, text:'Phosphorus additives (look for "phos" in the ingredient list).'});
+    else if (has("hiphos")) R.push({lvl:2, text:"Naturally high in phosphorus — limit."});
+    if (has("ksub")) R.push({lvl:3, text:"Potassium-chloride salt substitute — dangerous with kidney disease."});
+    if (!c.sodium && f.na > 400) R.push({lvl:2, text:`Salty (${fmt(f.na)} mg).`});
+  }
+
+  if (c.hik){
+    if (f.k >= 400) R.push({lvl:3, text:`High potassium: ${fmt(f.k)} mg per ${f.serving} — the medicine already raises potassium.`});
+    else if (f.k >= 250) R.push({lvl:2, text:`Moderate potassium: ${f.k} mg — small portion.`});
+    if (has("ksub")) R.push({lvl:3, text:"Potassium-chloride salt substitute — avoid with potassium-raising medicines."});
+  }
+
+  if (c.lok){
+    if (f.k >= 300) G.push(`Good potassium (${f.k} mg) — replaces what water pills flush out`);
+    if (has("ksub")) I.push("Salt substitute adds potassium — only if the doctor said so.");
+  }
+
+  if (c.heart){
+    if (f.sf >= 8) R.push({lvl:3, text:`Very high saturated fat: ${f.sf} g per ${f.serving}.`});
+    else if (f.sf >= 5) R.push({lvl:2, text:`Saturated fat: ${f.sf} g per ${f.serving}.`});
+    if (has("fried")) R.push({lvl:2, text:"Fried."});
+    if (has("proc")) R.push({lvl:2, text:"Processed meat — saturated fat and salt."});
+    if (has("omega")) G.push("Heart-healthy fats");
+    if (f.fiber >= 4) G.push(`Fiber (${f.fiber} g)`);
+    if (has("grapefruit") && !c.sodium) R.push({lvl:2, text:"Grapefruit interacts with statins and some blood-pressure medicines — ask the pharmacist."});
+  }
+
+  if (c.warfarin){
+    if (has("vitk")) R.push({lvl:2, text:"High vitamin K. Fine to eat — just eat about the same amount every week so the warfarin dose stays steady."});
+    if (has("alc")) R.push({lvl:2, text:"Alcohol changes how warfarin works."});
+    if (has("grapefruit") && !c.sodium && !c.heart) R.push({lvl:2, text:"Grapefruit can change medicine levels — ask the pharmacist."});
+  }
+
+  if (c.gerd){
+    const t = [];
+    if (has("acid")) t.push("acidic");
+    if (has("spicy")) t.push("spicy");
+    if (has("caff")) t.push("caffeine");
+    if (has("carb")) t.push("carbonated");
+    if (has("fried")) t.push("fried");
+    if (has("alc")) t.push("alcohol");
+    if (f.sf >= 5 && !has("fried")) t.push("high-fat");
+    if (t.length) R.push({lvl:2, text:`Reflux trigger: ${t.join(", ")}. Small amounts, not near bedtime.`});
+  }
+
+  if (c.gout){
+    if (has("purine2")) R.push({lvl:3, text:"Very high purines — raises uric acid."});
+    else if (has("purine")) R.push({lvl:2, text:"Moderate purines — small portions."});
+    if (has("alc")) R.push({lvl:3, text:"Alcohol (especially beer) triggers gout flares."});
+    if (f.fl > 0 && f.sugar >= 20) R.push({lvl:2, text:"Sugary drink — fructose raises uric acid."});
+  }
+
+  if (c.soft){
+    if (has("hard") || has("chew")) R.push({lvl:3, text:"Hard, crunchy or tough — choking risk. Pick soft foods or cook until very soft."});
+    else if (has("dry") || has("sticky")) R.push({lvl:2, text:"Dry or sticky — hard to swallow. Moisten it or skip."});
+    else if (has("soft")) G.push("Soft texture");
+  }
+
+  if (c.lactose){
+    if (has("lactose")) R.push({lvl:2, text:"High lactose — gas, cramps, diarrhea. A lactose-free version usually exists."});
+    else if (has("dairy")) I.push("Dairy, but low in lactose (aged cheese, yogurt, butter) — usually tolerated.");
+  }
+
+  if (c.gluten){
+    if (has("gluten") || has("wheat")) R.push({lvl:3, text:"Contains gluten."});
+    else if (has("oats")) R.push({lvl:2, text:"Oats — only if the label says certified gluten-free."});
+  }
+
+  if (c.noalc && has("alc")) R.push({lvl:3, text:"Alcohol."});
+  if (c.fiber && f.fiber >= 4) G.push(`Good fiber (${f.fiber} g) — helps constipation`);
+  if (has("flavor")) G.push("Salt-free flavor");
+
+  R.sort((a, b) => b.lvl - a.lvl);
+  const lvl = R.length ? R[0].lvl : 0;
+  return {lvl, reasons:R, goods:[...new Set(G)], infos:[...new Set(I)]};
+}
+
+// What to look for on the real package, for the active person's conditions
+function labelTips(p){
+  const c = (p && p.conds) || {}; const t = [];
+  if (c.sodium){ const L = +c.sodium || 2000; t.push(`Sodium: 140 mg or less per serving is low. Over ${Math.round(L*0.2)} mg — put it back.`); }
+  if (c.fluid) t.push("Fluid: anything liquid at room temperature counts. 1 cup = 240 mL, 8 fl oz = 240 mL, a 16.9 oz bottle = 500 mL.");
+  if (c.resp) t.push("Breathing: skip carbonated drinks and gas-makers; pick high-protein, soft, small-portion foods.");
+  if (c.diabetes) t.push("Diabetes: read Total Sugars and Total Carbohydrate per serving.");
+  if (c.ckd || c.hik) t.push('Potassium: read the Potassium line; skip anything with "phos" in the ingredients.');
+  if (c.heart) t.push("Fats: Saturated fat 5 g or less per serving, 0 g trans fat.");
+  if (c.gluten) t.push('Gluten: look for "gluten-free" on the front; wheat, barley, rye and malt mean no.');
+  if (c.soft) t.push("Texture: it should mash with a fork.");
+  return t;
+}
+
+// Summary chips for a person's conditions
+// The diet order as instrument readouts: [{k:"Sodium", v:"≤ 2,000 mg"}, …] — for the tray card and People rows.
+function orderReadouts(p){
+  const c = (p && p.conds) || {}; const out = [];
+  CONDITIONS.forEach(cd => { if (c[cd.id]){
+    if (cd.id === "sodium") out.push({k:"Sodium", v:`≤ ${(+c.sodium).toLocaleString()} mg`});
+    else if (cd.id === "fluid") out.push({k:"Fluid", v:`≤ ${(+c.fluid).toLocaleString()} mL`});
+    else if (cd.id === "diabetes") out.push({k:"Diabetes", v:`sugar > ${(+c.diabetes).toLocaleString()} g`});
+    else if (cd.param && typeof c[cd.id] === "number") out.push({k:cd.short, v:`${c[cd.id].toLocaleString()} ${cd.param.unit || ""}`.trim()});
+    else out.push({k:cd.short});
+  }});
+  ((p && p.allergies) || []).forEach(a => out.push({k:"No " + ALLERGEN_NAME[a]}));
+  return out;
+}
+const hudHTML = r => `<span class="hud">${esc(r.k)}${r.v ? ` <b>${esc(r.v)}</b>` : ""}</span>`;
+function condChips(p){
+  const c = (p && p.conds) || {}; const out = [];
+  CONDITIONS.forEach(cd => { if (c[cd.id]){
+    let s = cd.short;
+    if (cd.id === "sodium") s = `${(+c.sodium/1000).toLocaleString(undefined,{maximumFractionDigits:1})} g sodium`;
+    if (cd.id === "fluid") s = `${(+c.fluid).toLocaleString()} mL fluid`;
+    out.push(s);
+  }});
+  ((p && p.allergies) || []).forEach(a => out.push(`No ${ALLERGEN_NAME[a]}`));
+  return out;
+}
+// ===== State, storage, helpers =====
+// Everything is saved in THIS browser only (localStorage). Each person who opens the page on their own
+// phone gets their own private copy — nothing is shared between users. Inside the app, every person you
+// shop for has their own list (cart) and their own trips.
+const S = {
+  profiles:{}, stores:{}, foods:{}, trips:{}, prices:{}, carts:{},
+  sel:{profileId:null},
+  ui:{tab:"shop", cat:"Produce", q:"", filter:"all", expanded:null, confirm:null, historyOpen:{}, showTips:false, histPerson:"all", theme:"paper"},
+  built:false
+};
+function cartFor(pid){
+  const key = pid || "_none";
+  if (!S.carts[key]) S.carts[key] = {storeId:null, budget:0, items:[]};
+  return S.carts[key];
+}
+// S.cart always means "the selected person's list"
+Object.defineProperty(S, "cart", { get(){ const p = activeProfile(); return cartFor(p ? p.id : null); } });
+
+const STORE_PRESETS = [
+  {id:"kroger", name:"Kroger", type:"grocery"}, {id:"heb", name:"H-E-B", type:"grocery"}, {id:"sams", name:"Sam's Club", type:"warehouse"},
+  {id:"walmart", name:"Walmart", type:"grocery"}, {id:"costco", name:"Costco", type:"warehouse"}, {id:"aldi", name:"Aldi", type:"grocery"},
+  {id:"fiesta", name:"Fiesta Mart", type:"grocery"}, {id:"randalls", name:"Randalls", type:"grocery"}, {id:"foodtown", name:"Food Town", type:"grocery"},
+  {id:"joev", name:"Joe V's Smart Shop", type:"grocery"}, {id:"target", name:"Target", type:"grocery"}, {id:"wholefoods", name:"Whole Foods", type:"grocery"},
+  {id:"sprouts", name:"Sprouts", type:"grocery"}, {id:"traderjoes", name:"Trader Joe's", type:"grocery"}
+];
+const GRANDMA_PRESET = {name:"Grandma", note:"Heart failure, chronic respiratory failure", conds:{sodium:2000, fluid:1500, resp:true}, allergies:[]};
+
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const money = n => "$" + (Math.round((+n || 0) * 100) / 100).toFixed(2);
+const uid = (p="x") => p + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 40) || "x";
+const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const fmtDate = iso => { if (!iso) return ""; const [y,m,d] = iso.split("-").map(Number); return new Date(y, m-1, d).toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric", year:"numeric"}); };
+
+let toastTimer = null;
+function toast(msg){
+  const root = $("#toastRoot"); root.innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { root.innerHTML = ""; }, 2600);
+}
+function openModal(html){
+  const root = $("#modalRoot");
+  root.innerHTML = `<div class="overlay" id="overlay"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  $("#overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeModal(); });
+  const first = $("#overlay input, #overlay select, #overlay button");
+  if (first && window.innerWidth > 640) first.focus();
+}
+function closeModal(){ $("#modalRoot").innerHTML = ""; }
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+// ---- Storage: this browser only ----
+const LS_KEY = "traycard_v2";
+const LS_KEY_OLD = "traycard_v1";
+const Store = {
+  ok:true,
+  snapshot(){ return {v:2, profiles:S.profiles, stores:S.stores, foods:S.foods, trips:S.trips, prices:S.prices, carts:S.carts, sel:S.sel, ui:{cat:S.ui.cat, filter:S.ui.filter, theme:S.ui.theme}}; },
+  apply(d){
+    if (!d || typeof d !== "object") return false;
+    ["profiles","stores","foods","trips","prices"].forEach(k => { S[k] = (d[k] && typeof d[k] === "object" && !Array.isArray(d[k])) ? d[k] : {}; });
+    S.carts = {};
+    if (d.carts && typeof d.carts === "object") Object.keys(d.carts).forEach(k => { S.carts[k] = normalizeCart(d.carts[k]); });
+    if (d.cart){ const c = normalizeCart(d.cart); S.carts[d.cart.profileId || "_none"] = c; S.sel.profileId = d.cart.profileId || null; } // old single-cart shape
+    if (d.sel && typeof d.sel === "object") S.sel.profileId = d.sel.profileId || S.sel.profileId || null;
+    if (d.ui){ S.ui.cat = d.ui.cat || S.ui.cat; S.ui.filter = d.ui.filter || S.ui.filter; if (["paper","glass","auto"].includes(d.ui.theme)) S.ui.theme = d.ui.theme; }
+    return true;
+  },
+  loadLocal(){
+    try{
+      let raw = localStorage.getItem(LS_KEY); if (!raw) raw = localStorage.getItem(LS_KEY_OLD);
+      if (raw) this.apply(JSON.parse(raw));
+    }catch(e){}
+  },
+  saveLocal(){
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(this.snapshot())); this.ok = true; }
+    catch(e){ this.ok = false; }
+    setSync();
+  },
+  put(col, id, data){ S[col][id] = {...data, id}; this.saveLocal(); render(); },
+  del(col, id){ delete S[col][id]; this.saveLocal(); render(); },
+  saveCart(){ this.saveLocal(); render(); },
+  reset(){ try{ localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_KEY_OLD); }catch(e){} S.profiles = {}; S.stores = {}; S.foods = {}; S.trips = {}; S.prices = {}; S.carts = {}; S.sel.profileId = null; S.ui.histPerson = "all"; render(); }
+};
+function setSync(){ /* storage state is explained under More → Your data */ }
+const darkMQ = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+function applyTheme(){
+  const t = S.ui.theme || "paper";
+  const glass = t === "glass" || (t === "auto" && darkMQ && darkMQ.matches);
+  document.documentElement.dataset.theme = glass ? "glass" : "paper";
+  const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = glass ? "#0B0B0D" : "#F3EEE4";
+}
+if (darkMQ && darkMQ.addEventListener) darkMQ.addEventListener("change", applyTheme);
+function normalizeCart(c){
+  c = c || {};
+  return {storeId:c.storeId || null, budget:+c.budget || 0,
+    items:Array.isArray(c.items) ? c.items.map(i => ({id:i.id, qty:Math.max(1, +i.qty || 1), price:+i.price || 0, got:!!i.got, name:i.name || null})) : []};
+}
+
+// ---- Derived data ----
+const profileList = () => Object.values(S.profiles).sort((a,b) => (a.created||0) - (b.created||0));
+const storeList = () => Object.values(S.stores).sort((a,b) => (a.created||0) - (b.created||0));
+function activeProfile(){ const list = profileList(); if (!list.length) return null; return S.profiles[S.sel.profileId] || list[0]; }
+function activeStore(){ const list = storeList(); if (!list.length) return null; return S.stores[S.cart.storeId] || list[0]; }
+function allFoods(){ return FOODS.concat(Object.values(S.foods).map(normFood)); }
+function normFood(f){ return {...f, tags:Array.isArray(f.tags) ? f.tags : String(f.tags||"").split(" ").filter(Boolean), na:+f.na||0, k:+f.k||0, carb:+f.carb||0, sugar:+f.sugar||0, fiber:+f.fiber||0, prot:+f.prot||0, sf:+f.sf||0, fl:+f.fl||0, price:+f.price||0, builtin:false}; }
+function foodById(id){ return FOODS.find(f => f.id === id) || (S.foods[id] ? normFood(S.foods[id]) : null); }
+function foodsAt(store){
+  const wh = store && store.type === "warehouse";
+  return allFoods().filter(f => {
+    if (wh && f.nw && f.builtin) return false;
+    if (!f.builtin && Array.isArray(f.stores) && f.stores.length && store && !f.stores.includes(store.id)) return false;
+    return true;
+  });
+}
+function priceFor(f, store){
+  const o = store && S.prices[store.id] && S.prices[store.id][f.id];
+  if (o != null && !isNaN(+o)) return +o;
+  if (store && store.type === "warehouse" && f.bp != null) return +f.bp;
+  return +f.price || 0;
+}
+function unitFor(f, store){ return (store && store.type === "warehouse" && f.bu) ? f.bu : (f.unit || "each"); }
+function cartTotal(){ return S.cart.items.reduce((s, i) => s + i.qty * i.price, 0); }
+function cartGotTotal(){ return S.cart.items.filter(i => i.got).reduce((s, i) => s + i.qty * i.price, 0); }
+
+// ---- Tabs & render dispatch ----
+function setTab(t){ S.ui.tab = t; S.ui.confirm = null; render(); window.scrollTo({top:0}); }
+function render(){
+  if (!S.built) return;
+  applyTheme();
+  $$("#tabbar button").forEach(b => b.classList.toggle("on", b.dataset.tab === S.ui.tab));
+  $("#pageTitle").textContent = ({shop:"Shop", cart:"List", history:"Trips", people:"People", more:"More"})[S.ui.tab];
+  $("#titleAside").innerHTML = ""; $("#legend").innerHTML = "";
+  ["shop","cart","history","people","more"].forEach(t => { $("#screen-" + t).hidden = (t !== S.ui.tab); });
+  const n = S.cart.items.length; const badge = $("#cartCount"); badge.hidden = n === 0; badge.textContent = n;
+  ({shop:renderShop, cart:renderCart, history:renderHistory, people:renderPeople, more:renderMore})[S.ui.tab]();
+  renderIsland();
+}
+// One black lozenge, one line of truth: what's on the list and where the budget stands.
+function renderIsland(){
+  const root = $("#sumRoot"); const items = S.cart.items; const p = activeProfile();
+  if (!p || !items.length || S.ui.tab === "more" || S.ui.tab === "people"){ root.innerHTML = ""; document.body.classList.remove("has-sum"); return; }
+  const total = cartTotal(), budget = S.cart.budget; const over = !!budget && total > budget;
+  const remain = budget ? (over ? `${money(total - budget)} over` : `${money(budget - total)} left`) : "";
+  const n = items.length;
+  const line = S.ui.tab === "cart"
+    ? `<span data-total>${money(total)}</span>${remain ? `<span class="dim ${over ? "over" : ""}" data-remain>· ${remain}</span>` : ""}<span class="go" data-act="finish">Finish trip</span>`
+    : `<span>${n} item${n === 1 ? "" : "s"} · ${money(total)}</span>${remain ? `<span class="dim ${over ? "over" : ""}">· ${remain}</span>` : ""}<span class="go" data-act="gocart">List ›</span>`;
+  root.innerHTML = `<div class="sumbar"><button class="island" data-act="${S.ui.tab === "cart" ? "finish" : "gocart"}" aria-label="Open the list"><i></i>${line}</button></div>`;
+  document.body.classList.add("has-sum");
+}
+// ===== Shop screen =====
+const SEARCH_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`;
+function buildShop(){
+  $("#screen-shop").innerHTML = `
+    <div id="shopSetup"></div>
+    <div id="shopMain" class="stack">
+      <button class="tray" id="ctxbar" aria-label="Change who you're shopping for, the store, or the budget"></button>
+      <div class="search">${SEARCH_ICON}<input id="q" class="input" type="search" placeholder="Search all foods" aria-label="Search foods" autocomplete="off"></div>
+      <div class="index" id="catChips" role="tablist" aria-label="Aisle"></div>
+      <div class="row between nowrap" style="margin-top:-4px"><div class="seg" id="filterSeg" role="group" aria-label="Filter"><button data-f="all">Everything</button><button data-f="noavoid">Hide Avoid</button><button data-f="ok">OK only</button></div></div>
+      <div class="foods" id="foodList"></div>
+    </div>`;
+  $("#ctxbar").addEventListener("click", openTripSheet);
+  $("#q").addEventListener("input", e => { S.ui.q = e.target.value; renderFoodList(); $$("#catChips .chip").forEach(b => b.classList.toggle("on", !S.ui.q && b.dataset.cat === S.ui.cat)); });
+  $("#filterSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S.ui.filter = b.dataset.f; Store.saveLocal(); renderShop(); });
+  $("#catChips").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S.ui.cat = b.dataset.cat; S.ui.q = ""; $("#q").value = ""; S.ui.expanded = null; Store.saveLocal(); renderShop(); });
+  $("#shopSetup").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.act === "grandma") quickAddProfile(GRANDMA_PRESET);
+    if (b.dataset.act === "newperson") openProfileModal(null);
+    if (b.dataset.act === "store") quickAddStore(b.dataset.id);
+    if (b.dataset.act === "newstore") openStoreModal();
+  });
+  $("#foodList").addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches(".body")){ e.preventDefault(); e.target.click(); } });
+  $("#foodList").addEventListener("click", e => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const card = e.target.closest(".food"); const id = card && card.dataset.id; const act = b.dataset.act;
+    if (act === "toggle"){ S.ui.expanded = (S.ui.expanded === id ? null : id); renderFoodList(); }
+    if (act === "add") addToCart(id);
+    if (act === "inc") changeQty(id, 1);
+    if (act === "dec") changeQty(id, -1);
+    if (act === "fixprice") openPriceModal(id);
+    if (act === "editfood") openFoodModal(id);
+  });
+}
+function quickAddProfile(preset){
+  const id = uid("p"); const p = {...preset, conds:{...preset.conds}, allergies:[...(preset.allergies||[])], created:Date.now()};
+  S.sel.profileId = id; Store.put("profiles", id, p); toast(`${p.name} added`);
+}
+function quickAddStore(presetId){
+  const pr = STORE_PRESETS.find(s => s.id === presetId); if (!pr) return;
+  if (S.stores[pr.id]) { toast(`${pr.name} is already in your stores`); return; }
+  Store.put("stores", pr.id, {name:pr.name, type:pr.type, note:"", created:Date.now()});
+  if (!S.cart.storeId) { S.cart.storeId = pr.id; Store.saveCart(); }
+  toast(`${pr.name} added`);
+}
+function addToCart(id){
+  const f = foodById(id); if (!f) return; const st = activeStore();
+  const ex = S.cart.items.find(i => i.id === id);
+  if (ex) ex.qty += 1; else S.cart.items.push({id, qty:1, price:priceFor(f, st), got:false, name:f.name});
+  Store.saveCart();
+}
+function changeQty(id, d){
+  const ex = S.cart.items.find(i => i.id === id); if (!ex) return;
+  ex.qty += d; if (ex.qty <= 0) S.cart.items = S.cart.items.filter(i => i.id !== id);
+  Store.saveCart();
+}
+function renderShop(){
+  const profiles = profileList(), stores = storeList();
+  const setup = $("#shopSetup");
+  if (!profiles.length || !stores.length){
+    $("#shopMain").hidden = true;
+    setup.innerHTML = `<div class="card stack">
+      <h3>Set up in two taps</h3>
+      ${!profiles.length ? `<div class="stack"><p class="muted">Who are you shopping for?</p>
+        <div class="row"><button class="btn primary" data-act="grandma">Grandma · 2 g sodium · 1,500 mL fluid · breathing</button><button class="btn" data-act="newperson">Someone else</button></div></div>`
+        : `<p class="small muted">${esc(profiles[0].name)} ✓</p>`}
+      ${!stores.length ? `<div class="stack"><p class="muted">Where do you shop?</p>
+        <div class="chips wrap">${STORE_PRESETS.slice(0,6).map(s => `<button class="chip" data-act="store" data-id="${s.id}">+ ${esc(s.name)}</button>`).join("")}<button class="chip" data-act="newstore">+ Other…</button></div></div>`
+        : `<p class="small muted">Stores ✓</p>`}
+    </div>`;
+    return;
+  }
+  setup.innerHTML = ""; $("#shopMain").hidden = false;
+  const p = activeProfile(), st = activeStore();
+  if (S.sel.profileId !== p.id || S.cart.storeId !== st.id){ S.sel.profileId = p.id; S.cart.storeId = st.id; Store.saveLocal(); }
+  const readouts = orderReadouts(p);
+  $("#ctxbar").style.setProperty("--h", personHue(p));
+  $("#ctxbar").innerHTML = `<span class="tab">${esc(st.name)}${st.type === "warehouse" ? " · bulk sizes" : ""}</span>
+    <span class="who">${esc(p.name)}</span>
+    <span class="budget ${S.cart.budget ? "" : "none"}">${S.cart.budget ? money(S.cart.budget) : "No budget"}</span>
+    <span class="orders">${readouts.length ? readouts.map(hudHTML).join("") : `<span class="hud">No diet order yet</span>`}</span>
+    <span class="chev" aria-hidden="true">›</span>`;
+  $$("#filterSeg button").forEach(b => b.classList.toggle("on", b.dataset.f === S.ui.filter));
+  $("#catChips").innerHTML = CATS.map(c => `<button class="chip ${c === S.ui.cat && !S.ui.q ? "on" : ""}" role="tab" aria-selected="${c === S.ui.cat && !S.ui.q}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+  const on = $("#catChips .chip.on"); if (on && on.scrollIntoView) try{ on.scrollIntoView({block:"nearest", inline:"center"}); }catch(e){}
+  renderFoodList();
+}
+const unitShort = u => u.replace(/^per\s+/, "/").replace(/\s+/g, "\u00a0");
+const nb = s => s.replace(/ /g, "\u00a0");
+function keyFacts(f, p){
+  const c = (p && p.conds) || {}; const out = [];
+  if (c.sodium || Object.keys(c).length === 0) out.push(`${f.na.toLocaleString()} mg sodium`);
+  if (c.fluid && f.fl > 0) out.push(`${f.fl} mL`);
+  if ((c.ckd || c.hik || c.lok) && f.k) out.push(`${f.k} mg potassium`);
+  if (c.diabetes) out.push(`${f.sugar} g sugar`);
+  if (c.heart && f.sf) out.push(`${f.sf} g sat fat`);
+  if (c.resp && f.prot >= 10 && out.length < 3) out.push(`${f.prot} g protein`);
+  return out.slice(0, 3);
+}
+function renderFoodList(){
+  const p = activeProfile(), st = activeStore(); if (!p || !st) return;
+  const q = S.ui.q.trim().toLowerCase();
+  let items = foodsAt(st);
+  if (q) items = items.filter(f => f.name.toLowerCase().includes(q) || f.cat.toLowerCase().includes(q));
+  else items = items.filter(f => f.cat === S.ui.cat);
+  const graded = items.map(f => ({f, g:gradeFood(f, p)}));
+  const counts = [0,0,0,0]; graded.forEach(x => counts[x.g.lvl]++);
+  let shown = graded;
+  if (S.ui.filter === "noavoid") shown = graded.filter(x => x.g.lvl < 3);
+  if (S.ui.filter === "ok") shown = graded.filter(x => x.g.lvl <= 1);
+  shown.sort((a, b) => a.g.lvl - b.g.lvl || a.f.name.localeCompare(b.f.name));
+  $("#legend").innerHTML = LEVELS.map((L, i) => counts[i] ? `<span><span class="dot ${L.cls}"></span><b>${counts[i]}</b> ${L.word}</span>` : "").join("");
+  const inCart = Object.fromEntries(S.cart.items.map(i => [i.id, i]));
+  const firstSentence = t => String(t || "").split(". ")[0].replace(/\.$/, "");
+  $("#foodList").innerHTML = shown.length ? shown.map(({f, g}) => {
+    const L = LEVELS[g.lvl]; const ci = inCart[f.id]; const open = S.ui.expanded === f.id;
+    const goods = showGoods(g);
+    const facts = keyFacts(f, p).filter(k => !/sodium$/.test(k));
+    let sub;
+    if (g.lvl === 0) sub = `${esc(nb(f.serving))}${facts.length ? " · " + facts.map(k => esc(nb(k))).join(" · ") : (goods[0] ? " · " + esc(goods[0]) : "")}`;
+    else sub = `<b>${L.label}</b> · ${esc(g.reasons[0] ? firstSentence(g.reasons[0].text) : nb(f.serving))}`;
+    return `<article class="food l${g.lvl}" data-id="${esc(f.id)}">
+      ${tileHTML(f, g.lvl, `${f.na.toLocaleString()} mg`)}
+      <div class="body" data-act="toggle" role="button" tabindex="0" aria-expanded="${open}" aria-label="${esc(f.name)}, ${L.label}">
+        <div class="name">${esc(f.name)}</div>
+        <div class="sub c${g.lvl}">${sub}</div>
+      </div>
+      <div class="act">
+        ${ci ? `<div class="qty"><button data-act="dec" aria-label="One less">−</button><span>${ci.qty}</span><button data-act="inc" aria-label="One more">+</button></div>` : `<button class="add" data-act="add" aria-label="Add ${esc(f.name)} to list">Add</button>`}
+        <span class="price"><b>${money(priceFor(f, st))}</b> ${esc(unitShort(unitFor(f, st)))}</span>
+      </div>
+      ${open ? renderDetail(f, g, p, st) : ""}
+    </article>`;
+  }).join("") : `<div class="empty"><p>Nothing matches${q ? ` "${esc(S.ui.q)}"` : ""} with this filter.</p><p class="small">Try "Everything", another aisle, or add the food under More → Foods.</p></div>`;
+}
+const showGoods = g => g.goods.filter(t => !/^(Low sodium|Sodium-free)/.test(t));
+function renderDetail(f, g, p, st){
+  const rows = [["Sodium", f.na + " mg"], ["Potassium", f.k + " mg"], ["Carbs", f.carb + " g"], ["Sugar", f.sugar + " g"], ["Fiber", f.fiber + " g"], ["Protein", f.prot + " g"], ["Sat fat", f.sf + " g"], ["Fluid", f.fl ? f.fl + " mL" : "—"]];
+  const goods = showGoods(g);
+  return `<div class="detail">
+    ${g.reasons.length ? `<div class="stack" style="gap:6px">${g.reasons.map(r => `<div class="reason c${r.lvl}"><span class="dot l${r.lvl}" style="margin-top:6px"></span><span>${esc(r.text)}</span></div>`).join("")}</div>` : `<div class="reason c0"><span class="dot l0" style="margin-top:6px"></span><span>Fits ${esc(p.name)}'s diet order.</span></div>`}
+    ${goods.length ? `<div class="reason c0"><span>✓</span><span>${esc(goods.join(" · "))}</span></div>` : ""}
+    ${g.infos.map(t => `<div class="reason muted"><span>ⓘ</span><span>${esc(t)}</span></div>`).join("")}
+    <div class="nutri">${rows.map(([k, v]) => `<div><b>${esc(v)}</b>${k}</div>`).join("")}</div>
+    <div class="tiny muted">Per ${esc(f.serving)} · typical values; check the real label.</div>
+    <div class="row between"><span class="small">${esc(st.name)} price <b class="num">${money(priceFor(f, st))}</b> <span class="muted">${esc(unitFor(f, st))} · estimate</span></span><span class="row"><button class="btn sm" data-act="fixprice">Fix price</button>${f.builtin ? "" : `<button class="btn sm" data-act="editfood">Edit food</button>`}</span></div>
+  </div>`;
+}
+function openTripSheet(){
+  const p = activeProfile(), st = activeStore(); if (!p || !st) return;
+  const render = () => {
+    const p = activeProfile(), st = activeStore();
+    $("#modalRoot .sheet").innerHTML = `
+      <div class="row between"><h2>This trip</h2><button class="btn sm primary" id="tsDone">Done</button></div>
+      <div class="field"><label>Shopping for</label><div class="pick" id="tsPeople">${profileList().map(x => `<button data-id="${esc(x.id)}" class="${x.id === p.id ? "on" : ""}">${avatarHTML(x)}<span class="grow"><span class="lbl">${esc(x.name)}</span><span class="sub">${esc(condChips(x).join(" · ") || "No diet order")}</span></span>${cartFor(x.id).items.length ? `<span class="tag">${cartFor(x.id).items.length} on list</span>` : ""}</button>`).join("")}</div>
+        <button class="btn sm ghost" id="tsAddPerson" style="align-self:flex-start">+ Add a person</button></div>
+      <div class="field"><label>Store</label><div class="chips wrap" id="tsStores">${storeList().map(x => `<button class="chip ${x.id === st.id ? "on" : ""}" data-id="${esc(x.id)}">${esc(x.name)}${x.type === "warehouse" ? " · bulk" : ""}</button>`).join("")}<button class="chip" id="tsAddStore">+ Store</button></div></div>
+      <div class="field"><label for="tsBudget">Budget for ${esc(p.name)}'s trip</label><div class="money"><input id="tsBudget" class="input num" type="number" inputmode="decimal" min="0" step="1" value="${S.cart.budget || ""}" placeholder="No budget"></div></div>`;
+    $("#tsDone").onclick = () => { commitBudget(); closeModal(); };
+    $("#tsPeople").addEventListener("click", e => { const b = e.target.closest("button[data-id]"); if (!b) return; commitBudget(); S.sel.profileId = b.dataset.id; Store.saveLocal(); render(); renderShop(); });
+    $("#tsStores").addEventListener("click", e => { const b = e.target.closest("button[data-id]"); if (!b) return; commitBudget(); const st2 = S.stores[b.dataset.id]; S.cart.storeId = st2.id;
+      S.cart.items.forEach(i => { const f = foodById(i.id); if (f) i.price = priceFor(f, st2); }); Store.saveCart(); render(); });
+    $("#tsAddStore").onclick = () => openStoreModal();
+    $("#tsAddPerson").onclick = () => openProfileModal(null);
+    const commitBudget = () => { const v = Math.max(0, +$("#tsBudget").value || 0); if (v !== S.cart.budget){ S.cart.budget = v; Store.saveCart(); } };
+    $("#tsBudget").addEventListener("change", commitBudget);
+  };
+  openModal(""); render();
+}
+function openPriceModal(id){
+  const f = foodById(id), st = activeStore(); if (!f || !st) return;
+  openModal(`<div class="row nowrap">${thumbHTML(f)}<div><h2>Price at ${esc(st.name)}</h2><p class="muted small">${esc(f.name)} · ${esc(unitFor(f, st))}</p></div></div>
+
+    <div class="money"><input id="pxInput" class="input num" type="number" inputmode="decimal" min="0" step="0.01" value="${priceFor(f, st).toFixed(2)}"></div>
+    <div class="row"><button class="btn primary grow" id="pxSave">Save price</button><button class="btn" id="pxCancel">Cancel</button></div>`);
+  $("#pxCancel").onclick = closeModal;
+  $("#pxSave").onclick = () => {
+    const v = Math.max(0, +$("#pxInput").value || 0);
+    const cur = {...(S.prices[st.id] || {})}; delete cur.id; cur[f.id] = v;
+    Store.put("prices", st.id, cur);
+    const ci = S.cart.items.find(i => i.id === f.id); if (ci){ ci.price = v; Store.saveCart(); }
+    closeModal(); toast(`Saved ${money(v)} for ${f.name} at ${st.name}`);
+  };
+}
+// ===== List (cart / checklist) =====
+function buildCart(){
+  const sc = $("#screen-cart");
+  const onAct = e => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const line = e.target.closest(".cartrow"); const id = line && line.dataset.id; const act = b.dataset.act;
+    const it = S.cart.items.find(i => i.id === id);
+    if (act === "inc" && it){ it.qty += 1; Store.saveCart(); }
+    if (act === "dec" && it){ it.qty -= 1; if (it.qty <= 0) S.cart.items = S.cart.items.filter(i => i.id !== id); Store.saveCart(); }
+    if (act === "remove" && it){ S.cart.items = S.cart.items.filter(i => i.id !== id); Store.saveCart(); toast(`${it.name || "Item"} removed`); }
+    if (act === "finish") openFinishModal();
+    if (act === "gocart") setTab("cart");
+    if (act === "clearask"){ S.ui.confirm = "clearcart"; renderCart(); }
+    if (act === "cancel"){ S.ui.confirm = null; renderCart(); }
+    if (act === "clear"){ S.cart.items = []; S.ui.confirm = null; Store.saveCart(); toast("List cleared"); }
+    if (act === "goshop") setTab("shop");
+    if (act === "trip") openTripSheet();
+    if (act === "checkall"){ const all = S.cart.items.every(i => i.got); S.cart.items.forEach(i => i.got = !all); Store.saveCart(); }
+  };
+  sc.addEventListener("click", onAct);
+  $("#sumRoot").addEventListener("click", onAct);
+  sc.addEventListener("change", e => {
+    const line = e.target.closest(".cartrow"); if (!line) return; const it = S.cart.items.find(i => i.id === line.dataset.id); if (!it) return;
+    if (e.target.dataset.act === "got"){ it.got = e.target.checked; Store.saveCart(); }
+    if (e.target.dataset.act === "price"){ it.price = Math.max(0, +e.target.value || 0); Store.saveCart(); }
+  });
+  sc.addEventListener("input", e => {
+    if (e.target.dataset.act !== "price") return;
+    const line = e.target.closest(".cartrow"); const it = S.cart.items.find(i => i.id === line.dataset.id); if (!it) return;
+    it.price = Math.max(0, +e.target.value || 0); updateCartTotals();
+  });
+  sc.addEventListener("focusout", () => { if (S.ui.cartRenderPending){ S.ui.cartRenderPending = false; setTimeout(renderCart, 50); } });
+}
+function remainText(total, budget){
+  if (!budget) return "No budget set";
+  return total <= budget ? `${money(budget - total)} left of ${money(budget)}` : `${money(total - budget)} over the ${money(budget)} budget`;
+}
+function updateCartTotals(){
+  const total = cartTotal(), budget = S.cart.budget;
+  $$("[data-total]").forEach(el => el.textContent = money(total));
+  $$("[data-remain]").forEach(el => { const over = !!budget && total > budget; el.textContent = el.classList.contains("dim") ? (budget ? `· ${over ? money(total - budget) + " over" : money(budget - total) + " left"}` : "") : remainText(total, budget); el.classList.toggle("over", over); });
+  const bar = $("#cartBar"); if (bar && budget){ const pc = Math.min(100, total / budget * 100); bar.querySelector("i").style.width = pc + "%"; bar.className = "bar " + (total > budget ? "over" : pc > 85 ? "warn" : ""); }
+  $$("#screen-cart .cartrow").forEach(l => { const it = S.cart.items.find(i => i.id === l.dataset.id); const el = l.querySelector(".linetotal"); if (it && el) el.textContent = money(it.qty * it.price); });
+}
+function renderCart(){
+  const sc = $("#screen-cart"); const sum = $("#sumRoot");
+  if (sc.contains(document.activeElement) && document.activeElement.tagName === "INPUT" && document.activeElement.type !== "checkbox"){ S.ui.cartRenderPending = true; return; }
+  const p = activeProfile(), st = activeStore(); const items = S.cart.items; const total = cartTotal(), budget = S.cart.budget;
+  if (!p || !items.length){
+    sum.innerHTML = ""; document.body.classList.remove("has-sum");
+    sc.innerHTML = `<div class="empty" style="padding-top:60px"><h2>${p ? esc(p.name) + "'s list is empty" : "No list yet"}</h2><p class="muted small">Add foods from the Shop tab; they land here as a checklist.</p><button class="btn primary" data-act="goshop">Go to Shop</button></div>`;
+    return;
+  }
+  const avoid = items.map(i => ({i, f:foodById(i.id)})).filter(x => x.f && gradeFood(x.f, p).lvl === 3);
+  const got = items.filter(i => i.got).length;
+  const pc = budget ? Math.min(100, total / budget * 100) : 0;
+  if (st) $("#titleAside").innerHTML = `<span class="lozenge">${esc(st.name)}</span>`;
+  sc.innerHTML = `
+    <div class="listhead" style="--h:${personHue(p)}">
+      <div><div class="row nowrap" style="gap:8px"><span class="pdot"></span><h2>${esc(p.name)}'s list</h2></div><div class="sub"><span class="num">${got}/${items.length}</span> checked · ${items.length} item${items.length === 1 ? "" : "s"}</div></div>
+      <button class="btn sm" data-act="trip">Change</button>
+      <div class="bar ${budget && total > budget ? "over" : pc > 85 ? "warn" : ""}" id="cartBar"><i style="width:${pc}%"></i></div>
+      <div class="meta"><span data-remain>${remainText(total, budget)}</span><button class="btn sm ghost" data-act="checkall">${items.every(i => i.got) ? "Uncheck all" : "Check all"}</button></div>
+      ${avoid.length ? `<div class="meta c3">⚠ Marked Avoid for ${esc(p.name)}: ${esc(avoid.map(x => x.f.name).join(", "))}</div>` : ""}
+    </div>
+    <div class="foods" style="border-top:0;margin-top:-16px">${items.map(i => {
+      const f = foodById(i.id); const g = f ? gradeFood(f, p) : {lvl:0}; const L = LEVELS[g.lvl];
+      return `<div class="cartrow ${i.got ? "got" : ""}" data-id="${esc(i.id)}">
+        <label class="check"><input type="checkbox" data-act="got" ${i.got ? "checked" : ""} aria-label="Got ${esc(i.name || (f && f.name) || "item")}"></label>
+        ${f ? tileHTML(f, g.lvl, `${f.na.toLocaleString()} mg`, "sm") : "<span></span>"}
+        <div class="grow"><div class="name">${esc(i.name || (f && f.name) || "Item")}</div><div class="sub">${g.lvl ? `<b class="c${g.lvl}">${L.label}</b> · ` : ""}${f ? esc(unitFor(f, st)) : ""}</div></div>
+        <button class="btn sm ghost" data-act="remove" aria-label="Remove ${esc(i.name || "item")}">✕</button>
+        <div class="controls">
+          <div class="qty"><button data-act="dec" aria-label="One less">−</button><span>${i.qty}</span><button data-act="inc" aria-label="One more">+</button></div>
+          <div class="money"><input class="input num" type="number" inputmode="decimal" min="0" step="0.01" data-act="price" value="${(+i.price).toFixed(2)}" aria-label="Price each"></div>
+          <span class="small muted num linetotal">${money(i.qty * i.price)}</span>
+        </div>
+      </div>`;
+    }).join("")}</div>
+    ${S.ui.confirm === "clearcart" ? `<div class="confirm"><span class="small">Clear the whole list? This doesn't save a trip.</span><span class="row"><button class="btn sm danger" data-act="clear">Yes, clear it</button><button class="btn sm" data-act="cancel">Keep it</button></span></div>` : `<div class="row" style="justify-content:center;padding-top:4px"><button class="btn sm ghost danger" data-act="clearask">Clear list</button></div>`}`;
+}
+function openFinishModal(){
+  const p = activeProfile(), st = activeStore(); const items = S.cart.items; const anyGot = items.some(i => i.got);
+  const gotTotal = cartGotTotal(), allTotal = cartTotal();
+  openModal(`<h2>Finish ${esc(p ? p.name : "this")}'s trip</h2>
+    <p class="muted small">${esc(st ? st.name : "")} · ${fmtDate(todayISO())}</p>
+    <div class="field"><label>What did you buy?</label>
+      <div class="seg" id="finMode"><button data-m="checked" class="${anyGot ? "on" : ""}">Checked items (${items.filter(i => i.got).length})</button><button data-m="all" class="${anyGot ? "" : "on"}">Everything (${items.length})</button></div></div>
+    <div class="grid2">
+      <div class="field"><label for="finDate">Date</label><input id="finDate" class="input" type="date" value="${todayISO()}"></div>
+      <div class="field"><label for="finTotal">Receipt total</label><div class="money"><input id="finTotal" class="input num" type="number" inputmode="decimal" min="0" step="0.01" value="${(anyGot ? gotTotal : allTotal).toFixed(2)}"></div></div>
+    </div>
+    <div class="field"><label for="finNote">Note (optional)</label><input id="finNote" class="input" placeholder="Used a coupon, out of low-sodium bread…"></div>
+    <div class="row"><button class="btn primary grow" id="finSave">Save trip & clear list</button><button class="btn" id="finCancel">Cancel</button></div>`);
+  let mode = anyGot ? "checked" : "all";
+  $("#finMode").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; mode = b.dataset.m; $$("#finMode button").forEach(x => x.classList.toggle("on", x === b)); $("#finTotal").value = (mode === "checked" ? gotTotal : allTotal).toFixed(2); });
+  $("#finCancel").onclick = closeModal;
+  $("#finSave").onclick = () => {
+    const bought = mode === "checked" ? items.filter(i => i.got) : items;
+    if (!bought.length){ toast("Nothing is checked off yet"); return; }
+    const id = uid("t");
+    const trip = {date:$("#finDate").value || todayISO(), storeId:st ? st.id : null, storeName:st ? st.name : "", profileId:p ? p.id : null, profileName:p ? p.name : "",
+      budget:S.cart.budget || 0, total:Math.max(0, +$("#finTotal").value || 0), note:$("#finNote").value.trim(),
+      items:items.map(i => ({id:i.id, name:i.name || (foodById(i.id) || {}).name || "Item", qty:i.qty, price:i.price, got:mode === "all" ? true : !!i.got})), created:Date.now()};
+    Store.put("trips", id, trip);
+    if (st){ const cur = {...(S.prices[st.id] || {})}; delete cur.id; let changed = false;
+      bought.forEach(i => { const f = foodById(i.id); if (f && Math.abs(priceFor(f, st) - i.price) > 0.004){ cur[i.id] = i.price; changed = true; } });
+      if (changed) Store.put("prices", st.id, cur); }
+    S.cart.items = []; Store.saveCart(); closeModal(); setTab("history"); toast("Trip saved");
+  };
+}
+
+// ===== Trips (history) =====
+function buildHistory(){
+  $("#screen-history").addEventListener("click", e => {
+    const b = e.target.closest("[data-act]"); if (!b) return; const act = b.dataset.act; const id = b.dataset.id;
+    if (act === "open"){ S.ui.historyOpen[id] = !S.ui.historyOpen[id]; renderHistory(); }
+    if (act === "delask"){ S.ui.confirm = "trip:" + id; renderHistory(); }
+    if (act === "cancel"){ S.ui.confirm = null; renderHistory(); }
+    if (act === "del"){ Store.del("trips", id); S.ui.confirm = null; toast("Trip deleted"); }
+    if (act === "reuse"){ const t = S.trips[id]; if (!t) return;
+      if (t.profileId && S.profiles[t.profileId]) S.sel.profileId = t.profileId;
+      if (t.storeId && S.stores[t.storeId]) S.cart.storeId = t.storeId;
+      const st = activeStore();
+      t.items.forEach(ti => { const f = foodById(ti.id); if (!f) return; const ex = S.cart.items.find(i => i.id === ti.id); if (ex) ex.qty += ti.qty; else S.cart.items.push({id:ti.id, qty:ti.qty, price:priceFor(f, st), got:false, name:f.name}); });
+      Store.saveCart(); toast("Items added to the list"); setTab("cart"); }
+    if (act === "clearask"){ S.ui.confirm = "alltrips"; renderHistory(); }
+    if (act === "clearall"){ const keep = S.ui.histPerson; Object.keys(S.trips).forEach(k => { if (keep === "all" || S.trips[k].profileId === keep) delete S.trips[k]; }); S.ui.confirm = null; Store.saveLocal(); render(); toast("History cleared"); }
+    if (act === "hist"){ S.ui.histPerson = b.dataset.id; S.ui.confirm = null; renderHistory(); }
+  });
+}
+function monthLabel(iso){ const [y, m] = iso.split("-").map(Number); return new Date(y, m - 1, 1).toLocaleDateString(undefined, {month:"long", year:"numeric"}); }
+function renderHistory(){
+  const sc = $("#screen-history"); const allTrips = Object.values(S.trips).sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.created || 0) - (a.created || 0));
+  if (!allTrips.length){ sc.innerHTML = `<div class="empty" style="padding-top:60px"><h2>No trips yet</h2><p class="small muted">Finish a list and it lands here — what you bought, where, and what it cost.</p></div>`; return; }
+  const people = []; allTrips.forEach(t => { if (t.profileId && !people.some(p => p.id === t.profileId)) people.push({id:t.profileId, name:(S.profiles[t.profileId] || {}).name || t.profileName || "Unknown"}); });
+  if (S.ui.histPerson !== "all" && !people.some(p => p.id === S.ui.histPerson)) S.ui.histPerson = "all";
+  const trips = S.ui.histPerson === "all" ? allTrips : allTrips.filter(t => t.profileId === S.ui.histPerson);
+  const who = S.ui.histPerson === "all" ? "" : ` for ${esc((people.find(p => p.id === S.ui.histPerson) || {}).name || "")}`;
+  const sum = a => a.reduce((s, t) => s + (+t.total || 0), 0);
+  const ym = todayISO().slice(0, 7); const monthTrips = trips.filter(t => (t.date || "").startsWith(ym));
+  const groups = []; trips.forEach(t => { const k = (t.date || "").slice(0, 7); let g = groups.find(x => x.k === k); if (!g){ g = {k, trips:[]}; groups.push(g); } g.trips.push(t); });
+  $("#titleAside").innerHTML = `<span class="lozenge">${trips.length} trip${trips.length === 1 ? "" : "s"}</span>`;
+  sc.innerHTML = `
+    ${people.length > 1 ? `<div class="index">${[{id:"all", name:"Everyone"}, ...people].map(p => `<button class="chip ${S.ui.histPerson === p.id ? "on" : ""}" data-act="hist" data-id="${esc(p.id)}">${esc(p.name)}</button>`).join("")}</div>` : ""}
+    <div class="stats">
+      <div class="stat"><span class="k">This month</span><b>${money(sum(monthTrips))}</b><span class="s">${monthTrips.length} trip${monthTrips.length===1?"":"s"}</span></div>
+      <div class="stat"><span class="k">All time</span><b>${money(sum(trips))}</b><span class="s">${trips.length} trip${trips.length===1?"":"s"}</span></div>
+      <div class="stat"><span class="k">Average</span><b>${money(sum(trips) / trips.length)}</b><span class="s">per trip</span></div>
+    </div>
+    ${groups.map(g => `<div><div class="monthhead">${esc(monthLabel(g.k + "-01"))}<span>${g.trips.length} trip${g.trips.length===1?"":"s"} · ${money(sum(g.trips))}</span></div>
+      <div class="panel">${g.trips.map(t => {
+        const open = S.ui.historyOpen[t.id]; const bought = t.items.filter(i => i.got), missed = t.items.filter(i => !i.got); const prof = S.profiles[t.profileId] || {name:t.profileName};
+        return `<div class="panel-row trip" data-act="open" data-id="${esc(t.id)}" role="button" aria-expanded="${!!open}">
+          ${avatarHTML(prof)}
+          <div class="grow"><div class="when">${esc(fmtDate(t.date))}</div><div class="sub">${esc(t.storeName)} · ${esc(t.profileName)} · ${bought.length} item${bought.length===1?"":"s"}${t.budget ? ` · budget ${money(t.budget)}` : ""}</div>${t.note ? `<div class="small">${esc(t.note)}</div>` : ""}</div>
+          <div class="amt">${money(t.total)}</div>
+          ${open ? `<div class="items">${bought.map(i => `<div class="line"><span>${esc(i.name)} × ${i.qty}</span><span class="num">${money(i.qty * i.price)}</span></div>`).join("")}${missed.length ? `<div class="small muted" style="margin-top:4px">Not bought</div>${missed.map(i => `<div class="line miss"><span>${esc(i.name)} × ${i.qty}</span><span class="num">${money(i.qty * i.price)}</span></div>`).join("")}` : ""}<div class="line" style="border-top:1px solid var(--hair);padding-top:4px;margin-top:4px"><b>Receipt total</b><b class="num">${money(t.total)}</b></div></div>
+          <div class="actions"><button class="btn sm" data-act="reuse" data-id="${esc(t.id)}">Shop again</button>
+            ${S.ui.confirm === "trip:" + t.id ? `<span class="confirm" style="padding:6px 8px"><span class="small">Delete this trip?</span><button class="btn sm danger" data-act="del" data-id="${esc(t.id)}">Delete</button><button class="btn sm" data-act="cancel">Keep</button></span>` : `<button class="btn sm ghost danger" data-act="delask" data-id="${esc(t.id)}">Delete</button>`}</div>` : ""}
+        </div>`;
+      }).join("")}</div></div>`).join("")}
+    ${S.ui.confirm === "alltrips" ? `<div class="confirm"><span class="small">Delete ${trips.length} saved trip${trips.length===1?"":"s"}${who}? This can't be undone.</span><span class="row"><button class="btn sm danger" data-act="clearall">Delete</button><button class="btn sm" data-act="cancel">Keep</button></span></div>` : `<div class="row" style="justify-content:center;padding-top:8px"><button class="btn sm ghost danger" data-act="clearask">Clear ${S.ui.histPerson === "all" ? "all trips" : "this person's trips"}</button></div>`}`;
+}
+// ===== People (profiles / diet orders) =====
+function buildPeople(){
+  $("#screen-people").addEventListener("click", e => {
+    const b = e.target.closest("[data-act]"); if (!b) return; const act = b.dataset.act, id = b.dataset.id;
+    if (act === "add") openProfileModal(null);
+    if (act === "grandma") quickAddProfile(GRANDMA_PRESET);
+    if (act === "edit") openProfileModal(id);
+    if (act === "shop"){ S.sel.profileId = id; Store.saveLocal(); setTab("shop"); }
+  });
+}
+function renderPeople(){
+  const list = profileList();
+  $("#titleAside").innerHTML = list.length ? `<span class="lozenge">${list.length}</span>` : "";
+  $("#screen-people").innerHTML = `
+    <div class="row between nowrap"><span class="small muted">Everyone gets their own diet order, list and trips.</span><button class="btn sm primary" data-act="add">Add person</button></div>
+    ${list.length ? `<div class="people">${list.map(p => { const n = cartFor(p.id).items.length, t = Object.values(S.trips).filter(x => x.profileId === p.id).length; const r = orderReadouts(p); const cur = S.sel.profileId === p.id; return `<div class="tray person" style="--h:${personHue(p)}">
+        ${cur ? `<span class="tab">Shopping now</span>` : ""}
+        <span class="who">${esc(p.name)}</span>
+        <span class="count"><span class="num">${n}</span> on list · <span class="num">${t}</span> trip${t===1?"":"s"}</span>
+        ${p.note ? `<span class="note">${esc(p.note)}</span>` : ""}
+        <span class="orders">${r.length ? r.map(hudHTML).join("") : `<span class="hud">No diet order yet</span>`}</span>
+        <span class="foot"><button class="btn sm" data-act="edit" data-id="${esc(p.id)}">Edit diet order</button><span class="actions">${cur ? "" : `<button class="btn sm primary" data-act="shop" data-id="${esc(p.id)}">Shop for ${esc(p.name)}</button>`}</span></span>
+      </div>`; }).join("")}</div>`
+    : `<div class="empty" style="padding-top:40px"><p>No one yet.</p><div class="stack"><button class="btn primary" data-act="grandma">Add Grandma · 2 g sodium · 1,500 mL fluid · breathing</button><button class="btn" data-act="add">Add someone else</button></div></div>`}`;
+}
+function openProfileModal(id){
+  const p = id ? S.profiles[id] : {name:"", note:"", conds:{}, allergies:[]};
+  if (!p) return;
+  const conds = {...(p.conds || {})}; const allergies = new Set(p.allergies || []);
+  openModal(`<h2>${id ? "Edit " + esc(p.name) : "Add a person"}</h2>
+    <div class="grid2">
+      <div class="field"><label for="pfName">Name</label><input id="pfName" class="input" value="${esc(p.name)}" placeholder="Grandma"></div>
+      <div class="field"><label for="pfNote">Note</label><input id="pfNote" class="input" value="${esc(p.note || "")}" placeholder="Heart failure · Dr. Lee's diet sheet"></div>
+    </div>
+    <div class="field"><label>Diet orders — numbers are per day</label>
+      <div class="condlist" id="pfConds">${CONDITIONS.map(c => { const on = !!conds[c.id]; const val = on && c.param ? conds[c.id] : (c.param ? c.param.def : "");
+        return `<div class="cond ${on ? "on" : ""}" data-cid="${c.id}">
+          <div class="top"><input type="checkbox" id="c_${c.id}" ${on ? "checked" : ""} style="width:22px;height:22px;accent-color:var(--ink)"><label for="c_${c.id}">${esc(c.name)}</label></div>
+          ${c.param ? `<div class="param" ${on ? "" : "hidden"}><span>${esc(c.param.label)}:</span><input class="input" type="number" inputmode="numeric" min="${c.param.min}" max="${c.param.max}" step="${c.param.step}" value="${esc(val)}" aria-label="${esc(c.param.label)}"><span class="muted">${c.param.unit}</span></div>` : ""}
+        </div>`; }).join("")}</div>
+    </div>
+    <div class="field"><label>Allergies</label><div class="chips wrap" id="pfAll">${ALLERGENS.map(a => `<button type="button" class="chip ${allergies.has(a.id) ? "on" : ""}" data-a="${a.id}">${esc(a.name)}</button>`).join("")}</div></div>
+    <div class="row"><button class="btn primary grow" id="pfSave">${id ? "Save changes" : "Add person"}</button><button class="btn" id="pfCancel">Cancel</button></div>
+    ${id ? `<div id="pfDelWrap"><button class="btn ghost danger block" id="pfDelAsk">Delete ${esc(p.name)}</button></div>` : ""}`);
+  $("#pfConds").addEventListener("change", e => {
+    const row = e.target.closest(".cond"); if (!row) return; const cb = row.querySelector("input[type=checkbox]"); const prm = row.querySelector(".param");
+    row.classList.toggle("on", cb.checked); if (prm) prm.hidden = !cb.checked;
+  });
+  $("#pfAll").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; b.classList.toggle("on"); });
+  $("#pfCancel").onclick = closeModal;
+  $("#pfSave").onclick = () => {
+    const name = $("#pfName").value.trim(); if (!name){ toast("Give this person a name"); $("#pfName").focus(); return; }
+    const out = {};
+    $$("#pfConds .cond").forEach(row => { const cid = row.dataset.cid; const cb = row.querySelector("input[type=checkbox]"); if (!cb.checked) return;
+      const prm = row.querySelector(".param input"); out[cid] = prm ? (+prm.value || COND[cid].param.def) : true; });
+    const al = $$("#pfAll .chip.on").map(b => b.dataset.a);
+    const data = {name, note:$("#pfNote").value.trim(), conds:out, allergies:al, created:p.created || Date.now()};
+    const pid = id || uid("p");
+    if (!id) S.sel.profileId = pid; Store.put("profiles", pid, data);
+    closeModal(); toast(id ? "Saved" : `${name} added`);
+  };
+  const da = $("#pfDelAsk"); if (da) da.onclick = () => {
+    $("#pfDelWrap").innerHTML = `<div class="confirm"><span class="small">Delete ${esc(p.name)} and their diet order? Saved trips stay.</span><span class="row"><button class="btn sm danger" id="pfDel">Delete</button><button class="btn sm" id="pfKeep">Keep</button></span></div>`;
+    $("#pfKeep").onclick = () => openProfileModal(id);
+    $("#pfDel").onclick = () => { delete S.carts[id]; if (S.sel.profileId === id) S.sel.profileId = null; Store.del("profiles", id); closeModal(); toast(`${p.name} deleted`); };
+  };
+}
+// ===== More: stores, custom foods, guide, data =====
+const TAG_OPTIONS = [
+  ["gas","Gas-forming (beans, cabbage, onions…)"],["carb","Carbonated"],["fried","Fried / greasy"],["proc","Processed meat"],["phos","Phosphorus additive (\"phos\" in ingredients)"],["hiphos","Naturally high phosphorus"],
+  ["gluten","Contains gluten"],["wheat","Contains wheat"],["dairy","Dairy"],["lactose","High lactose"],["egg","Egg"],["soy","Soy"],["peanut","Peanuts"],["nut","Tree nuts"],["fish","Fish"],["shell","Shellfish"],["sesame","Sesame"],
+  ["vitk","High vitamin K (leafy greens)"],["alc","Alcohol"],["caff","Caffeine"],["acid","Acidic"],["spicy","Spicy"],["purine","Moderate purines"],["purine2","Very high purines (organ meats, sardines)"],
+  ["hard","Hard / crunchy"],["chew","Tough to chew"],["soft","Soft texture"],["sticky","Dry or sticky"],["protein","Good protein source"],["omega","Heart-healthy fats"],["flavor","Salt-free flavor helper"],["thirst","Helps thirst without fluid"],["wet","Very watery food"],["ksub","Potassium-chloride salt substitute"]
+];
+function buildMore(){
+  $("#screen-more").addEventListener("click", e => {
+    const b = e.target.closest("[data-act]"); if (!b) return; const act = b.dataset.act, id = b.dataset.id;
+    if (act === "theme"){ S.ui.theme = id; Store.saveLocal(); render(); return; }
+    if (act === "addstore") openStoreModal();
+    if (act === "preset") quickAddStore(id);
+    if (act === "editstore") openStoreModal(id);
+    if (act === "delstoreask"){ S.ui.confirm = "store:" + id; renderMore(); }
+    if (act === "delstore"){ const s = S.stores[id]; Store.del("stores", id); if (S.cart.storeId === id){ S.cart.storeId = null; Store.saveCart(); } S.ui.confirm = null; toast(`${s ? s.name : "Store"} removed`); }
+    if (act === "cancel"){ S.ui.confirm = null; renderMore(); }
+    if (act === "addfood") openFoodModal();
+    if (act === "editfood") openFoodModal(id);
+    if (act === "delfoodask"){ S.ui.confirm = "food:" + id; renderMore(); }
+    if (act === "delfood"){ const f = S.foods[id]; Store.del("foods", id); S.cart.items = S.cart.items.filter(i => i.id !== id); Store.saveCart(); S.ui.confirm = null; toast(`${f ? f.name : "Food"} removed`); }
+    if (act === "export") exportCSV();
+    if (act === "backup") backupJSON();
+    if (act === "restore") $("#restoreFile").click();
+    if (act === "resetask"){ S.ui.confirm = "reset"; renderMore(); }
+    if (act === "reset"){ Store.reset(); S.ui.confirm = null; toast("This device has been cleared"); }
+    if (act === "copyexport"){ const ta = $("#exportText"); ta.select(); navigator.clipboard && navigator.clipboard.writeText(ta.value).then(() => toast("Copied")).catch(() => toast("Select the text and copy it")); }
+  });
+}
+function onRestoreFile(e){
+  const file = e.target.files && e.target.files[0]; e.target.value = ""; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data = null; try{ data = JSON.parse(reader.result); }catch(err){}
+    if (!data || typeof data !== "object" || !data.profiles){ toast("That file isn't a Tray Card Grocer backup"); return; }
+    const np = Object.keys(data.profiles || {}).length, nt = Object.keys(data.trips || {}).length;
+    openModal(`<h2>Restore this backup?</h2><p class="muted">${np} ${np===1?"person":"people"}, ${Object.keys(data.stores||{}).length} stores, ${nt} saved trip${nt===1?"":"s"}, ${Object.keys(data.foods||{}).length} added foods.</p>
+      <p class="small reason l3">This replaces everything currently on this device.</p>
+      <div class="row"><button class="btn primary grow" id="rsGo">Replace and restore</button><button class="btn" id="rsCancel">Cancel</button></div>`);
+    $("#rsCancel").onclick = closeModal;
+    $("#rsGo").onclick = () => { Store.apply(data); Store.saveLocal(); closeModal(); setTab("shop"); toast("Backup restored"); };
+  };
+  reader.readAsText(file);
+}
+function renderMore(){
+  const stores = storeList(); const presets = STORE_PRESETS.filter(p => !S.stores[p.id]);
+  const foods = Object.values(S.foods).sort((a, b) => a.name.localeCompare(b.name));
+  $("#screen-more").innerHTML = `
+    <div class="stack">
+      <div class="row between nowrap"><span class="section">Appearance</span>
+        <div class="seg" role="group" aria-label="Appearance">${[["paper","Paper"],["glass","Glass"],["auto","Auto"]].map(([k, l]) => `<button class="${(S.ui.theme || "paper") === k ? "on" : ""}" data-act="theme" data-id="${k}">${l}</button>`).join("")}</div></div>
+      <p class="small muted">Paper is the default. Glass is the dark version; Auto follows the phone.</p>
+    </div>
+    <div class="stack" style="gap:0">
+      <div class="row between nowrap" style="padding-bottom:6px"><span class="section">Stores</span><button class="btn sm" data-act="addstore">Add a store</button></div>
+      <div class="panel">${stores.length ? stores.map(s => `<div class="srow"><div class="grow"><b>${esc(s.name)}</b><span class="sub">${s.type === "warehouse" ? "Warehouse club · bulk sizes and prices" : "Grocery"}${s.note ? ` · ${esc(s.note)}` : ""}</span></div>
+        ${S.ui.confirm === "store:" + s.id ? `<span class="confirm" style="padding:6px 8px"><span class="small">Remove?</span><button class="btn sm danger" data-act="delstore" data-id="${esc(s.id)}">Remove</button><button class="btn sm" data-act="cancel">Keep</button></span>` : `<button class="btn sm" data-act="editstore" data-id="${esc(s.id)}">Edit</button><button class="btn sm ghost danger" data-act="delstoreask" data-id="${esc(s.id)}">Remove</button>`}</div>`).join("") : `<p class="muted small" style="padding:12px 0">No stores yet.</p>`}</div>
+      ${presets.length ? `<div class="chips wrap" style="padding-top:12px">${presets.map(p => `<button class="chip" data-act="preset" data-id="${p.id}">+ ${esc(p.name)}</button>`).join("")}</div>` : ""}
+    </div>
+    <div class="stack" style="gap:0">
+      <div class="row between nowrap" style="padding-bottom:6px"><span class="section">Foods you added</span><button class="btn sm" data-act="addfood">Add a food</button></div>
+      <div class="panel">${foods.length ? foods.map(f => `<div class="srow">${thumbHTML(normFood(f), "sm")}<div class="grow"><b>${esc(f.name)}</b><span class="sub">${esc(f.cat)} · ${esc(f.serving)} · ${+f.na||0} mg sodium</span></div>
+        ${S.ui.confirm === "food:" + f.id ? `<span class="confirm" style="padding:6px 8px"><span class="small">Delete?</span><button class="btn sm danger" data-act="delfood" data-id="${esc(f.id)}">Delete</button><button class="btn sm" data-act="cancel">Keep</button></span>` : `<button class="btn sm" data-act="editfood" data-id="${esc(f.id)}">Edit</button><button class="btn sm ghost danger" data-act="delfoodask" data-id="${esc(f.id)}">Delete</button>`}</div>`).join("") : `<p class="muted small" style="padding:12px 0"><span class="num">${FOODS.length}</span> built-in foods. Not in the list? Type the numbers off the Nutrition Facts label and it gets graded like everything else.</p>`}</div>
+    </div>
+    <div class="stack" style="gap:0">
+      <span class="section" style="padding-bottom:4px">Diet guide</span>
+      ${GUIDE.map(g => `<details class="guide"><summary>${esc(g.t)}</summary><div class="body">${g.b}</div></details>`).join("")}
+    </div>
+    <div class="stack" style="gap:0">
+      <span class="section" style="padding-bottom:4px">Your data</span>
+      <p class="small muted" style="padding-bottom:6px">Saved on this device only. Anyone else who opens the page gets their own blank copy.</p>
+      <div class="panel">
+        <button class="srow" data-act="backup"><span class="grow"><b>Back up</b><span class="sub">Save a file with everyone's lists, trips and stores</span></span><span class="chev">›</span></button>
+        <button class="srow" data-act="restore"><span class="grow"><b>Restore from a backup</b><span class="sub">Replaces what's on this device</span></span><span class="chev">›</span></button>
+        <button class="srow" data-act="export"><span class="grow"><b>Export trip history</b><span class="sub">CSV for a spreadsheet</span></span><span class="chev">›</span></button>
+      </div>
+      <input type="file" id="restoreFile" accept="application/json,.json" hidden>
+      <div id="exportBox"></div>
+      <div style="padding-top:12px">${S.ui.confirm === "reset" ? `<div class="confirm"><span>Erase every person, list, store and trip on this device? Back up first if you want a copy.</span><span class="row"><button class="btn sm danger" data-act="reset">Erase everything</button><button class="btn sm" data-act="cancel">Keep</button></span></div>` : `<button class="btn ghost danger block" data-act="resetask">Erase everything on this device</button>`}</div>
+      <p class="tiny muted" style="padding-top:10px">Typical label values and standard hospital diet rules. A shopping aid, not medical advice — the person's doctor or dietitian sets the real limits. Product photos: Adobe Stock.</p>
+    </div>`;
+  $("#restoreFile").addEventListener("change", onRestoreFile);
+}
+function openStoreModal(id){
+  const s = id ? S.stores[id] : {name:"", type:"grocery", note:""}; if (!s) return;
+  openModal(`<h2>${id ? "Edit store" : "Add a store"}</h2>
+    <div class="field"><label for="stName">Store name</label><input id="stName" class="input" value="${esc(s.name)}" placeholder="Fiesta Mart on Bellaire"></div>
+    <div class="field"><label>Kind</label><div class="seg" id="stType"><button data-t="grocery" class="${s.type !== "warehouse" ? "on" : ""}">Regular grocery</button><button data-t="warehouse" class="${s.type === "warehouse" ? "on" : ""}">Bulk club (Sam's, Costco)</button></div></div>
+    <div class="field"><label for="stNote">Note (optional)</label><input id="stNote" class="input" value="${esc(s.note || "")}" placeholder="Location, best day to go…"></div>
+    <div class="row"><button class="btn primary grow" id="stSave">${id ? "Save" : "Add store"}</button><button class="btn" id="stCancel">Cancel</button></div>`);
+  let type = s.type === "warehouse" ? "warehouse" : "grocery";
+  $("#stType").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; type = b.dataset.t; $$("#stType button").forEach(x => x.classList.toggle("on", x === b)); });
+  $("#stCancel").onclick = closeModal;
+  $("#stSave").onclick = () => {
+    const name = $("#stName").value.trim(); if (!name){ toast("Type the store's name"); return; }
+    const sid = id || (S.stores[slug(name)] ? uid("s") : slug(name));
+    Store.put("stores", sid, {name, type, note:$("#stNote").value.trim(), created:s.created || Date.now()});
+    if (!S.cart.storeId){ S.cart.storeId = sid; Store.saveCart(); }
+    closeModal(); toast(id ? "Saved" : `${name} added`);
+  };
+}
+function openFoodModal(id){
+  const f = id ? normFood(S.foods[id]) : {name:"", cat:"Pantry & Canned", serving:"", na:"", k:"", carb:"", sugar:"", fiber:"", prot:"", sf:"", fl:"", tags:[], price:"", unit:"", bp:"", bu:"", stores:[]};
+  if (!f) return;
+  let pic = {emoji:f.emoji || "", img:f.img || ""};
+  const num = (key, label, unit, ph="0") => `<div class="field"><label for="fd_${key}">${label} <span class="muted">(${unit})</span></label><input id="fd_${key}" class="input num" type="number" inputmode="decimal" min="0" step="any" value="${f[key] === "" || f[key] == null ? "" : esc(f[key])}" placeholder="${ph}"></div>`;
+  openModal(`<h2>${id ? "Edit food" : "Add a food"}</h2>
+    <div class="field"><label>Picture</label>
+      <div class="row nowrap"><span id="fdPreview">${thumbHTML({...f, cat:f.cat, emoji:pic.emoji, img:pic.img}, "lg")}</span>
+        <div class="row grow"><button type="button" class="btn sm" id="fdPhoto">Use a photo</button><button type="button" class="btn sm" id="fdPickEmoji">Pick an icon</button>${(pic.img || pic.emoji) ? `<button type="button" class="btn sm ghost" id="fdClearPic">Reset</button>` : ""}</div>
+        <input type="file" id="fdPhotoFile" accept="image/*" hidden></div>
+      <div class="emojigrid" id="fdEmoji" hidden>${EMOJI_CHOICES.map(e => `<button type="button" data-e="${e}" class="${pic.emoji === e ? "on" : ""}">${e}</button>`).join("")}</div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label for="fdName">Name</label><input id="fdName" class="input" value="${esc(f.name)}" placeholder="Boar's Head low sodium ham"></div>
+      <div class="field"><label for="fdCat">Aisle</label><select id="fdCat" class="input">${CATS.map(c => `<option ${c === f.cat ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></div>
+      <div class="field"><label for="fdServing">Serving size (from the label)</label><input id="fdServing" class="input" value="${esc(f.serving)}" placeholder="2 oz"></div>
+      <div class="field"><label for="fdUnit">Sold as</label><input id="fdUnit" class="input" value="${esc(f.unit || "")}" placeholder="per lb, 12 oz pack, each"></div>
+    </div>
+    <div class="grid3">
+      ${num("na","Sodium","mg")}${num("k","Potassium","mg")}${num("carb","Total carbs","g")}${num("sugar","Total sugars","g")}${num("fiber","Fiber","g")}${num("prot","Protein","g")}${num("sf","Saturated fat","g")}${num("fl","Fluid per serving","mL","0 if not a liquid")}${num("price","Price","$","0.00")}
+    </div>
+    <div class="field"><label>Also true about it (tap all that apply)</label><div class="chips wrap" id="fdTags">${TAG_OPTIONS.map(([t, l]) => `<button type="button" class="chip ${f.tags.includes(t) ? "on" : ""}" data-t="${t}" style="min-height:34px;padding:6px 10px;font-size:.85rem">${esc(l)}</button>`).join("")}</div></div>
+    <div class="field"><label>Which stores carry it? (none selected = all)</label><div class="chips wrap" id="fdStores">${storeList().map(s => `<button type="button" class="chip ${(f.stores || []).includes(s.id) ? "on" : ""}" data-s="${esc(s.id)}">${esc(s.name)}</button>`).join("") || `<span class="muted small">Add stores first</span>`}</div></div>
+    <div class="row"><button class="btn primary grow" id="fdSave">${id ? "Save" : "Add food"}</button><button class="btn" id="fdCancel">Cancel</button></div>`);
+  const refreshPic = () => { $("#fdPreview").innerHTML = thumbHTML({id:id || "", cat:$("#fdCat").value, emoji:pic.emoji, img:pic.img}, "lg"); };
+  $("#fdCat").addEventListener("change", refreshPic);
+  $("#fdPickEmoji").onclick = () => { const g = $("#fdEmoji"); g.hidden = !g.hidden; };
+  $("#fdEmoji").addEventListener("click", e => { const b = e.target.closest("button[data-e]"); if (!b) return; pic.emoji = b.dataset.e; pic.img = ""; $$("#fdEmoji button").forEach(x => x.classList.toggle("on", x === b)); refreshPic(); });
+  $("#fdPhoto").onclick = () => $("#fdPhotoFile").click();
+  $("#fdPhotoFile").addEventListener("change", e => { const file = e.target.files && e.target.files[0]; if (!file) return;
+    shrinkImage(file, 112).then(url => { pic.img = url; pic.emoji = ""; refreshPic(); toast("Photo added"); }).catch(() => toast("Couldn't read that photo")); e.target.value = ""; });
+  const cp = $("#fdClearPic"); if (cp) cp.onclick = () => { pic = {emoji:"", img:""}; refreshPic(); };
+  $("#fdTags").addEventListener("click", e => { const b = e.target.closest("button"); if (b) b.classList.toggle("on"); });
+  $("#fdStores").addEventListener("click", e => { const b = e.target.closest("button"); if (b) b.classList.toggle("on"); });
+  $("#fdCancel").onclick = closeModal;
+  $("#fdSave").onclick = () => {
+    const name = $("#fdName").value.trim(); if (!name){ toast("Give the food a name"); return; }
+    const g = k => Math.max(0, +$("#fd_" + k).value || 0);
+    const data = {name, cat:$("#fdCat").value, serving:$("#fdServing").value.trim() || "1 serving", na:g("na"), k:g("k"), carb:g("carb"), sugar:g("sugar"), fiber:g("fiber"), prot:g("prot"), sf:g("sf"), fl:g("fl"),
+      tags:$$("#fdTags .chip.on").map(b => b.dataset.t), price:g("price"), unit:$("#fdUnit").value.trim() || "each", stores:$$("#fdStores .chip.on").map(b => b.dataset.s), created:f.created || Date.now(),
+      emoji:pic.emoji || "", img:pic.img || ""};
+    const fid = id || uid("f");
+    Store.put("foods", fid, data); closeModal(); toast(id ? "Saved" : `${name} added to ${data.cat}`);
+    if (!id){ S.ui.cat = data.cat; S.ui.q = ""; }
+  };
+}
+function shrinkImage(file, size){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file); const im = new Image();
+    im.onload = () => { try{
+      const c = document.createElement("canvas"); c.width = size; c.height = size; const ctx = c.getContext("2d");
+      const s = Math.min(im.width, im.height); const sx = (im.width - s) / 2, sy = (im.height - s) / 2;
+      ctx.drawImage(im, sx, sy, s, s, 0, 0, size, size); URL.revokeObjectURL(url); resolve(c.toDataURL("image/jpeg", 0.82));
+    }catch(e){ reject(e); } };
+    im.onerror = reject; im.src = url;
+  });
+}
+// On a plain website (no Claude runtime) hand the file to the browser the normal way.
+function plainDownload(filename, data, type){
+  try{
+    const blob = new Blob([data], {type}); const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = filename; a.rel = "noopener"; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500); return true;
+  }catch(e){ return false; }
+}
+async function backupJSON(){
+  const json = JSON.stringify({...Store.snapshot(), app:"Tray Card Grocer", savedAt:new Date().toISOString()}, null, 1);
+  let dl = null; try{ if (window.claude && window.claude.use) dl = await window.claude.use("downloads"); }catch(e){}
+  if (dl){ try{ await dl.save({filename:`tray-card-backup-${todayISO()}.json`, data:json}); toast("Backup saved"); return; }catch(e){ if (e && e.code === "declined") return; } }
+  if (plainDownload(`tray-card-backup-${todayISO()}.json`, json, "application/json")){ toast("Backup file ready"); return; }
+  $("#exportBox").innerHTML = `<div class="stack"><p class="small muted">Copy and keep this text; paste it into a .json file to restore later.</p><textarea id="exportText" class="input" rows="6" readonly>${esc(json)}</textarea><button class="btn sm" data-act="copyexport">Copy</button></div>`;
+}
+async function exportCSV(){
+  const trips = Object.values(S.trips).sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  if (!trips.length){ toast("No trips to export yet"); return; }
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const rows = [["Date","Store","Person","Item","Qty","Price each","Line total","Bought","Trip total","Budget","Note"]];
+  trips.forEach(t => t.items.forEach(i => rows.push([t.date, t.storeName, t.profileName, i.name, i.qty, (+i.price).toFixed(2), (i.qty * i.price).toFixed(2), i.got ? "yes" : "no", (+t.total).toFixed(2), t.budget || "", t.note || ""])));
+  const csv = rows.map(r => r.map(q).join(",")).join("\n");
+  let dl = null; try{ if (window.claude && window.claude.use) dl = await window.claude.use("downloads"); }catch(e){}
+  if (dl){ try{ await dl.save({filename:`grocery-history-${todayISO()}.csv`, data:csv}); toast("Saved"); return; }catch(e){ if (e && e.code === "declined") return; } }
+  if (plainDownload(`grocery-history-${todayISO()}.csv`, csv, "text/csv")){ toast("CSV file ready"); return; }
+  $("#exportBox").innerHTML = `<div class="stack"><p class="small muted">Copy this into a spreadsheet:</p><textarea id="exportText" class="input" rows="6" readonly>${esc(csv)}</textarea><button class="btn sm" data-act="copyexport">Copy</button></div>`;
+}
+
+// ===== Guide content =====
+const GUIDE = [
+  {t:"How the colors work", b:`<p><span class="badge l0">OK</span> fits every diet order the person has.</p><p><span class="badge l1">Counts as fluid</span> fine to buy, but every sip comes out of the day's fluid allowance — the card shows how much.</p><p><span class="badge l2">Limit</span> small portion, once in a while, or a caution about medicines. Read the reason.</p><p><span class="badge l3">Avoid</span> breaks a rule outright (very high sodium, an allergy, alcohol on a no-alcohol order). Look for the swap suggested in the reason.</p><p class="muted">Numbers are typical values for a generic version of the food. Brands differ, so the app also tells you what to look for on the real label.</p>`},
+  {t:"2 g sodium diet (heart failure, blood pressure)", b:`<p>2 grams = 2,000 mg a day, spread over all meals and snacks. Most of the salt in a diet comes from packaged food, not the shaker.</p><ul><li><b>Low sodium</b> on a label means 140 mg or less per serving — the target for most items.</li><li><b>Very low</b> = 35 mg or less. <b>Sodium-free</b> = under 5 mg.</li><li><b>Reduced sodium</b> only means 25% less than the regular version — soy sauce and soups can still be very high.</li><li><b>No salt added</b> is the phrase to hunt for on canned vegetables, beans, tomatoes, broth and tuna.</li><li>Anything over 400 mg per serving (20% of the day) is a put-it-back item.</li></ul><p><b>Biggest offenders:</b> deli meat, bacon, sausage, hot dogs, canned soup, ramen, frozen dinners, pizza, cheese, pickles, olives, soy sauce, seasoning salts, bouillon, biscuits, boxed rice and pasta mixes.</p><p><b>Swaps:</b> fresh or frozen plain meat instead of deli; no-salt-added cans, or rinse regular canned beans and vegetables (drops sodium by about a third); Swiss or fresh mozzarella instead of cheddar or American; salt-free seasoning blends, garlic and onion powder, lemon, vinegar, pepper, fresh herbs for flavor.</p><p>Chicken, pork and shrimp are sometimes injected with salt water — the package says "enhanced" or "contains up to 15% solution". Buy plain.</p>`},
+  {t:"1,500 mL fluid restriction", b:`<p>Everything that is liquid at room temperature counts, not just water: coffee, tea, milk, juice, soda, soup and broth, nutrition shakes, ice (half its volume), ice cream, sherbet, popsicles, Jell-O, pudding, yogurt, gravy, creamer.</p><div class="kv"><b>1 cup / 8 fl oz</b><span>240 mL</span><b>1 fl oz</b><span>30 mL</span><b>16.9 oz water bottle</b><span>500 mL — a third of the day</span><b>12 oz can</b><span>355 mL</span><b>Popsicle</b><span>about 75 mL</span><b>Jell-O or pudding cup</b><span>about 100 mL</span><b>Scoop of ice cream</b><span>about 120 mL</span><b>Bowl of soup</b><span>240–360 mL</span></div><p><b>Making it easier:</b> use small cups; spread fluids through the day; take pills with meal fluids instead of an extra glass; sugar-free hard candy or gum, a lemon wedge, or rinsing and spitting for a dry mouth; avoid salty food, which drives thirst.</p><p>Many heart-failure plans also ask for a daily morning weight. A gain of 2–3 lb in a day or 5 lb in a week usually means call the clinic — that is fluid, not fat.</p>`},
+  {t:"Chronic respiratory failure / COPD", b:`<ul><li><b>Small, frequent meals</b> (5–6 a day). A full stomach pushes up on the diaphragm and makes breathing harder.</li><li><b>Skip gas-makers</b> and carbonated drinks: beans, cabbage, broccoli, cauliflower, Brussels sprouts, onions, corn, soda, sparkling water, fried food.</li><li><b>Protein at every meal</b> — eggs, chicken, fish, Greek yogurt, cottage cheese, protein shakes. Breathing burns calories, and the breathing muscles need protein.</li><li><b>Go easy on sugar and refined carbs.</b> Burning a big load of simple carbs produces extra carbon dioxide that tired lungs have to clear. Healthy fats (olive oil, avocado, nuts, fish) are a gentler fuel.</li><li><b>Salt</b> makes the body hold fluid, which strains breathing — the sodium rule helps here too.</li><li><b>Soft, easy-to-chew foods</b> on short-of-breath days; rest before meals, eat slowly, sit upright.</li><li>Fluids thin mucus, but a doctor's fluid restriction always wins over "drink more".</li><li>If on steroid pills or inhalers long term, calcium and vitamin D (milk, yogurt, fortified foods) protect the bones.</li></ul>`},
+  {t:"Other diet orders you can turn on", b:`<ul><li><b>Diabetes</b> — watches Total Sugars and Total Carbohydrate per serving; sugary drinks are red. Fiber gets a green note.</li><li><b>Kidney disease</b> — flags potassium (250 mg+ limit, 400 mg+ avoid) and phosphorus additives (any ingredient with "phos"). Never use potassium-chloride salt substitute.</li><li><b>High potassium / potassium-raising meds</b> (spironolactone, lisinopril, losartan) — same potassium flags.</li><li><b>Needs extra potassium</b> (water pills like furosemide/Lasix) — bananas, potatoes, oranges, tomatoes, yogurt get a green note. Ask the doctor which potassium rule applies; they conflict.</li><li><b>Cholesterol</b> — saturated fat 5 g+ per serving is a limit; fried and processed meats too.</li><li><b>Warfarin</b> — leafy greens are fine, just keep the amount steady week to week.</li><li><b>Reflux</b> — acidic, spicy, fried, fatty, caffeine, carbonated, alcohol.</li><li><b>Gout</b> — organ meats and sardines avoid; shellfish and beer limit.</li><li><b>Soft diet</b> — hard, crunchy or tough foods are red; soft gets a green note.</li><li><b>Lactose</b> — milk and ice cream limit; aged cheese and yogurt usually fine.</li><li><b>Gluten-free</b> — wheat, barley, rye, most bread, pasta, crackers, soy sauce and beer are red; oats only if certified.</li><li><b>Allergies</b> — anything containing the allergen is red.</li></ul>`},
+  {t:"Shopping and price tips", b:`<ul><li>Shop the outside walls first: produce, meat, dairy, frozen plain vegetables. Most red items live in the middle aisles.</li><li>"Heart healthy", "natural" and "organic" on the front say nothing about sodium. Turn it over.</li><li>Bulk clubs are fine for staples — portion big packs into freezer bags the day you get home.</li><li>Prices here start as estimates. Fix a price on any item (open it → Fix price) and the app remembers it for that store; prices you enter at checkout are remembered too.</li><li>Finish Trip saves the receipt total, what was bought and what was skipped, so next week you can tap "Shop this list again".</li><li>Everything stays on your own phone or computer. Other people can use this same page for their own family — nobody sees anyone else's lists.</li></ul>`}
+];
+
+// ===== Boot =====
+function boot(){
+  buildShop(); buildCart(); buildHistory(); buildPeople(); buildMore();
+  $("#tabbar").addEventListener("click", e => { const b = e.target.closest("button[data-tab]"); if (b) setTab(b.dataset.tab); });
+  S.built = true;
+  Store.loadLocal();
+  const h = (location.hash || "").slice(1); if (["shop","cart","history","people","more"].includes(h)) S.ui.tab = h;
+  setSync(); render();
+}
+boot();
+</script>
+</head><body></body></html>
