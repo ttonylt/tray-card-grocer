@@ -1,0 +1,117 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tray Card Grocer — how to set it up</title>
+<meta name="theme-color" content="#F3EEE4">
+<meta name="description" content="Put Tray Card Grocer on your Home Screen and set it up for Grandma in about two minutes.">
+<link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" href="icon-64.png">
+<style>
+:root{--bg:#F3EEE4;--paper2:#E9E3D6;--ink:#141412;--ink2:#615D55;--ink3:#9B968C;--hair:rgba(20,20,18,.14);--blue:#1E7FBF;--sand:#E8B84A;--ok:#1E9E4A;--limit:#E0A100;--avoid:#D0342C;--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) 20px 60px}
+h1{font-size:2.2rem;letter-spacing:-.035em;line-height:1.05;font-weight:800;margin:14px 0 8px}
+h2{font-size:1.5rem;letter-spacing:-.025em;margin:48px 0 6px;font-weight:700}
+p{margin:0 0 12px}
+.lead{color:var(--ink2);font-size:1.05rem}
+.app{display:flex;align-items:center;gap:14px;margin-top:10px}
+.app img{width:64px;height:64px;border-radius:15px;box-shadow:0 2px 8px rgba(40,30,10,.18)}
+.app b{display:block;font-size:1.05rem}
+.app span{color:var(--ink2);font-size:.92rem}
+.open{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);border-radius:999px;padding:12px 18px;font-weight:700;text-decoration:none;margin-top:10px}
+.sub{color:var(--ink2);margin-bottom:22px}
+.step{display:grid;grid-template-columns:34px 1fr;gap:6px 14px;padding:18px 0;border-top:1px solid var(--hair)}
+.step .n{width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:800;font-size:1rem}
+.step h3{margin:4px 0 4px;font-size:1.1rem;font-weight:700;letter-spacing:-.01em}
+.step p{color:var(--ink2);margin:0 0 12px}
+.step figure{grid-column:1/-1;margin:2px 0 0;display:flex;justify-content:center}
+.shot{width:min(100%,300px);border-radius:26px;box-shadow:0 8px 28px rgba(40,30,10,.18);border:1px solid var(--hair);display:block}
+/* phone mock for the Home Screen steps */
+.phone{width:300px;background:#fff;border-radius:34px;border:1px solid var(--hair);box-shadow:0 8px 28px rgba(40,30,10,.18);overflow:hidden;position:relative;font-size:14px}
+.phone .screen{height:300px;background:var(--bg);position:relative;overflow:hidden}
+.phone .site{padding:26px 16px 0}
+.phone .site .t{font-size:24px;font-weight:800;letter-spacing:-.03em}
+.phone .site .card{margin-top:14px;background:#fff;border:1px solid var(--hair);border-radius:8px;padding:12px 12px 12px 18px;position:relative}
+.phone .site .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--blue);border-radius:6px 0 0 6px}
+.phone .site .card b{display:block}
+.phone .site .card span{color:var(--ink2);font-size:12px}
+.phone .site .row{display:flex;gap:10px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}
+.phone .site .tile{width:34px;height:34px;border-radius:8px;background:#fff;border:1px solid var(--hair);position:relative}
+.phone .site .tile i{position:absolute;right:-4px;bottom:-4px;width:9px;height:9px;border-radius:50%;background:var(--ok);border:2px solid var(--bg)}
+.phone .site .name{font-weight:600}
+.phone .bar{position:absolute;left:0;right:0;bottom:0;height:78px;background:rgba(246,246,247,.98);border-top:1px solid rgba(0,0,0,.1)}
+.phone .url{margin:10px 14px 0;height:36px;border-radius:10px;background:#E5E5EA;display:flex;align-items:center;justify-content:center;color:#3C3C43;font-size:13px}
+.phone .icons{display:flex;justify-content:space-between;padding:8px 26px 0;color:#0A84FF;font-size:18px}
+.phone .icons .share{position:relative}
+.ring{position:absolute;border:3px solid var(--avoid);border-radius:14px;pointer-events:none}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#F2F2F7;border-radius:14px 14px 0 0;padding:10px 10px 12px;box-shadow:0 -6px 24px rgba(0,0,0,.18)}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:#C7C7CC;margin:0 auto 10px}
+.sheet .head{display:flex;gap:10px;align-items:center;background:#fff;border-radius:10px;padding:8px 10px;margin-bottom:8px}
+.sheet .head img{width:34px;height:34px;border-radius:8px}
+.sheet .head b{display:block;font-size:13px}
+.sheet .head span{font-size:11px;color:#8E8E93}
+.sheet .list{background:#fff;border-radius:10px}
+.sheet .item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(0,0,0,.08);font-size:14px}
+.sheet .item:last-child{border-bottom:0}
+.sheet .item .g{width:26px;height:26px;border-radius:7px;border:1.6px solid #1C1C1E;display:grid;place-items:center;font-size:16px;color:#1C1C1E}
+.sheet .item.hi{background:#FFF6E0;border-radius:10px}
+.dlg{position:absolute;inset:0;background:#F2F2F7}
+.dlg .top{display:flex;justify-content:space-between;align-items:center;padding:14px 14px 10px;font-size:15px}
+.dlg .top .c{color:#0A84FF}
+.dlg .top .a{color:#0A84FF;font-weight:700;position:relative;padding:6px 10px}
+.dlg .top b{font-size:15px}
+.dlg .body{margin:6px 12px;background:#fff;border-radius:10px;padding:12px;display:flex;gap:12px;align-items:center}
+.dlg .body img{width:58px;height:58px;border-radius:13px}
+.dlg .body .nm{font-size:15px;font-weight:600;border-bottom:1px solid rgba(0,0,0,.12);padding-bottom:4px}
+.dlg .body .u{font-size:12px;color:#8E8E93;margin-top:4px}
+.dlg .note{margin:10px 16px;font-size:12px;color:#8E8E93}
+.dots{display:inline-flex;gap:6px;vertical-align:middle;margin-left:4px}
+.dots i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:8px 0 0;font-size:.98rem}
+.kv i{width:12px;height:12px;border-radius:50%;display:inline-block;margin-top:6px}
+.card{background:#fff;border:1px solid var(--hair);border-radius:10px;padding:16px 18px;margin-top:14px}
+.card > b{display:block;margin-bottom:4px}
+.tiny{font-size:.85rem;color:var(--ink3)}
+</style></head><body><div class="wrap">
+  <div class="app"><img src="icon-180.png" alt=""><div><b>Tray Card Grocer</b><span>A grocery list that checks every food against Grandma's diet order.</span></div></div>
+  <h1>Set it up in two minutes</h1>
+  <p class="lead">It's a website, not something to install — nothing to download, no account. Put it on your Home Screen so it opens like an app, then tell it who you're shopping for.</p>
+  <a class="open" href="./">Open Tray Card Grocer ›</a>
+
+  <h2>Put it on your Home Screen</h2>
+  <p class="sub">Do this once, in Safari on your iPhone.</p>
+
+  <div class="step"><span class="n">1</span><div><h3>Open the link in Safari, then tap Share</h3><p>It's the square with the arrow at the bottom of the screen.</p></div>
+    <figure><div class="phone"><div class="screen"><div class="site"><div class="t">Shop</div><div class="card"><b>Grandma</b><span>2 g sodium · 1,500 mL fluid · Breathing</span></div><div class="row"><span class="tile"><i></i></span><span class="name">Bananas</span></div><div class="row"><span class="tile"><i></i></span><span class="name">Apples</span></div></div>
+      <div class="bar"><div class="url">ttonylt.github.io</div><div class="icons"><span>‹</span><span>›</span><span class="share">⬆︎<span class="ring" style="left:-12px;top:-10px;width:44px;height:44px"></span></span><span>▯</span><span>▢</span></div></div></div></div></figure></div>
+
+  <div class="step"><span class="n">2</span><div><h3>Scroll down and tap “Add to Home Screen”</h3><p>It's a little way down the list, under the row of app icons.</p></div>
+    <figure><div class="phone"><div class="screen"><div class="sheet"><div class="grab"></div><div class="head"><img src="icon-180.png" alt=""><div><b>Tray Card Grocer</b><span>ttonylt.github.io</span></div></div>
+      <div class="list"><div class="item"><span>Copy</span><span class="g">⧉</span></div><div class="item"><span>Add to Reading List</span><span class="g">☰</span></div><div class="item"><span>Add Bookmark</span><span class="g">▤</span></div><div class="item hi"><span><b>Add to Home Screen</b></span><span class="g">＋</span></div></div></div></div></div></figure></div>
+
+  <div class="step"><span class="n">3</span><div><h3>Tap “Add”</h3><p>The Tray Card icon appears next to your other apps. Tap it any time — your list is right where you left it.</p></div>
+    <figure><div class="phone"><div class="screen"><div class="dlg"><div class="top"><span class="c">Cancel</span><b>Add to Home Screen</b><span class="a">Add<span class="ring" style="left:-4px;top:-2px;width:52px;height:36px"></span></span></div>
+      <div class="body"><img src="icon-180.png" alt=""><div style="flex:1"><div class="nm">Tray Card</div><div class="u">https://ttonylt.github.io/tray-card-grocer/</div></div></div><div class="note">An icon will be added to your Home Screen so you can quickly access this website.</div></div></div></div></figure></div>
+
+  <h2>Using it</h2>
+  <p class="sub">The first time it opens it asks two things: who you're shopping for, and where.</p>
+
+  <div class="step"><span class="n">1</span><div><h3>Tell it who you're shopping for</h3><p>Tap <b>Grandma</b> to start with a 2 g sodium · 1,500 mL fluid · breathing diet order, or <b>Someone else</b> to type your own. Then tap your store — H-E-B, Kroger, Sam's Club and the other Houston stores are already there. You can change any of this later by tapping the card at the top.</p></div>
+    <figure><img class="shot" src="shots/1-setup.png" alt="The set-up card: who are you shopping for, and where"></figure></div>
+
+  <div class="step"><span class="n">2</span><div><h3>Read the dots</h3><p>Every food has a dot on its picture, and the small number is the sodium in one serving.</p>
+    <div class="kv"><i style="background:var(--ok)"></i><span><b>Green</b> — fits the diet order.</span><i style="background:var(--limit)"></i><span><b>Yellow</b> — limit it; the line under the name says why.</span><i style="background:var(--avoid)"></i><span><b>Red</b> — avoid; tap the food to see the reason and a swap.</span><i style="background:var(--blue)"></i><span><b>Blue</b> — counts toward the day's fluids.</span></div><p style="margin-top:10px">The same food can change color with how it's packaged — fresh green beans are fine, regular canned beans are not. Tap any food name for the full nutrition numbers.</p></div>
+    <figure><img class="shot" src="shots/2-shop.png" alt="The Shop screen with green, yellow and red dots"></figure></div>
+
+  <div class="step"><span class="n">3</span><div><h3>Tap Add</h3><p>The black bar at the bottom keeps the running total and what's left of the budget. Search finds anything across all aisles.</p></div>
+    <figure><img class="shot" src="shots/3-added.png" alt="Foods added, with the total in the black bar"></figure></div>
+
+  <div class="step"><span class="n">4</span><div><h3>In the store, use the List</h3><p>Check things off as they go in the cart. If the shelf price is different, tap the price and fix it — the app remembers it for that store.</p></div>
+    <figure><img class="shot" src="shots/4-list.png" alt="The List screen with check circles"></figure></div>
+
+  <div class="step"><span class="n">5</span><div><h3>Finish the trip</h3><p>Tap <b>Finish trip</b>, type the receipt total, and it's saved under <b>Trips</b> — what you bought, where, and what it cost. <b>Shop again</b> puts a past trip back on the list in one tap.</p></div>
+    <figure><img class="shot" src="shots/5-trips.png" alt="The Trips screen"></figure></div>
+
+  <h2>Your information stays on your phone</h2>
+  <div class="card"><b>Nothing is sent anywhere.</b><p style="margin:0;color:var(--ink2)">Grandma's diet order, your lists and your trips are saved inside your own phone's browser. Nobody else who opens the same link sees them — not even the person who sent it to you. If you open the link on a second phone or computer, it starts blank there.</p></div>
+  <div class="card"><b>Keep a copy.</b><p style="margin:0;color:var(--ink2)">Under <b>More → Back up</b> you can save a small file with everything in it. If you ever get a new phone, open the app there and use <b>Restore from a backup</b>.</p></div>
+  <p class="tiny" style="margin-top:22px">Nutrition numbers are typical label values for a generic version of each food and standard hospital diet rules. It's a shopping aid, not medical advice — the doctor or dietitian sets the real limits.</p>
+</div></body></html>
