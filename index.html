@@ -214,15 +214,24 @@ img.sp.own{object-fit:cover;border-radius:22%;background:none}
 .sfield .key{flex:none}
 .searchv .sub{margin-top:12px}
 .results{margin-top:8px}
-.srow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:8px var(--pad);border-bottom:1px solid var(--line)}
-.srow .z .sp{--s:44px}
-.srow .t b{display:block;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.srow .t small{display:flex;align-items:flex-end;gap:4px;margin-top:5px;font-size:12px;color:var(--grey);flex-wrap:wrap;line-height:1}
+/* every brand, under the everyday foods */
+.catres .cathead{padding-top:28px}
+.catres .small,.results .catwait{padding:14px var(--pad);color:var(--grey)}
+.results .freeadd{padding:22px var(--pad) 10px}
+.results .srow .z img.sp.own{width:44px;height:44px;object-fit:cover;border-radius:8px;background:var(--raise)}
+.sp.cph{position:relative;overflow:hidden;border-radius:8px}
+.sp.cph.blank{background:var(--raise)}
+.sp.cph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px;background:#fff}
+.results .srow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:8px var(--pad);border-bottom:1px solid var(--line);flex-wrap:nowrap}
+.results .srow .z .sp{--s:44px}
+.results .srow .t{min-width:0}
+.results .srow .t b{display:block;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.results .srow .t small{display:flex;align-items:flex-end;gap:4px;margin-top:5px;font-size:12px;color:var(--grey);flex-wrap:wrap;line-height:1}
 .srow .t small em{font-style:normal}
 .srow .t small b{display:inline;color:var(--ink);font-weight:600}
-.srow .w{font-size:12px;text-align:right}
-.srow.l3 .z .sp{opacity:.4;filter:grayscale(1)}
-.srow.l3 .t b{color:var(--grey)}
+.results .srow .w{font-size:12px;text-align:right;white-space:nowrap}
+.results .srow.l3 .z .sp{opacity:.4;filter:grayscale(1)}
+.results .srow.l3 .t b{color:var(--grey)}
 .results .aisles{flex-direction:column;gap:0;padding:4px var(--pad);overflow:visible}
 .results .aisles button{font-size:28px;font-weight:700;letter-spacing:-.03em;color:var(--ink);padding:4px 0;text-align:left}
 .results .aisles button.on{display:none}
@@ -887,7 +896,7 @@ const PHOTO_BASE = "img/";
 // Short aisle names: the aisle row, headlines and back links.
 const SHORT = {"Produce":"Produce","Meat & Seafood":"Meat","Dairy & Eggs":"Dairy","Bread & Grains":"Bread","Pantry & Canned":"Pantry","Frozen":"Frozen","Beverages":"Drinks","Snacks & Sweets":"Snacks","Deli & Prepared":"Deli","Condiments & Seasonings":"Condiments"};
 const shortCat = c => SHORT[c] || c;
-const photoKey = f => (f && !f.img && PHOTO[f.id]) || null;
+const photoKey = f => (f && !f.img && (PHOTO[f.id] || f.pk)) || null;
 
 // A product as a cut-out on the black ground: the 512 px transparent picture, for anything bigger than a thumbnail.
 // Foods people add themselves show their own photo (square, rounded) or the icon they picked.
@@ -900,6 +909,14 @@ function cutHTML(f, cls, attrs){
     return `<img class="cut ch ${cls || ""}" src="${big ? f.ch.img : f.ch.img.replace("/img/", "/sm/")}" alt="" decoding="async" draggable="false"${withSheetSpot(attrs, f.ch.i)}>`;
   }
   if (key) return `<img class="cut ${cls || ""}" src="${PHOTO_BASE}${key}.webp" alt="" decoding="async" draggable="false"${attrs}>`;
+  // a brand product: its package photo; if the photo can't load, the general cut-out of its kind takes its place
+  if (f.catalog && f.img){
+    const gk = f.gid && PHOTO[f.gid], big = /\bbig\b/.test(cls || "") && f.imgBig && f.imgBig !== f.img;
+    const fall = gk ? `this.onerror=null;this.className='cut ${cls || ""}';this.src='${PHOTO_BASE}${gk}.webp'` : "this.style.visibility='hidden'";
+    // on the product page the sharp photo comes from the archive; the small one shows until it arrives (and stays if it can't)
+    if (big) return `<img class="cut own ${cls || ""}" src="${esc(f.img)}" alt="" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="${fall}" data-big="${esc(f.imgBig)}" onload="if(this.dataset.big){const b=new Image(),me=this,u=this.dataset.big;this.dataset.big='';b.referrerPolicy='no-referrer';b.onload=()=>{me.src=u};b.src=u}"${attrs}>`;
+    return `<img class="cut own ${cls || ""}" src="${esc(f.img)}" alt="" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="${fall}"${attrs}>`;
+  }
   if (f.img) return `<img class="cut own ${cls || ""}" src="${esc(f.img)}" alt="" draggable="false"${attrs}>`;
   return `<span class="cut em ${cls || ""}"${attrs}><b>${foodEmoji(f)}</b></span>`;
 }
@@ -915,6 +932,11 @@ function spriteHTML(f, cls, attrs){
   if (f && f.sc && f.sc.img) return `<img class="sp own ${cls || ""}" src="${esc(f.sc.img)}" alt="" referrerpolicy="no-referrer"${attrs}>`;
   if (f && f.ch) return `<i class="sp cs ${cls || ""}"${withSheetSpot(attrs, f.ch.i)}></i>`;
   if (at != null) return `<i class="sp ${cls || ""}" style="--sx:${at % 16};--sy:${at >> 4}"${attrs}></i>`;
+  // a brand product: the general sprite of its kind shows at once, its package photo covers it when it arrives
+  if (f && f.catalog && f.img){
+    const gk = f.gid && PHOTO[f.gid], ga = gk ? ATLAS_AT[gk] : undefined;
+    return `<i class="sp cph ${ga == null ? "blank " : ""}${cls || ""}"${ga != null ? ` style="--sx:${ga % 16};--sy:${ga >> 4}"` : ""}${attrs}><img src="${esc(f.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()"></i>`;
+  }
   if (f.img) return `<img class="sp own ${cls || ""}" src="${esc(f.img)}" alt=""${attrs}>`;
   return `<i class="sp em ${cls || ""}"${attrs}>${foodEmoji(f)}</i>`;
 }
@@ -1506,6 +1528,135 @@ function guessFoods(text){
     return {f, s};
   }).filter(x => x.s > .3).sort((a, b) => b.s - a.s).map(x => x.f);
 }
+// ===== The whole grocery store =====
+// Besides the everyday foods, search finds every branded food sold in US grocery stores (Kraft, Campbell's, Doritos,
+// store brands...): label numbers from USDA FoodData Central and Open Food Facts, graded like everything else.
+// The catalog lives on the website as small files: a word index (cat/i/) and products 256 to a file (cat/p/), most
+// bought first, so a search reads a few small files and the phone keeps them for next time.
+// A product you add to the tray is kept on this phone (S.prods), so the list, trips and the shelves still show it
+// offline. Photos: a small copy on the site for the most bought products, else Open Food Facts' archive, else the
+// general photo of that kind of food.
+const CAT_DIR = "cat/";
+const CAT_VERSION = 1;
+const OFF_IMG = "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/";
+const CAT = {meta:null, json:new Map(), byId:new Map(), seq:0, last:null};
+const FOOD_BY_ID = new Map(FOODS.map(f => [f.id, f]));
+
+const catGet = url => getJSON(`${CAT_DIR}${url}?v=${CAT_VERSION}`, CAT.json);
+async function catMeta(){ if (!CAT.meta) CAT.meta = await catGet("meta.json"); return CAT.meta; }
+// the same words the index was built from
+const CAT_STOP = new Set("and the of with in an for to on by or oz fl ct pk lb lbs ml kg count pack size".split(" "));
+function catWords(s){
+  const t = String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[’`]/g, "'");
+  const out = [];
+  for (const w of t.split(/[^a-z0-9'&.-]+/)){
+    const x = w.replace(/^[-'.&]+|[-'.&]+$/g, "").replace(/'s$/, "s").replace(/[^a-z0-9]/g, "");
+    if (x.length >= 2 && !/^\d+$/.test(x) && !CAT_STOP.has(x) && !out.includes(x)) out.push(x);
+  }
+  return out;
+}
+const B36 = x => parseInt(x, 36);
+function decodeIds(s, cap){ const out = []; let v = 0; for (const p of s.split(",")){ v += B36(p); out.push(v); if (out.length >= cap) break; } return out; }
+async function catShard(w){
+  const m = await catMeta(); if (!m || w.length < 2) return {};
+  const p2 = w.slice(0, 2), key = m.split && m.split.includes(p2) ? (w.length >= 3 ? w.slice(0, 3) : null) : p2;
+  if (!key) return null;          // a two-letter start of a very common prefix: wait for the third letter
+  return (await catGet(`i/${key}.json`)) || {};
+}
+// ids (most bought first) of the products whose words contain every word typed; the last word may be unfinished
+async function catIds(q, limit){
+  const words = catWords(q); if (!words.length) return [];
+  const lists = await Promise.all(words.map(async (w, i) => {
+    const sh = await catShard(w); if (sh === null) return null;
+    const last = i === words.length - 1;
+    const keys = Object.keys(sh).filter(k => k === w || (last ? k.startsWith(w) : (k.startsWith(w) && k.length <= w.length + 2)));
+    if (!keys.length) return [];
+    if (keys.length === 1) return decodeIds(sh[keys[0]], 4000);
+    const set = new Set(); keys.sort((a, b) => (a === w ? -1 : b === w ? 1 : a.length - b.length)).slice(0, 60).forEach(k => decodeIds(sh[k], 1500).forEach(x => set.add(x)));
+    return [...set].sort((a, b) => a - b);
+  }));
+  if (lists.some(l => l === null)) return null;
+  lists.sort((a, b) => a.length - b.length);
+  let ids = lists[0];
+  for (const l of lists.slice(1)){ const s = new Set(l); ids = ids.filter(x => s.has(x)); }
+  return ids.slice(0, limit);
+}
+async function catCards(ids){
+  const m = await catMeta(); const per = (m && m.per) || 256;
+  const shards = [...new Set(ids.map(i => Math.floor(i / per)))];
+  const got = await Promise.all(shards.map(n => catGet(`p/${n}.json`)));
+  const byShard = new Map(shards.map((n, k) => [n, got[k] || []]));
+  return ids.map(i => (byShard.get(Math.floor(i / per)) || [])[i % per]).filter(Boolean);
+}
+async function catSearch(q, limit){
+  if (!ONLINE_DATA) return [];
+  const ids = await catIds(q, limit || 40); if (!ids) return null;
+  return (await catCards(ids)).map(catFood);
+}
+const TYP_KEY = {n:"na", k:"k", c:"carb", s:"sug", f:"fib", p:"prot", t:"sf"};
+// "t…": a small photo on the site (and, after it, the big one's address); "s…": only the big one in the archive
+function catImg(c){
+  const im = c[15] || "";
+  if (im[0] === "t") return `${CAT_DIR}t/${c[0].slice(-2)}/${c[0]}.webp`;
+  if (im[0] === "s") return `${OFF_IMG}${im.slice(1)}.400.jpg`;
+  return "";
+}
+function catImgBig(c){
+  const im = c[15] || "", s = im[0] === "t" ? im.slice(1) : im;
+  return s[0] === "s" ? `${OFF_IMG}${s.slice(1)}.400.jpg` : "";
+}
+// A catalog card -> a food the rest of the app understands
+function catFood(c){
+  const id = "p" + c[0], gen = c[4] ? FOOD_BY_ID.get(c[4]) : null;
+  const f = {id, code:c[0], name:c[1], product:c[1], brand:c[2], cat:CATS[c[3]] || "Pantry & Canned", kind:gen ? gen.name : "", gid:c[4] || "",
+    serving:c[5] || "1 serving", na:+c[6] || 0, k:+c[7] || 0, carb:+c[8] || 0, sugar:+c[9] || 0, fiber:+c[10] || 0, prot:+c[11] || 0, sf:+c[12] || 0, fl:+c[13] || 0,
+    tags:c[14] ? String(c[14]).split(" ") : [], img:catImg(c), imgBig:catImgBig(c), pk:gen && !c[15] ? PHOTO[gen.id] || null : null,
+    label:c[16] === "u" ? "usda" : "off", typical:String(c[17] || "").split("").map(x => TYP_KEY[x]).filter(Boolean),
+    size:c[18] || "", price:gen ? gen.price : 3.99, unit:c[18] || (gen ? gen.unit : "each"), builtin:false, catalog:true};
+  CAT.byId.set(id, c);
+  return f;
+}
+// Keep a product on this phone once it's in the tray (the list, trips and shelves need it offline)
+function keepProduct(id){
+  const c = CAT.byId.get(id); if (!c || (S.prods[id] && S.prods[id].c)) return;
+  S.prods[id] = {c, t:Date.now()};
+}
+function catById(id){ const k = S.prods[id]; const c = (k && k.c) || CAT.byId.get(id); return c ? catFood(c) : null; }
+
+// ---- The search screen's second half: brands and products ----
+let CAT_TIMER = 0;
+function renderCatalogResults(q){
+  const box = $("#catRes"); if (!box) return;
+  clearTimeout(CAT_TIMER);
+  const seq = ++CAT.seq, text = q.trim();
+  if (!ONLINE_DATA || catWords(text).length === 0 || text.length < 2){ box.innerHTML = ""; return; }
+  // quiet for a moment (people are still typing); a note only if it takes more than a second
+  const slow = setTimeout(() => { if (seq === CAT.seq && !box.dataset.done) box.innerHTML = `<p class="small catwait">Looking through every brand…</p>`; }, 1000);
+  box.dataset.done = "";
+  CAT_TIMER = setTimeout(() => {
+    catSearch(text, 40).then(list => {
+      clearTimeout(slow); if (seq !== CAT.seq || !$("#catRes")) return;
+      box.dataset.done = "1";
+      if (list === null){ box.innerHTML = `<p class="small">Keep typing…</p>`; return; }
+      const p = activeProfile(), st = activeStore(), m = metricFor(p);
+      const qty = Object.fromEntries(S.cart.items.map(i => [i.id, i.qty]));
+      box.innerHTML = list.length ? `<div class="grp cathead"><b>Brands and products</b><span>${list.length === 40 ? "40+" : list.length}</span></div>` + list.map(f => { const g = gradeFood(f, p), tv = tagValue(f, g, m);
+        return `<button class="srow l${g.lvl}" data-act="open" data-id="${esc(f.id)}"><span class="z">${spriteHTML(f)}</span>
+          <span class="t"><b>${esc(f.name)}</b><small>${f.brand ? esc(f.brand) + " · " : ""}${dotMatrix(dmNumber(tv.v), 1.7, "c" + tv.lvl)}<em>${esc(tv.unit)}</em>${qty[f.id] ? ` · <b>${qty[f.id]} in the tray</b>` : ""}</small></span>
+          <span class="w c${g.lvl}">${esc(LEVELS[g.lvl].label)}</span></button>`; }).join("")
+        : `<p class="small">No brand called “${esc(text)}” in the catalog.</p>`;
+      const cnt = $("#qcount"); if (cnt && cnt.dataset.none && list.length) cnt.innerHTML = `Brands and products for “${esc(text)}”`;
+    }).catch(() => { clearTimeout(slow); if (seq === CAT.seq && $("#catRes")) box.innerHTML = `<p class="small">Couldn't reach the catalog. The everyday foods above still work.</p>`; });
+  }, 200);
+}
+// Anything else on the list — paper towels, dish soap — goes on as a plain line (not graded).
+function addFreeItem(text){
+  const name = String(text || "").trim().replace(/\s+/g, " ").replace(/^\w/, c => c.toUpperCase()); if (!name) return;
+  const id = "x_" + slug(name);
+  const ex = S.cart.items.find(i => i.id === id);
+  if (ex) ex.qty += 1; else S.cart.items.push({id, qty:1, price:0, got:false, name});
+  Store.saveCart(); toast(`${name} is on the list`);
+}
 // ===== Conditions (diet orders) and the grading rules =====
 const CONDITIONS = [
   {id:"sodium", name:"Low sodium (heart failure, high blood pressure)", short:"Sodium", param:{label:"Daily sodium limit", unit:"mg", def:2000, min:500, max:4000, step:100}},
@@ -1755,7 +1906,7 @@ function instrumentsFor(f, p){
 // phone gets their own private copy — nothing is shared between users. Inside the app, every person you
 // shop for has their own list (cart) and their own trips.
 const S = {
-  profiles:{}, stores:{}, foods:{}, trips:{}, prices:{}, carts:{}, scans:{},
+  profiles:{}, stores:{}, foods:{}, trips:{}, prices:{}, carts:{}, scans:{}, prods:{},
   sel:{profileId:null},
   ui:{tab:"shop", view:"store", cat:"Produce", q:"", filter:"all", itemId:null, itemFrom:"store", scroll:{store:0, aisle:0, search:0},
       expanded:null, confirm:null, historyOpen:{}, histPerson:"all", theme:"paper", look:"night"},
@@ -1815,11 +1966,11 @@ const LS_KEY_OLD = "traycard_v1";
 const LOOKS = ["night", "day", "auto"];
 const Store = {
   ok:true,
-  snapshot(){ return {v:2, profiles:S.profiles, stores:S.stores, foods:S.foods, trips:S.trips, prices:S.prices, carts:S.carts, scans:S.scans, sel:S.sel,
+  snapshot(){ return {v:2, profiles:S.profiles, stores:S.stores, foods:S.foods, trips:S.trips, prices:S.prices, carts:S.carts, scans:S.scans, prods:S.prods, sel:S.sel,
     ui:{cat:S.ui.cat, filter:S.ui.filter, theme:S.ui.theme, look:S.ui.look, view:S.ui.view === "aisle" ? "aisle" : "store"}}; },
   apply(d){
     if (!d || typeof d !== "object") return false;
-    ["profiles","stores","foods","trips","prices","scans"].forEach(k => { S[k] = (d[k] && typeof d[k] === "object" && !Array.isArray(d[k])) ? d[k] : {}; });
+    ["profiles","stores","foods","trips","prices","scans","prods"].forEach(k => { S[k] = (d[k] && typeof d[k] === "object" && !Array.isArray(d[k])) ? d[k] : {}; });
     S.carts = {};
     if (d.carts && typeof d.carts === "object") Object.keys(d.carts).forEach(k => { S.carts[k] = normalizeCart(d.carts[k]); });
     if (d.cart){ const c = normalizeCart(d.cart); S.carts[d.cart.profileId || "_none"] = c; S.sel.profileId = d.cart.profileId || null; } // old single-cart shape
@@ -1846,7 +1997,7 @@ const Store = {
   put(col, id, data){ S[col][id] = {...data, id}; this.saveLocal(); render(); },
   del(col, id){ delete S[col][id]; this.saveLocal(); render(); },
   saveCart(){ this.saveLocal(); render(); },
-  reset(){ try{ localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_KEY_OLD); }catch(e){} S.profiles = {}; S.stores = {}; S.foods = {}; S.trips = {}; S.prices = {}; S.carts = {}; S.scans = {}; S.sel.profileId = null; S.ui.histPerson = "all"; S.ui.view = "store"; render(); }
+  reset(){ try{ localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_KEY_OLD); }catch(e){} S.profiles = {}; S.stores = {}; S.foods = {}; S.trips = {}; S.prices = {}; S.carts = {}; S.scans = {}; S.prods = {}; S.sel.profileId = null; S.ui.histPerson = "all"; S.ui.view = "store"; render(); }
 };
 // Night (the default), Day, or follow the phone.
 const darkMQ = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
@@ -1869,9 +2020,9 @@ const storeList = () => Object.values(S.stores).sort((a,b) => (a.created||0) - (
 function activeProfile(){ const list = profileList(); if (!list.length) return null; return S.profiles[S.sel.profileId] || list[0]; }
 function activeStore(){ const list = storeList(); if (!list.length) return null; return S.stores[S.cart.storeId] || list[0]; }
 const ready = () => !!(activeProfile() && activeStore());
-function allFoods(){ return FOODS.map(chainFood).concat(Object.values(S.foods).map(normFood)); }
+function allFoods(){ return FOODS.map(chainFood).concat(Object.values(S.foods).map(normFood), Object.keys(S.prods).map(catById).filter(Boolean)); }
 function normFood(f){ return {...f, tags:Array.isArray(f.tags) ? f.tags : String(f.tags||"").split(" ").filter(Boolean), na:+f.na||0, k:+f.k||0, carb:+f.carb||0, sugar:+f.sugar||0, fiber:+f.fiber||0, prot:+f.prot||0, sf:+f.sf||0, fl:+f.fl||0, price:+f.price||0, builtin:false}; }
-function foodById(id){ const f = FOODS.find(x => x.id === id); return f ? chainFood(f) : (S.foods[id] ? normFood(S.foods[id]) : null); }
+function foodById(id){ const f = FOODS.find(x => x.id === id); return f ? chainFood(f) : S.foods[id] ? normFood(S.foods[id]) : (id && id[0] === "p" ? catById(id) : null); }
 function foodsAt(store){
   const wh = store && store.type === "warehouse";
   return allFoods().filter(f => {
@@ -2075,6 +2226,7 @@ function buildShop(){
       if (act === "newstore"){ openStoreModal(); return; }
       if (act === "pickstore"){ quickAddStore(b.dataset.id); return; }
       if (act === "clearq"){ S.ui.q = ""; const q = $("#q"); if (q){ q.value = ""; q.focus(); } renderResults(); return; }
+      if (act === "addfree"){ addFreeItem(S.ui.q); return; }
     }
   });
   sc.addEventListener("input", e => { if (e.target.id === "q"){ S.ui.q = e.target.value; renderResults(); } });
@@ -2111,6 +2263,7 @@ function quickAddStore(presetId){
 // ---- The tray: adding and taking out ----
 function addToCart(id){
   const f = foodById(id); if (!f) return false; const st = activeStore();
+  if (f.catalog) keepProduct(id);
   const ex = S.cart.items.find(i => i.id === id);
   if (ex) ex.qty += 1; else S.cart.items.push({id, qty:1, price:priceFor(f, st), got:false, name:f.name});
   return true;
@@ -2354,7 +2507,8 @@ function stageHTML(f, p, st, ins){
 }
 function renderItem(sc, p, st){
   const f = foodById(S.ui.itemId), g = gradeFood(f, p), ins = instrumentsFor(f, p);
-  const main = f.name.replace(/\s*\(.*?\)/, ""), extra = (f.name.match(/\((.*?)\)/) || [])[1];
+  const kindName = f.catalog ? (f.kind || shortCat(f.cat)) : f.name;
+  const main = kindName.replace(/\s*\(.*?\)/, ""), extra = (kindName.match(/\((.*?)\)/) || [])[1];
   const sw = swapFor(f, g, p), goods = g.goods.filter(t => !/^(Low sodium|Sodium-free)/.test(t));
   const first = g.reasons[0], rest = g.reasons.slice(1);
   const stage = stageHTML(f, p, st, ins), labelled = STAGE_W > 0;
@@ -2376,7 +2530,7 @@ function renderItem(sc, p, st){
       ${g.infos.map(t => `<li class="info"><i class="dot"></i>${esc(t)}</li>`).join("")}</ul>` : ""}
     ${sw ? swapHTML(sw, p) : ""}
     <p class="facts">${labelled ? "" : `Per ${esc(f.serving)}${facts ? " · " + facts : ""}. `}${f.product ? labelNote(f) : "Typical values for a generic version — check the real label."}</p>
-    <div class="keys"><button class="key" data-act="fixprice">Fix price</button>${f.builtin ? (ONLINE_DATA ? `<button class="key" data-act="scan">${f.scanned ? "Scan again" : "Scan the package"}</button>` : "") + (f.scanned ? `<button class="key" data-act="unscan">Usual photo</button>` : "") : `<button class="key" data-act="editfood">Edit food</button>`}</div>
+    <div class="keys"><button class="key" data-act="fixprice">Fix price</button>${f.catalog ? "" : f.builtin ? (ONLINE_DATA ? `<button class="key" data-act="scan">${f.scanned ? "Scan again" : "Scan the package"}</button>` : "") + (f.scanned ? `<button class="key" data-act="unscan">Usual photo</button>` : "") : `<button class="key" data-act="editfood">Edit food</button>`}</div>
   </div>`;
 }
 // Where a store product's numbers come from.
@@ -2428,7 +2582,7 @@ function showSearch(){
 }
 function renderSearch(sc){
   sc.innerHTML = `<div class="view searchv">
-    <div class="sfield"><input id="q" type="search" placeholder="Search foods" value="${esc(S.ui.q)}" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Search all foods">${S.ui.q ? `<button class="key sm" data-act="clearq" aria-label="Clear the search">Clear</button>` : ONLINE_DATA ? `<button class="key sm" data-act="scanany" aria-label="Scan a package's barcode">Scan</button>` : ""}</div>
+    <div class="sfield"><input id="q" type="search" placeholder="Foods and brands" value="${esc(S.ui.q)}" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Search every food and brand">${S.ui.q ? `<button class="key sm" data-act="clearq" aria-label="Clear the search">Clear</button>` : ONLINE_DATA ? `<button class="key sm" data-act="scanany" aria-label="Scan a package's barcode">Scan</button>` : ""}</div>
     <p class="sub" id="qcount"></p>
     <div id="results" class="results"></div>
   </div>`;
@@ -2439,15 +2593,19 @@ function renderResults(){
   const p = activeProfile(), st = activeStore(), m = metricFor(p), q = S.ui.q.trim().toLowerCase();
   const clear = $("#screen-shop .sfield [data-act=clearq]");
   if (!!q !== !!clear){ const sf = $("#screen-shop .sfield"); if (q && !clear) sf.insertAdjacentHTML("beforeend", `<button class="key sm" data-act="clearq" aria-label="Clear the search">Clear</button>`); else if (clear) clear.remove(); }
-  if (!q){ $("#qcount").textContent = "Type a food — milk, soup, bread, chicken."; box.innerHTML = aislesHTML(null); return; }
+  if (!q){ $("#qcount").textContent = ONLINE_DATA ? "Type a food or a brand — milk, Kraft, soup, Campbell's." : "Type a food — milk, soup, bread, chicken."; box.innerHTML = aislesHTML(null); return; }
   const hits = foodsAt(st).filter(f => f.name.toLowerCase().includes(q) || f.cat.toLowerCase().includes(q) || shortCat(f.cat).toLowerCase().includes(q))
     .map(f => ({f, g:gradeFood(f, p)})).sort((a, b) => a.g.lvl - b.g.lvl || a.f.name.localeCompare(b.f.name));
-  $("#qcount").innerHTML = hits.length ? `<b>${hits.length}</b> ${hits.length === 1 ? "food" : "foods"} for “${esc(S.ui.q.trim())}”` : `Nothing matches “${esc(S.ui.q.trim())}”.`;
+  const cnt = $("#qcount");
+  cnt.innerHTML = hits.length ? `<b>${hits.length}</b> everyday ${hits.length === 1 ? "food" : "foods"} for “${esc(S.ui.q.trim())}”` : ONLINE_DATA ? `Looking for “${esc(S.ui.q.trim())}”…` : `Nothing matches “${esc(S.ui.q.trim())}”.`;
+  cnt.dataset.none = hits.length ? "" : "1";
   const qty = Object.fromEntries(S.cart.items.map(i => [i.id, i.qty]));
   box.innerHTML = hits.slice(0, 120).map(({f, g}) => { const tv = tagValue(f, g, m);
     return `<button class="srow l${g.lvl}" data-act="open" data-id="${esc(f.id)}"><span class="z">${spriteHTML(f)}</span>
       <span class="t"><b>${esc(f.name)}</b><small>${dotMatrix(dmNumber(tv.v), 1.7, "c" + tv.lvl)}<em>${esc(tv.unit)}</em> · ${esc(shortCat(f.cat))} · ${esc(money(priceFor(f, st)))}${qty[f.id] ? ` · <b>${qty[f.id]} in the tray</b>` : ""}</small></span>
-      <span class="w c${g.lvl}">${esc(LEVELS[g.lvl].label)}</span></button>`; }).join("");
+      <span class="w c${g.lvl}">${esc(LEVELS[g.lvl].label)}</span></button>`; }).join("")
+    + `<div id="catRes" class="catres"></div><div class="keys freeadd"><button class="key" data-act="addfree">Add “${esc(S.ui.q.trim().slice(0, 40))}” to the list</button></div>`;
+  renderCatalogResults(S.ui.q);
 }
 
 // ---- Setup: who, then where ----
@@ -2987,6 +3145,7 @@ async function exportCSV(){
 // ===== Guide content =====
 const GUIDE = [
   {t:"How the colors work", b:`<p><span class="badge"><i class="dot c0"></i>Fits</span> fits every diet order the person has. In the store these foods sit in the middle of the collage.</p><p><span class="badge"><i class="dot c1"></i>Counts as fluid</span> fine to buy, but every sip comes out of the day's fluid allowance — the label shows how many millilitres.</p><p><span class="badge"><i class="dot c2"></i>Small amounts</span> a small portion once in a while, or a caution about medicines. Read the reason on the product.</p><p><span class="badge"><i class="dot c3"></i>Avoid</span> breaks a rule outright (very high sodium, an allergy, alcohol on a no-alcohol order). These are grey in the store; the product shows a swap when there is one.</p><p class="small">At the big chains the numbers come from the real product's label (see “Your store's own shelves”). Everywhere else they are typical values for a generic version of the food — brands differ, so the app also tells you what to look for on the real label.</p>`},
+  {t:"Every brand in the store", b:`<p><b>Search finds any food a US grocery store sells</b> — Kraft, Campbell's, Coca-Cola, store brands, about 650,000 products. Each one is graded for the person with the numbers from its own label (USDA FoodData Central or Open Food Facts). The everyday foods come first, then <b>Brands and products</b>.</p><p>Tap one to see why it fits or not, and press Add to tray. It stays on this phone, so the list and trips still show it without internet, and it joins the store's shelves.</p><p><b>Not food?</b> Paper towels, dish soap: type it and tap <b>Add “…” to the list</b>. It goes on the list as a plain line, not graded.</p><p class="small">Package photos: Open Food Facts contributors (CC BY-SA). Where a product has no photo, the general picture of that kind of food stands in. Labels change — the package in your hand is the final word.</p>`},
   {t:"Your store's own shelves", b:`<p><b>Find your store:</b> Menu → This trip → + Store (or Other… when you start). Type the store and your ZIP code — “Kroger 77004”, “Ralphs Los Angeles” — or tap Near me, then tap your store.</p><p><b>Real products:</b> at 55 chains — Walmart, Kroger and its stores (Ralphs, Food 4 Less, Fry's, King Soopers…), H-E-B, Albertsons and Safeway (Vons, Randalls, Tom Thumb…), Aldi, Target, Costco, Sam's Club, Trader Joe's, Whole Foods, Publix and more — the shelves fill with that chain's own products, mostly its house brand. The product page shows the real name and brand, and grades it with the numbers from its label.</p><p><b>Any other store</b> shows the general photos. Open a product and tap <b>Scan the package</b> to point the camera at its barcode; from then on that store's shelf shows the product you scanned, with its label numbers.</p><p><b>Loading:</b> the general shelf is on screen right away. A chain's shelf fills in a moment later — instantly after the first visit, because it stays on the phone. A progress light appears in the middle of the store picture only if it takes more than a second.</p><p><b>Prices</b> are still estimates. Fix any price once and the app remembers it for that store.</p><p class="small">Product photos and data: Open Food Facts contributors (CC BY-SA, ODbL) — cut out for this app and shared under the same license. Nutrition: USDA FoodData Central. Store locations: All the Places, Overture Maps Foundation and OpenStreetMap contributors. Products change; the package in your hand is always the final word.</p>`},
   {t:"2 g sodium diet (heart failure, blood pressure)", b:`<p>2 grams = 2,000 mg a day, spread over all meals and snacks. Most of the salt in a diet comes from packaged food, not the shaker.</p><ul><li><b>Low sodium</b> on a label means 140 mg or less per serving — the target for most items.</li><li><b>Very low</b> = 35 mg or less. <b>Sodium-free</b> = under 5 mg.</li><li><b>Reduced sodium</b> only means 25% less than the regular version — soy sauce and soups can still be very high.</li><li><b>No salt added</b> is the phrase to hunt for on canned vegetables, beans, tomatoes, broth and tuna.</li><li>Anything over 400 mg per serving (20% of the day) is a put-it-back item.</li></ul><p><b>Biggest offenders:</b> deli meat, bacon, sausage, hot dogs, canned soup, ramen, frozen dinners, pizza, cheese, pickles, olives, soy sauce, seasoning salts, bouillon, biscuits, boxed rice and pasta mixes.</p><p><b>Swaps:</b> fresh or frozen plain meat instead of deli; no-salt-added cans, or rinse regular canned beans and vegetables (drops sodium by about a third); Swiss or fresh mozzarella instead of cheddar or American; salt-free seasoning blends, garlic and onion powder, lemon, vinegar, pepper, fresh herbs for flavor.</p><p>Chicken, pork and shrimp are sometimes injected with salt water — the package says "enhanced" or "contains up to 15% solution". Buy plain.</p>`},
   {t:"1,500 mL fluid restriction", b:`<p>Everything that is liquid at room temperature counts, not just water: coffee, tea, milk, juice, soda, soup and broth, nutrition shakes, ice (half its volume), ice cream, sherbet, popsicles, Jell-O, pudding, yogurt, gravy, creamer.</p><div class="kv"><b>1 cup / 8 fl oz</b><span>240 mL</span><b>1 fl oz</b><span>30 mL</span><b>16.9 oz water bottle</b><span>500 mL — a third of the day</span><b>12 oz can</b><span>355 mL</span><b>Popsicle</b><span>about 75 mL</span><b>Jell-O or pudding cup</b><span>about 100 mL</span><b>Scoop of ice cream</b><span>about 120 mL</span><b>Bowl of soup</b><span>240–360 mL</span></div><p><b>Making it easier:</b> use small cups; spread fluids through the day; take pills with meal fluids instead of an extra glass; sugar-free hard candy or gum, a lemon wedge, or rinsing and spitting for a dry mouth; avoid salty food, which drives thirst.</p><p>Many heart-failure plans also ask for a daily morning weight. A gain of 2–3 lb in a day or 5 lb in a week usually means call the clinic — that is fluid, not fat.</p>`},
