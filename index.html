@@ -14,6 +14,8 @@
   --ok:#43D685; --fluid:#55B6F2; --limit:#F2B33D; --avoid:#F2554A;
   --sticker:#EE9433; --sticker-ink:#2B1705;
   --pill:#F1EEE8; --pill-ink:#0B0B0A; --pill-sub:#6B6863;
+  --key-top:#272624; --key-bot:#1B1A18; --key-edge:#353430; --key-skirt:#030303; --key-hi:rgba(255,255,255,.08);
+  --pkey-top:#FFFFFF; --pkey-bot:#E3DFD7; --pkey-edge:#CCC8BF; --pkey-skirt:#7A766E; --pkey-hi:#FFFFFF;
   --glow:255,244,225; --cast:0,0,0; --cast-a:.7;
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   --sans:"Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -27,6 +29,8 @@
   --dm-off:#E3DFD6; --ring:#A9A59C; --ring-ink:#77746D;
   --ok:#17914A; --fluid:#1B74B5; --limit:#B97A00; --avoid:#D0342C;
   --pill:#0B0B0A; --pill-ink:#F1EEE8; --pill-sub:#9A968E;
+  --key-top:#FFFFFF; --key-bot:#EEEAE3; --key-edge:#D2CEC5; --key-skirt:#B7B2A8; --key-hi:#FFFFFF;
+  --pkey-top:#2C2B28; --pkey-bot:#0E0E0D; --pkey-edge:#000000; --pkey-skirt:#000000; --pkey-hi:rgba(255,255,255,.14);
   --glow:60,44,20; --cast:70,50,20; --cast-a:.24;
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -54,6 +58,16 @@ body.has-dock main{padding-bottom:calc(128px + env(safe-area-inset-bottom))}
 .tiny{font-size:12px;color:var(--dim);margin:28px var(--pad) 0;line-height:1.45}
 .hint{color:var(--grey);margin:10px var(--pad) 0;font-size:12px}
 .note{margin:10px var(--pad) 0;font-size:12px;color:var(--grey)}
+.key{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 14px;border-radius:10px;font-size:12px;font-weight:600;line-height:1;color:var(--ink);white-space:nowrap;
+  background:linear-gradient(var(--key-top),var(--key-bot));border:1px solid var(--key-edge);box-shadow:0 2px 0 var(--key-skirt),inset 0 1px 0 var(--key-hi);transition:transform .08s,box-shadow .08s}
+.key:active,.key.down{transform:translateY(2px);box-shadow:0 0 0 var(--key-skirt),inset 0 1px 3px rgba(0,0,0,.35)}
+.key.sm{min-height:32px;padding:0 12px;border-radius:9px}
+.key.danger{color:var(--avoid)}
+.key.primary{background:linear-gradient(var(--pkey-top),var(--pkey-bot));color:var(--pill-ink);border-color:var(--pkey-edge);box-shadow:0 2px 0 var(--pkey-skirt),inset 0 1px 0 var(--pkey-hi)}
+.key.primary:active{box-shadow:0 0 0 var(--pkey-skirt),inset 0 1px 3px rgba(0,0,0,.3)}
+.key .led{display:block;width:6px;height:6px;border-radius:50%;background:var(--dm-off);box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);transition:background .12s,box-shadow .12s}
+.key.down .led{background:var(--limit);box-shadow:0 0 7px var(--limit)}
+.keys{display:flex;gap:10px;flex-wrap:wrap;margin:12px var(--pad) 0}
 .lnk{font-size:12px;color:var(--grey);padding:8px 0;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--faint)}
 .lnk.danger{color:var(--avoid);text-decoration-color:rgba(242,85,74,.35)}
 .lnk.strong{color:var(--ink);font-weight:600;text-decoration:none}
@@ -125,7 +139,7 @@ img.sp.own{object-fit:cover;border-radius:22%;background:none}
 .sech{display:flex;align-items:baseline;gap:8px;padding:12px var(--pad) 8px;font-size:12px}
 .sech b{font-weight:600}
 .sech span{color:var(--grey)}
-.sech .tog{margin-left:auto;color:var(--grey);padding:8px 0 8px 16px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--faint)}
+.sech .key{margin-left:auto;align-self:center}
 .shelf{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:12px;padding:0 var(--pad)}
 .shelf .edge{position:absolute;left:calc(var(--pad) - 4px);right:calc(var(--pad) - 4px);top:0;height:0;padding-top:calc((100% - 2 * var(--pad) - 24px) / 3 * .94);pointer-events:none}
 .shelf .edge::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,rgba(var(--glow),.05),rgba(var(--glow),.34) 20%,rgba(var(--glow),.34) 80%,rgba(var(--glow),.05));box-shadow:0 1px 10px rgba(var(--glow),.12)}
@@ -155,6 +169,15 @@ img.sp.own{object-fit:cover;border-radius:22%;background:none}
 .stage .obj .cut.own{width:180px;height:180px;object-fit:cover;border-radius:24px}
 .stage .obj .cut.em b{font-size:150px}
 .stage .pgbtn{position:absolute;right:22px;top:20px}
+.stage.lab > .cut{position:absolute;filter:drop-shadow(0 18px 22px rgba(var(--cast),calc(var(--cast-a) + .1)))}
+.stage.lab .pool{bottom:10px}
+.leaders{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.leaders path{fill:none;stroke:var(--grey);stroke-width:1;opacity:.75}
+.leaders circle{fill:var(--ink);stroke:var(--ground);stroke-width:1.5}
+.co{position:absolute;left:var(--pad);transform:translateY(-50%);text-align:right;font-size:12px;line-height:1.25;pointer-events:none}
+.co small{display:block;color:var(--grey)}
+.co b{display:block;font-weight:600;color:var(--ink)}
+.itemv .keys{margin-top:10px}
 .pname{font-weight:700;font-size:36px;line-height:1;letter-spacing:-.035em;margin:12px var(--pad) 0;text-wrap:balance}
 .pname span{color:var(--grey);font-weight:400}
 .serv{color:var(--grey);margin:8px var(--pad) 0;font-size:12px}
@@ -181,15 +204,14 @@ img.sp.own{object-fit:cover;border-radius:22%;background:none}
 .swap small{display:block;font-size:12px;color:var(--grey);margin-top:3px}
 .swap .go{font-weight:600;font-size:12px;white-space:nowrap}
 .facts{margin:14px var(--pad) 0;font-size:12px;color:var(--dim);line-height:1.5}
-.links{display:flex;gap:18px;margin:6px var(--pad) 0}
-.links button{font-size:12px;color:var(--grey);padding:8px 0;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--faint)}
+
 
 /* ---- Search ---- */
 .sfield{display:flex;align-items:center;gap:12px;margin:14px var(--pad) 0;border-bottom:1px solid var(--edge)}
 .sfield input{flex:1;min-width:0;background:none;border:0;border-radius:0;color:var(--ink);font:700 36px/1.1 var(--sans);letter-spacing:-.035em;padding:6px 0 10px;outline:none;-webkit-appearance:none;appearance:none}
 .sfield input::placeholder{color:var(--faint)}
 .sfield input::-webkit-search-cancel-button{display:none}
-.sfield button{font-size:12px;color:var(--grey);padding:10px 0}
+.sfield .key{flex:none}
 .searchv .sub{margin-top:12px}
 .results{margin-top:8px}
 .srow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:8px var(--pad);border-bottom:1px solid var(--line)}
@@ -219,17 +241,17 @@ img.sp.own{object-fit:cover;border-radius:22%;background:none}
 /* ---- List ---- */
 .who{display:flex;align-items:center;gap:6px;margin:0 var(--pad);font-size:12px;color:var(--grey);padding:6px 0}
 .who b{color:var(--ink);font-weight:600}
-.who u{text-decoration-color:var(--faint);text-underline-offset:3px}
+
 .meter{position:relative;display:flex;align-items:flex-end;gap:12px;margin:14px var(--pad) 0;min-height:48px}
 .meter em{font-style:normal;font-size:12px;color:var(--grey);padding-bottom:3px}
 .meter .pgbtn{position:absolute;right:-6px;top:-12px}
-.meter .setb{margin-left:auto;font-size:12px;color:var(--grey);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--faint);padding:8px 0}
+.meter .setb{margin-left:auto;align-self:center}
 .left{margin:12px var(--pad) 0;font-size:12px;color:var(--grey)}
 .left b{color:var(--ink);font-weight:600}
 .left b.c3{color:var(--avoid)}
 .warn{display:flex;gap:8px;align-items:baseline;margin:10px var(--pad) 0;font-size:12px;color:var(--ink2);line-height:1.4}
 .sheet .warn{margin:0}
-.keys{display:flex;gap:18px;margin:4px var(--pad) 0}
+
 .grp{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:24px var(--pad) 6px;font-size:12px;color:var(--grey)}
 .grp b{color:var(--ink);font-weight:600}
 .li{position:relative;display:grid;grid-template-columns:26px minmax(0,1fr);column-gap:12px;align-items:center;padding:0 var(--pad);border-bottom:1px solid var(--line)}
@@ -247,7 +269,9 @@ img.sp.own{object-fit:cover;border-radius:22%;background:none}
 .got .rowb .t b{color:var(--grey);text-decoration:line-through;text-decoration-color:var(--dim)}
 .got .rowb .z .cut{opacity:.4}
 .got .rowb .p{color:var(--grey)}
-.exp{grid-column:2;display:flex;align-items:center;gap:2px 16px;flex-wrap:wrap;padding:0 0 12px 60px}
+.exp{grid-column:2;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;padding:2px 0 14px 60px}
+.exp > .key{justify-self:end}
+.exk{grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap}
 .rocker.sm{display:inline-flex;align-items:center;border:1px solid var(--edge);border-radius:18px;height:36px;background:var(--raise)}
 .rocker.sm button{width:40px;height:34px;font-size:18px;display:grid;place-items:center;text-align:center}
 .rocker.sm button:active{background:var(--raise2)}
@@ -273,7 +297,7 @@ img.sp.own{object-fit:cover;border-radius:22%;background:none}
 .tl.miss{color:var(--dim)}
 .tl.tot{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;color:var(--ink);font-weight:600}
 .tsub{font-size:12px;color:var(--grey);margin-top:8px}
-.tacts{display:flex;align-items:center;gap:16px;margin-top:12px;flex-wrap:wrap}
+.tacts{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
 .foot{margin:16px var(--pad) 0}
 
 /* ---- People ---- */
@@ -288,18 +312,18 @@ img.sp.own{object-fit:cover;border-radius:22%;background:none}
 .pcount{font-size:12px;color:var(--grey);margin-top:10px}
 .pstrip{display:flex;gap:4px;margin-top:12px;flex-wrap:wrap}
 .pstrip .sp{--s:34px;filter:drop-shadow(0 2px 3px rgba(var(--cast),var(--cast-a)))}
-.pacts{display:flex;gap:18px;margin-top:4px;flex-wrap:wrap}
+.pacts{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
 
 /* ---- Settings & Guide ---- */
 .set{margin:22px var(--pad) 0;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
 .seth{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:12px}
 .seth b{font-weight:600}
-.seth .lnk{padding:4px 0}
+.seth .key{align-self:center}
 .srow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);width:100%;text-align:left;color:inherit;text-decoration:none;flex-wrap:wrap}
 .srow b{display:block;font-weight:600}
 .srow small{display:block;font-size:12px;color:var(--grey);margin-top:2px}
 .srow .chev{color:var(--grey);font-size:18px}
-.srow .lnk{padding:6px 0}
+.srow .key + .key{margin-left:-4px}
 .callouts{list-style:none;display:flex;flex-direction:column;gap:10px}
 .callouts li{display:flex;gap:10px;line-height:1.45;color:var(--ink2)}
 .callouts li i{flex:none;width:22px;height:22px;border-radius:50%;background:var(--sticker);color:var(--sticker-ink);font:700 12px/22px var(--sans);text-align:center;font-style:normal}
@@ -319,8 +343,10 @@ details.guide .body{padding:0 0 16px;line-height:1.5;color:var(--ink2)}
 /* ---- The dock: tray, add, finish ---- */
 .dockfade{position:fixed;left:0;right:0;bottom:0;height:140px;background:linear-gradient(rgba(var(--ground-rgb),0),rgba(var(--ground-rgb),.92) 62%,var(--ground));pointer-events:none;z-index:30}
 .dock{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 16px);max-width:536px;margin:0 auto;z-index:31}
-.tray{display:flex;align-items:center;gap:14px;width:100%;height:64px;border-radius:32px;background:var(--raise);border:1px solid var(--edge);padding:0 20px 0 11px;text-align:left;transition:transform .12s;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-.tray:active{transform:scale(.985)}
+.tray{display:flex;align-items:center;gap:14px;width:100%;height:64px;border-radius:32px;background:linear-gradient(var(--key-top),var(--raise) 60%);border:1px solid var(--edge);padding:0 20px 0 11px;text-align:left;transition:transform .08s,box-shadow .08s;box-shadow:0 3px 0 var(--key-skirt),0 12px 30px rgba(0,0,0,.35),inset 0 1px 0 var(--key-hi)}
+.tray:active{transform:translateY(3px);box-shadow:0 0 0 var(--key-skirt),0 8px 20px rgba(0,0,0,.3),inset 0 1px 3px rgba(0,0,0,.3)}
+.trpg{position:absolute;right:30px;top:-17px;z-index:2}
+.tray small b{color:var(--ink)}
 .discs{display:flex;flex:none}
 .disc{position:relative;width:42px;height:42px;border-radius:50%;background:var(--raise2);margin-left:-14px;box-shadow:0 0 0 2px var(--raise);display:grid;place-items:center;overflow:hidden;flex:none}
 .disc:first-child{margin-left:0;z-index:3} .disc:nth-child(2){z-index:2} .disc:nth-child(3){z-index:1}
@@ -329,8 +355,8 @@ details.guide .body{padding:0 0 16px;line-height:1.5;color:var(--ink2)}
 .tray .tot{margin-left:auto;display:flex;align-items:center;gap:10px}
 .tray small{color:var(--grey);font-size:12px;text-align:right;line-height:1.25;white-space:nowrap}
 .tray small b{font-weight:600}
-.pill{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;height:64px;border-radius:32px;background:var(--pill);color:var(--pill-ink);padding:0 26px;font-size:16px;font-weight:600;transition:transform .12s;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-button.pill:active{transform:scale(.985)}
+.pill{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;height:64px;border-radius:32px;background:linear-gradient(var(--pkey-top),var(--pkey-bot));color:var(--pill-ink);padding:0 26px;font-size:16px;font-weight:600;transition:transform .08s,box-shadow .08s;box-shadow:0 3px 0 var(--pkey-skirt),0 12px 30px rgba(0,0,0,.35),inset 0 1px 0 var(--pkey-hi)}
+button.pill:active{transform:translateY(3px);box-shadow:0 0 0 var(--pkey-skirt),0 8px 20px rgba(0,0,0,.3)}
 .pill small{color:var(--pill-sub);font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pill.rocker{padding:0 8px}
 .pill.rocker button{width:48px;height:48px;border-radius:50%;font-size:26px;font-weight:400;display:grid;place-items:center;text-align:center;line-height:1}
@@ -383,11 +409,15 @@ textarea.input{font:12px/1.4 ui-monospace,Menlo,monospace}
 .nowrap{flex-wrap:nowrap}
 .grow{flex:1;min-width:0}
 .stack{display:flex;flex-direction:column;gap:10px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:0 20px;border-radius:24px;border:1px solid var(--edge);background:var(--raise2);color:var(--ink);font-size:14px;font-weight:600;transition:transform .1s;text-align:center}
-.btn:active{transform:scale(.97)}
-.btn.primary{background:var(--pill);color:var(--pill-ink);border-color:var(--pill)}
-.btn.sm{min-height:36px;padding:0 14px;font-size:12px;border-radius:18px}
-.btn.ghost{background:none;border-color:transparent;color:var(--grey);padding-left:0;padding-right:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:0 20px;border-radius:14px;border:1px solid var(--key-edge);background:linear-gradient(var(--key-top),var(--key-bot));color:var(--ink);font-size:14px;font-weight:600;text-align:center;box-shadow:0 3px 0 var(--key-skirt),inset 0 1px 0 var(--key-hi);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--key-skirt),inset 0 1px 3px rgba(0,0,0,.35)}
+.btn.primary{background:linear-gradient(var(--pkey-top),var(--pkey-bot));color:var(--pill-ink);border-color:var(--pkey-edge);box-shadow:0 3px 0 var(--pkey-skirt),inset 0 1px 0 var(--pkey-hi)}
+.btn.primary:active{box-shadow:0 0 0 var(--pkey-skirt),inset 0 1px 3px rgba(0,0,0,.3)}
+.btn.sm{min-height:36px;padding:0 14px;font-size:12px;border-radius:10px;box-shadow:0 2px 0 var(--key-skirt),inset 0 1px 0 var(--key-hi)}
+.btn.sm:active{transform:translateY(2px)}
+.btn.primary.sm{box-shadow:0 2px 0 var(--pkey-skirt),inset 0 1px 0 var(--pkey-hi)}
+.btn.ghost{background:none;border-color:transparent;box-shadow:none;color:var(--grey);padding-left:0;padding-right:0}
+.btn.ghost:active{transform:none}
 .btn.danger{color:var(--avoid)}
 .btn.block{width:100%}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
@@ -896,6 +926,9 @@ function fitStickers(root){
 // Products are transparent cut-outs (Upscayl 4x + Apple Vision), 512 px each in img/, and all of them
 // together in img/atlas.webp: 96 px cells, 16 per row, in the order of ATLAS_KEYS.
 const PHOTO_BOX = {"almondmilk":[13,10,242,246],"almonds":[10,39,246,216],"american":[10,74,246,182],"angelfood":[10,40,246,215],"applejuice":[10,49,246,207],"apples":[13,10,242,246],"applesauce":[36,10,220,246],"asparagus":[10,56,246,200],"avocado":[10,44,246,211],"bacon":[10,34,246,222],"bagels":[12,10,244,246],"bananas":[10,52,246,204],"bbqsauce":[10,31,246,224],"beans":[10,46,246,209],"beefliver":[10,77,246,178],"beer":[70,10,185,246],"bellpep":[34,10,222,246],"bfastsandwich":[10,56,246,200],"biscuits":[10,98,246,158],"blueberries":[10,56,246,200],"bouillon":[10,85,246,170],"brisket":[10,32,246,224],"broccoli":[10,22,246,234],"broth":[14,10,242,246],"brownrice":[13,10,243,246],"brussels":[10,50,246,206],"buns":[10,58,246,198],"burritos":[10,71,246,185],"butter":[10,42,246,214],"butternut":[10,34,246,222],"cabbage":[10,24,246,232],"cannedchicken":[10,36,246,220],"cannedcorn":[10,14,246,242],"cannedfruit":[10,46,246,209],"cannedsalmon":[10,35,246,220],"cannedtom":[10,76,246,179],"cannedveg":[11,10,244,246],"cantaloupe":[18,10,238,246],"carrots":[10,11,246,245],"catfish":[10,72,246,183],"cauliflower":[10,54,246,202],"celery":[10,44,246,212],"cheddar":[10,70,246,185],"cheerios":[10,44,246,212],"cheesepuffs":[16,89,239,167],"cherries":[10,22,246,234],"chickenbreast":[10,46,246,210],"chickensalad":[10,39,246,216],"chickenthigh":[10,50,246,206],"chili":[10,43,246,213],"chips":[10,24,246,232],"chocmilk":[74,10,182,246],"chocolatebar":[10,42,246,214],"chuckroast":[10,60,246,196],"clementines":[10,58,246,198],"coconutwater":[15,10,240,246],"cod":[10,72,246,184],"coffee":[10,63,246,193],"cookies":[10,39,246,217],"corn":[10,94,246,162],"cornbread":[10,22,246,234],"corntort":[10,42,246,213],"cottage":[10,28,246,228],"cranjuice":[43,10,212,246],"creamcheese":[10,45,246,211],"creamofwheat":[10,10,246,246],"creamsoup":[10,49,246,207],"creole":[10,10,246,246],"cucumber":[10,34,246,221],"darkchoc":[10,41,246,214],"deliham":[10,18,246,237],"deliroastbeef":[76,10,180,246],"delisalad":[10,56,246,200],"deliturkey":[10,46,246,210],"donuts":[14,10,242,246],"drinkmix":[42,10,214,246],"drumsticks":[16,10,240,246],"drybeans":[10,12,246,244],"edamame":[10,82,246,174],"eggplant":[10,50,246,206],"eggs":[36,10,220,246],"eggwhites":[10,16,246,240],"energydrink":[32,10,223,246],"engmuffin":[13,10,243,246],"fishsticks":[10,44,246,212],"flour":[10,52,246,204],"flourtort":[10,42,246,213],"freshmozz":[10,30,246,225],"fries":[10,76,246,180],"frozenberries":[10,21,246,234],"frozendinner":[10,55,246,200],"frozenfish":[10,54,246,202],"frozenfruit":[10,34,246,221],"frozenpizza":[10,63,246,192],"frozenveg":[10,88,246,168],"fruitbars":[56,10,200,246],"fruitsnacks":[10,114,246,142],"fruittray":[10,20,246,236],"garlic":[10,33,246,223],"garlicpowder":[10,76,246,180],"garlicsalt":[10,76,246,180],"gatorade":[32,10,223,246],"grahams":[10,50,246,206],"granola":[10,45,246,210],"granolabar":[10,80,246,175],"grapefruit":[10,34,246,221],"grapes":[28,10,228,246],"gravy":[10,56,246,200],"greekyogurt":[10,40,246,216],"greenbeans":[10,66,246,190],"grits":[10,10,246,246],"groundbeef":[10,22,246,234],"groundturkey":[10,50,246,206],"guac":[10,32,246,224],"gum":[10,74,246,182],"halfhalf":[36,10,220,246],"hardcandy":[10,72,246,184],"herbs":[10,46,246,210],"honey":[10,32,246,224],"hotdogs":[10,62,246,194],"hotsauce":[92,10,164,246],"hummus":[10,71,246,184],"icecream":[10,12,246,244],"instantoat":[10,38,246,218],"instantpotato":[10,40,246,216],"italiandressing":[90,10,166,246],"jalapeno":[10,20,246,235],"jam":[43,10,212,246],"jello":[10,48,246,208],"jerky":[10,70,246,186],"kale":[10,67,246,188],"ketchup":[81,10,174,246],"lemonade":[42,10,214,246],"lemonjuice":[38,10,218,246],"lemons":[10,60,246,196],"lentils":[10,36,246,220],"lettuce":[10,36,246,220],"macncheese":[10,83,246,172],"mango":[10,52,246,204],"maplesyrup":[42,10,214,246],"mayo":[60,10,195,246],"milk":[36,10,220,246],"mozz":[10,82,246,174],"mrsdash":[10,56,246,200],"mushrooms":[10,54,246,202],"mustard":[10,66,246,189],"nuggets":[10,43,246,212],"nutella":[10,11,246,245],"oatmilk":[10,24,246,232],"oats":[10,39,246,217],"oj":[72,10,184,246],"oliveoil":[100,10,156,246],"olives":[10,18,246,238],"onions":[10,44,246,212],"oranges":[10,48,246,208],"pancakemix":[10,26,246,230],"parmesan":[10,20,246,236],"pasta":[10,84,246,172],"pastasauce":[22,10,234,246],"peaches":[10,46,246,210],"peanutbutter":[24,10,232,246],"pears":[10,39,246,217],"pepper":[10,60,246,196],"pickles":[65,10,190,246],"pineapple":[10,10,246,246],"plums":[34,10,222,246],"popcorn":[10,38,246,218],"popcornkernels":[10,80,246,176],"porkchop":[10,74,246,182],"porkribs":[10,64,246,192],"porkrinds":[10,66,246,190],"porktender":[10,42,246,214],"potatoes":[10,62,246,194],"pretzels":[10,88,246,168],"proteinbar":[10,48,246,208],"proteinpowder":[10,58,246,198],"pudding":[12,10,244,246],"quinoa":[10,70,246,186],"raisinbran":[10,11,246,244],"raisins":[10,74,246,182],"ramen":[10,22,246,233],"ranch":[90,10,166,246],"raspberries":[10,30,246,225],"refried":[10,10,246,246],"relish":[10,12,246,244],"ricecakes":[10,57,246,199],"ricemix":[10,10,246,246],"rolls":[10,98,246,158],"rotisserie":[10,46,246,209],"saladkit":[10,13,246,242],"salmon":[10,61,246,195],"salsa":[10,30,246,226],"salt":[10,38,246,217],"saltednuts":[12,10,244,246],"saltines":[10,50,246,206],"saltsub":[10,38,246,217],"sardines":[10,14,246,242],"sausage":[10,62,246,194],"sfcandy":[10,17,246,238],"shake":[10,12,246,244],"sherbet":[10,51,246,204],"shreddedwheat":[10,45,246,210],"shrimp":[14,10,242,246],"sirloin":[10,64,246,192],"smokedsausage":[10,82,246,174],"smoothie":[79,10,176,246],"soda":[55,10,201,246],"soup":[10,48,237,202],"sourcream":[10,40,246,216],"soymilk":[10,10,246,246],"soysauce":[94,10,162,246],"spam":[10,64,246,192],"sparklingwater":[16,10,239,246],"spinach":[10,26,246,230],"strawberries":[10,42,246,214],"sugar":[10,46,246,209],"sugarcereal":[10,87,246,168],"sushi":[10,58,246,197],"sweetpot":[10,74,246,182],"sweettea":[70,10,186,246],"swiss":[10,27,246,229],"tacoseasoning":[10,46,246,210],"tea":[10,63,246,193],"tilapia":[10,64,246,192],"tomatoes":[10,73,246,182],"tortillachips":[10,30,246,226],"trailmix":[19,10,237,246],"triscuit":[10,64,246,191],"tuna":[10,58,246,198],"turkeybacon":[10,78,246,178],"turkeyburger":[10,62,246,194],"v8":[10,18,246,238],"veggieburger":[10,48,246,208],"vegoil":[96,10,160,246],"vinegar":[18,10,237,246],"waffles":[10,30,246,226],"walnuts":[10,68,246,188],"water":[96,10,160,246],"watermelon":[10,13,246,243],"wheatbread":[10,62,246,194],"whitebread":[10,74,246,182],"whiterice":[10,31,246,225],"wholechicken":[10,36,246,220],"wine":[10,40,246,215],"wwpasta":[10,30,246,226],"yogurtflav":[10,30,246,226],"zucchini":[10,57,246,199]};
+// The left outline of each product: its leftmost solid pixel on 21 rows from the top of its box to the bottom,
+// in 256ths. Callout lines on the product page end exactly on the product, not in the air beside it.
+const PHOTO_EDGE = {"almondmilk":[170,161,160,168,162,154,148,143,139,84,84,84,84,85,85,86,88,32,16,57,103],"almonds":[97,94,94,95,39,35,34,35,38,43,48,14,11,16,24,34,76,68,68,72,165],"american":[216,176,146,140,98,102,105,96,86,86,48,11,12,16,22,28,32,43,66,144,null],"angelfood":[null,104,80,52,48,45,46,38,17,18,18,20,20,18,16,14,14,11,18,34,null],"applejuice":[96,95,95,95,95,95,96,96,96,96,16,11,14,26,23,22,23,26,33,45,null],"apples":[94,91,70,46,36,26,20,16,14,14,15,18,22,26,32,38,47,58,72,90,null],"applesauce":[122,57,48,47,44,48,38,36,36,36,36,37,38,38,38,38,39,43,53,70,118],"asparagus":[76,74,56,28,25,11,14,14,18,24,71,90,103,111,120,128,134,144,154,172,null],"avocado":[140,130,126,44,32,24,21,18,18,18,20,26,32,26,14,14,10,15,22,38,91],"bacon":[83,70,68,51,44,38,32,25,26,30,35,22,12,11,16,26,45,59,66,77,null],"bagels":[122,85,68,54,43,35,27,22,18,16,14,12,12,14,16,20,26,35,48,65,null],"bananas":[16,11,13,17,20,23,26,28,26,25,24,26,28,33,38,46,53,62,74,90,122],"bbqsauce":[156,72,48,36,18,14,11,11,14,20,24,26,30,34,38,43,50,58,68,86,116],"beans":[104,55,32,20,13,11,11,11,12,12,12,14,16,18,22,26,31,38,50,72,119],"beefliver":[71,52,44,39,39,39,39,40,42,41,40,32,24,18,12,11,11,12,18,35,50],"beer":[104,72,72,71,71,72,72,74,76,79,80,82,84,85,86,86,87,87,87,87,116],"bellpep":[166,136,62,48,42,38,36,35,34,34,36,37,39,41,44,46,52,58,68,88,120],"bfastsandwich":[154,136,121,108,95,90,93,100,69,36,20,14,18,20,15,13,12,10,11,122,null],"biscuits":[153,57,53,44,34,28,25,22,20,16,14,12,11,11,12,12,15,24,66,77,null],"blueberries":[150,60,35,34,32,24,21,19,18,19,21,24,30,40,28,18,14,11,14,20,111],"bouillon":[128,127,126,13,13,13,13,13,14,14,14,14,14,13,12,10,10,11,104,106,110],"brisket":[189,176,158,140,126,114,98,93,80,66,51,38,27,18,11,14,16,31,63,90,123],"broccoli":[128,96,89,89,106,106,105,102,98,92,88,82,72,58,46,27,11,16,22,30,193],"broth":[117,100,70,54,44,34,26,21,18,16,14,14,17,20,25,32,40,52,69,97,120],"brownrice":[110,82,80,81,57,52,40,41,36,16,14,34,51,56,55,78,102,113,118,121,null],"brussels":[88,66,57,53,50,48,48,50,57,26,18,14,12,11,12,12,12,16,46,80,null],"buns":[204,102,12,12,18,184,109,92,13,11,14,24,96,99,28,16,12,12,15,21,null],"burritos":[216,191,147,108,58,12,12,14,16,15,13,11,11,12,14,18,18,20,24,27,38],"butter":[null,31,32,18,14,15,24,24,18,18,28,null,40,12,11,11,11,11,11,12,null],"butternut":[96,76,68,64,60,58,56,50,43,34,29,24,22,22,26,13,11,21,35,36,86],"cabbage":[141,102,98,90,49,28,22,16,12,12,13,12,13,20,28,30,34,40,48,100,188],"cannedchicken":[54,46,35,37,31,24,20,18,20,14,10,12,14,16,26,44,65,116,136,160,null],"cannedcorn":[113,74,56,44,34,26,20,16,14,12,11,11,14,16,20,26,34,44,57,76,null],"cannedfruit":[100,18,13,11,11,14,19,70,25,14,11,11,13,16,25,72,70,15,16,18,34],"cannedsalmon":[194,161,148,139,134,130,128,114,80,48,31,21,15,12,10,12,14,22,29,40,75],"cannedtom":[158,153,142,130,123,118,70,62,54,47,32,21,20,18,13,10,16,16,36,48,174],"cannedveg":[116,76,58,44,34,26,21,16,14,12,12,12,13,16,20,26,34,44,57,75,null],"cantaloupe":[136,74,57,46,38,30,26,22,20,19,18,18,20,22,26,32,38,46,58,74,119],"carrots":[24,18,18,22,16,14,22,14,12,20,14,14,118,21,13,13,12,72,44,14,26],"catfish":[null,102,68,52,44,38,36,36,40,41,42,38,35,30,24,20,15,12,11,14,42],"cauliflower":[null,90,79,78,76,72,68,69,72,75,78,82,75,49,31,19,10,15,98,124,null],"celery":[127,84,83,70,43,36,20,27,28,46,21,12,35,38,56,60,90,98,117,122,157],"cheddar":[null,113,112,48,45,42,40,36,34,31,28,26,23,20,18,15,12,10,16,31,50],"cheerios":[14,12,16,20,26,31,36,24,22,20,22,26,34,38,42,48,53,62,72,92,134],"cheesepuffs":[null,91,71,58,48,40,35,31,28,27,27,28,29,32,36,42,49,60,72,94,null],"cherries":[165,158,144,112,108,108,111,112,111,110,86,36,23,14,11,10,13,18,35,101,136],"chickenbreast":[124,56,32,22,15,12,10,10,11,13,14,24,27,38,58,64,68,85,96,120,null],"chickensalad":[112,78,25,25,22,16,12,11,11,12,14,18,20,22,24,26,28,32,41,55,95],"chickenthigh":[144,129,106,86,66,55,43,38,36,32,24,18,14,11,11,12,20,54,81,92,null],"chili":[116,66,47,34,24,17,13,11,10,12,14,17,20,24,30,36,44,54,66,84,126],"chips":[114,99,96,91,48,46,46,44,22,12,10,10,15,35,40,51,76,76,77,80,null],"chocmilk":[105,74,75,76,76,77,78,78,79,80,81,82,82,84,84,86,87,88,89,90,120],"chocolatebar":[140,81,78,76,78,82,78,60,40,27,18,14,10,19,32,40,49,58,66,76,null],"chuckroast":[164,108,93,86,62,43,36,30,15,13,12,10,19,20,24,32,42,47,56,86,null],"clementines":[74,48,38,32,27,24,20,20,18,18,20,22,25,28,28,20,16,11,14,36,94],"coconutwater":[59,60,64,70,74,72,73,72,72,72,71,71,60,16,16,20,28,44,72,94,174],"cod":[99,36,28,23,19,11,14,22,32,41,50,60,68,78,88,98,106,116,126,136,146],"coffee":[98,61,48,46,47,48,48,49,50,52,48,28,16,11,11,11,14,20,32,52,111],"cookies":[124,66,46,34,25,18,14,12,12,12,11,10,12,14,18,26,34,46,61,83,128],"corn":[188,120,90,66,50,40,34,28,22,20,13,10,10,10,14,23,32,40,46,56,null],"cornbread":[138,93,65,46,34,22,18,15,12,12,11,12,14,18,22,28,34,42,57,75,null],"corntort":[151,107,72,48,32,22,16,13,10,11,12,12,13,19,32,39,50,68,83,98,130],"cottage":[null,76,56,42,32,25,19,14,12,10,10,12,18,23,27,34,42,52,60,80,null],"cranjuice":[69,44,44,45,46,46,46,47,48,49,50,50,52,53,54,56,57,58,60,62,null],"creamcheese":[174,168,142,136,123,99,68,56,36,26,18,12,10,16,22,30,39,51,70,90,null],"creamofwheat":[116,74,56,42,32,25,20,16,14,12,10,11,11,14,18,24,32,42,56,74,126],"creamsoup":[68,56,51,50,49,46,24,16,12,11,12,17,40,44,46,88,94,102,113,128,null],"creole":[122,77,58,44,34,26,20,16,13,12,11,11,12,16,20,25,32,42,55,74,null],"cucumber":[121,103,94,86,80,73,68,46,40,16,11,10,13,22,24,18,14,12,13,17,null],"darkchoc":[110,93,76,60,49,23,20,15,16,17,16,15,14,12,11,11,12,158,162,166,176],"deliham":[112,74,58,44,32,24,18,17,14,11,12,13,14,16,20,24,28,40,60,77,137],"deliroastbeef":[112,76,76,77,76,76,76,77,78,78,78,78,79,79,80,112,120,120,119,120,130],"delisalad":[232,168,159,155,141,119,75,36,11,11,11,11,11,14,20,25,31,34,36,38,null],"deliturkey":[136,124,116,104,52,35,27,20,15,12,11,11,12,14,16,45,46,48,52,59,82],"donuts":[130,86,66,50,36,30,24,20,16,16,14,15,16,18,22,27,36,45,57,76,null],"drinkmix":[209,186,52,44,42,46,54,70,71,72,72,72,73,74,74,74,75,76,76,77,89],"drumsticks":[130,107,68,51,38,28,22,16,26,30,39,39,40,46,76,75,73,70,72,83,null],"drybeans":[120,76,56,42,33,26,20,16,13,12,11,12,14,16,21,27,37,46,60,82,null],"edamame":[null,93,102,114,81,64,54,16,16,20,26,32,35,11,17,37,52,84,122,158,null],"eggplant":[116,63,42,30,22,16,12,10,11,14,20,33,50,64,61,60,59,62,64,68,null],"eggs":[119,88,75,66,58,52,48,44,40,39,38,38,38,40,44,48,54,62,74,88,122],"eggwhites":[114,98,90,86,28,18,12,11,12,14,16,20,24,29,36,43,53,68,104,164,192],"energydrink":[65,44,34,37,50,50,51,54,59,68,76,86,96,106,116,124,130,138,146,153,167],"engmuffin":[168,128,124,124,124,48,32,26,20,16,26,46,84,82,81,79,75,72,71,78,null],"fishsticks":[142,34,15,12,11,13,16,13,12,15,28,20,14,12,14,26,48,70,88,107,132],"flour":[125,92,82,36,18,12,10,14,17,20,24,28,32,36,41,46,51,56,64,78,120],"flourtort":[152,110,74,49,32,22,16,13,11,11,12,12,13,20,32,40,51,69,82,98,130],"freshmozz":[61,40,28,20,14,12,12,11,11,12,11,11,11,12,18,24,29,38,54,77,null],"fries":[78,78,78,80,84,89,84,66,62,45,32,30,23,18,21,28,18,10,22,56,174],"frozenberries":[138,125,126,123,106,100,28,20,18,19,14,11,10,14,26,28,36,52,53,62,76],"frozendinner":[null,172,160,155,143,126,78,39,11,11,11,11,11,13,19,25,31,34,36,38,null],"frozenfish":[173,161,149,74,58,39,27,20,12,11,12,14,19,26,34,40,48,56,62,70,null],"frozenfruit":[null,78,58,43,32,24,18,15,12,12,11,12,14,19,24,31,37,46,59,76,null],"frozenpizza":[128,77,58,42,32,25,19,14,12,10,10,11,12,15,19,25,32,42,55,74,112],"frozenveg":[22,22,21,18,11,12,14,14,16,14,17,18,18,20,20,30,28,28,66,222,227],"fruitbars":[79,64,62,62,62,62,62,60,60,59,59,58,58,57,58,66,82,82,82,82,86],"fruitsnacks":[null,14,14,14,13,12,12,12,12,11,10,10,10,10,11,12,12,14,16,20,null],"fruittray":[134,102,90,26,14,10,14,24,32,40,48,55,63,70,74,74,76,76,78,89,116],"garlic":[73,48,39,33,27,14,48,60,92,110,215,84,74,54,40,32,26,22,20,24,56],"garlicpowder":[170,170,170,166,94,82,74,62,54,10,10,12,12,14,17,22,28,28,28,32,null],"garlicsalt":[170,170,170,166,94,82,74,62,54,10,10,12,12,14,17,22,28,28,28,32,null],"gatorade":[65,44,34,37,50,50,51,54,59,68,76,86,96,106,116,124,130,138,146,153,167],"grahams":[124,114,46,41,38,34,30,27,24,20,16,13,11,10,14,28,48,64,82,164,null],"granola":[117,66,46,32,24,18,14,11,11,12,16,22,27,33,39,45,50,58,70,87,126],"granolabar":[88,49,46,43,40,38,35,32,30,27,24,22,20,17,15,12,10,16,25,90,null],"grapefruit":[174,100,78,62,50,40,33,26,20,16,13,11,11,12,16,23,35,52,108,120,148],"grapes":[107,106,112,119,124,122,116,63,48,39,32,30,28,30,32,39,50,81,88,97,null],"gravy":[88,54,34,23,16,12,10,12,12,14,16,20,28,36,40,46,52,60,70,84,118],"greekyogurt":[null,70,55,42,32,23,16,11,11,12,15,18,22,26,32,40,48,56,68,84,null],"greenbeans":[51,42,30,32,16,15,18,16,23,28,21,17,28,23,21,21,18,14,14,18,null],"grits":[116,74,56,42,32,25,20,16,14,12,10,11,11,14,18,24,32,42,56,74,126],"groundbeef":[null,48,26,18,15,12,11,14,18,26,40,66,32,56,116,62,18,27,36,64,null],"groundturkey":[80,74,66,58,54,44,34,28,19,14,12,11,14,21,44,60,86,106,134,150,null],"guac":[136,76,52,36,26,19,14,11,11,14,18,21,25,29,34,40,47,54,63,80,null],"gum":[150,87,80,78,25,17,12,10,14,31,99,93,86,80,76,78,86,157,161,166,174],"halfhalf":[49,37,48,58,60,61,60,58,54,50,46,43,40,40,40,41,44,46,51,62,102],"hardcandy":[102,94,88,84,81,80,80,82,66,62,48,42,39,42,15,12,11,12,16,24,38],"herbs":[153,20,16,11,11,14,12,16,20,57,54,62,48,50,50,54,73,73,72,74,130],"honey":[110,90,82,78,77,78,82,82,73,64,54,45,36,27,18,11,128,134,143,156,178],"hotdogs":[167,124,104,82,61,47,36,27,20,16,12,12,11,10,24,16,16,16,18,20,34],"hotsauce":[114,105,108,108,107,106,101,95,94,96,96,94,94,95,96,94,95,94,93,96,116],"hummus":[156,60,46,14,10,12,16,34,44,51,56,58,58,56,56,57,60,64,70,78,98],"icecream":[103,70,54,40,31,25,20,16,12,10,10,12,14,18,22,28,35,43,60,79,null],"instantoat":[null,56,35,22,15,12,11,11,11,11,12,14,16,21,27,34,44,56,66,82,null],"instantpotato":[112,103,68,52,28,21,14,10,12,14,17,20,22,26,29,34,40,50,63,76,111],"italiandressing":[113,102,104,106,106,106,106,105,104,102,98,90,91,91,90,90,90,90,90,92,null],"jalapeno":[122,118,126,124,120,76,69,65,60,56,52,46,39,32,26,20,16,12,10,14,32],"jam":[64,47,47,54,56,46,46,47,48,48,48,47,47,46,46,44,44,44,48,63,null],"jello":[72,70,70,69,48,36,18,11,12,12,12,12,11,14,36,56,106,116,127,138,155],"jerky":[129,115,99,78,61,46,42,38,34,30,27,24,11,11,20,30,36,44,52,118,126],"kale":[100,76,57,32,24,19,15,12,14,11,10,14,25,18,18,22,26,31,74,81,92],"ketchup":[110,108,100,84,82,82,82,82,82,82,82,83,83,83,83,83,83,83,82,82,105],"lemonade":[209,186,52,44,42,46,54,70,71,72,72,72,73,74,74,74,75,76,76,77,89],"lemonjuice":[120,116,118,118,116,112,108,106,103,103,103,103,74,68,56,46,62,58,44,40,174],"lemons":[159,138,66,46,38,31,26,23,20,18,14,12,11,14,20,28,37,54,80,96,162],"lentils":[121,98,80,60,41,22,12,11,12,12,13,14,20,36,42,48,44,50,60,79,null],"lettuce":[74,68,10,15,18,14,18,18,18,18,18,19,22,28,32,38,47,50,54,54,null],"macncheese":[142,89,41,26,16,11,12,16,20,26,28,30,33,36,39,42,46,51,56,64,73],"mango":[86,22,16,15,16,20,82,28,18,14,14,16,28,49,44,38,35,26,16,40,188],"maplesyrup":[88,78,82,78,76,72,63,53,48,44,43,43,44,46,50,52,57,62,86,114,132],"mayo":[96,72,77,78,72,62,62,62,63,63,63,63,63,63,62,62,62,62,62,66,118],"milk":[49,37,48,58,60,61,60,58,54,50,46,43,40,40,40,41,44,46,51,62,102],"mozz":[146,124,118,116,116,116,94,89,60,52,47,32,27,11,14,22,20,18,19,23,184],"mrsdash":[null,54,35,28,18,14,12,10,11,13,16,20,28,29,36,48,67,82,116,122,null],"mushrooms":[161,138,128,58,47,38,32,26,22,17,14,12,11,11,12,14,17,22,28,36,null],"mustard":[null,212,175,119,110,104,89,82,27,20,12,11,14,20,26,56,58,64,90,96,164],"nuggets":[103,82,78,73,70,68,32,21,20,16,14,11,14,18,85,83,84,98,145,150,164],"nutella":[114,76,56,44,33,26,20,16,13,11,10,11,14,16,20,26,34,43,56,75,120],"oatmilk":[150,150,38,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,21,149],"oats":[136,90,70,43,28,13,12,12,14,16,20,23,28,34,40,48,58,70,80,99,null],"oj":[94,72,72,72,72,72,72,73,73,73,74,74,74,74,74,74,75,75,76,77,114],"oliveoil":[124,115,116,116,112,102,100,100,100,100,100,100,100,100,100,100,100,100,100,100,104],"olives":[null,128,125,52,44,42,14,31,20,18,24,23,22,20,21,22,26,32,40,61,null],"onions":[126,98,86,78,72,38,36,36,24,30,16,26,20,52,69,72,76,83,91,104,null],"oranges":[158,90,86,63,38,28,22,16,14,12,11,11,12,14,18,22,28,38,57,78,null],"pancakemix":[142,136,85,54,52,51,32,28,34,21,18,24,16,10,23,14,12,18,34,86,null],"parmesan":[156,144,124,98,90,92,85,48,42,36,32,26,22,17,13,12,12,112,115,120,null],"pasta":[50,46,30,26,18,10,14,22,34,49,62,76,90,102,115,128,142,154,166,180,null],"pastasauce":[145,129,134,134,128,126,126,126,126,126,126,126,126,126,82,36,24,22,26,36,182],"peaches":[162,142,127,120,114,110,108,88,73,54,31,16,10,14,24,34,38,44,54,70,null],"peanutbutter":[223,206,188,168,85,32,28,28,26,24,26,26,27,27,28,28,27,28,32,42,80],"pears":[88,80,74,52,44,40,36,32,26,20,15,12,10,10,12,15,20,28,105,86,130],"pepper":[128,112,78,73,61,34,40,31,16,12,10,22,46,36,30,26,39,62,58,60,96],"pickles":[98,74,80,78,68,66,68,68,68,68,68,68,68,68,68,68,67,66,70,78,116],"pineapple":[114,76,65,51,39,32,24,20,16,15,12,13,16,18,20,25,29,45,56,76,null],"plums":[170,116,107,104,104,136,127,124,124,138,166,171,38,34,37,44,65,76,76,82,104],"popcorn":[134,110,61,60,48,44,12,13,14,16,18,21,24,28,34,40,48,57,69,86,121],"popcornkernels":[114,84,64,56,54,56,40,38,27,26,14,14,11,12,20,30,36,37,60,76,null],"porkchop":[74,44,41,36,26,22,20,15,13,12,12,11,12,32,32,36,42,59,66,144,169],"porkribs":[108,104,88,86,72,66,49,38,26,24,19,16,14,11,12,19,25,30,42,59,78],"porkrinds":[140,75,14,11,10,10,11,14,54,18,10,10,12,40,11,10,10,10,10,11,98],"porktender":[106,74,58,48,38,28,20,13,11,14,20,28,37,54,68,79,118,121,130,142,167],"potatoes":[72,57,44,36,30,26,24,20,16,15,14,13,12,12,12,11,12,14,18,24,42],"pretzels":[38,32,18,14,12,11,12,14,20,44,40,24,16,13,12,12,12,14,18,22,34],"proteinbar":[81,72,66,59,56,56,54,59,46,28,18,10,12,16,20,28,33,172,180,194,null],"proteinpowder":[124,106,98,93,90,88,86,86,78,62,45,28,16,11,10,13,22,64,76,116,null],"pudding":[122,84,62,46,36,28,23,20,16,14,12,13,16,18,22,30,38,49,62,78,null],"quinoa":[58,41,32,26,22,18,16,13,12,11,11,12,12,14,16,19,23,28,34,44,null],"raisinbran":[114,76,56,43,34,26,20,16,13,12,11,12,14,16,21,27,34,44,58,77,117],"raisins":[null,53,42,33,24,15,12,11,12,12,13,14,18,20,24,30,44,51,50,72,null],"ramen":[183,30,20,18,18,17,19,17,14,16,16,18,16,16,14,12,14,13,10,16,40],"ranch":[113,102,104,106,106,106,106,105,104,102,98,90,91,91,90,90,90,90,90,92,null],"raspberries":[null,179,177,174,168,103,74,72,64,10,22,28,32,28,26,27,30,34,48,61,88],"refried":[115,96,80,62,50,40,33,28,26,13,11,12,13,16,20,29,51,49,58,80,128],"relish":[108,72,54,42,32,26,20,16,13,12,11,12,13,16,20,26,34,44,58,77,118],"ricecakes":[153,95,68,53,40,32,24,20,14,12,12,11,12,14,16,18,22,28,38,52,90],"ricemix":[117,76,58,44,35,27,21,16,13,12,10,10,12,15,20,26,32,42,56,74,123],"rolls":[153,57,53,44,34,28,25,22,20,16,14,12,11,11,12,12,15,24,66,77,null],"rotisserie":[204,192,116,82,64,44,32,24,18,12,11,10,13,16,18,26,31,38,44,54,153],"saladkit":[120,82,64,52,43,36,30,26,24,18,22,11,20,26,30,35,42,52,64,82,130],"salmon":[104,72,58,49,42,38,32,32,32,32,30,24,18,13,11,28,34,39,172,188,204],"salsa":[89,88,67,66,54,54,36,20,11,14,16,22,27,34,40,48,58,108,117,130,150],"salt":[null,70,54,48,50,54,56,58,60,60,58,56,51,50,50,50,50,22,16,10,210],"saltednuts":[114,76,59,46,36,28,22,18,15,13,12,12,14,18,22,28,36,45,58,76,120],"saltines":[124,114,46,41,38,34,30,27,24,20,16,13,11,10,14,28,48,64,82,164,null],"saltsub":[null,70,54,48,50,54,56,58,60,60,58,56,51,50,50,50,50,22,16,10,210],"sardines":[102,72,63,34,69,66,65,64,52,38,24,14,10,14,16,18,23,48,80,118,161],"sausage":[182,91,68,64,63,64,37,18,12,10,12,15,24,55,150,148,148,150,154,200,210],"sfcandy":[156,126,118,116,116,124,134,130,64,53,51,50,54,62,30,14,10,10,12,20,52],"shake":[75,44,21,12,13,28,37,46,48,51,67,78,92,100,47,50,59,145,157,169,182],"sherbet":[244,234,224,148,121,80,70,66,61,52,44,32,12,11,11,11,11,11,11,12,13],"shreddedwheat":[117,66,46,32,24,18,14,11,11,12,16,22,27,33,39,45,50,58,70,87,126],"shrimp":[null,114,96,81,70,58,44,34,23,18,15,15,19,26,32,38,48,67,88,126,null],"sirloin":[93,48,36,26,21,16,18,20,22,18,16,16,16,14,12,10,11,12,14,16,48],"smokedsausage":[120,90,80,75,76,64,52,40,30,31,16,11,11,13,15,17,21,89,111,112,null],"smoothie":[83,83,88,92,97,102,106,110,91,90,90,89,88,88,87,86,84,84,86,93,122],"soda":[176,71,56,56,58,58,60,60,60,62,64,66,67,68,68,70,70,71,73,79,null],"soup":[137,92,69,54,42,32,26,20,15,12,11,11,11,12,14,17,19,23,27,30,null],"sourcream":[94,46,25,14,11,11,11,11,12,14,15,17,19,22,25,30,36,43,55,71,122],"soymilk":[null,78,58,44,34,26,20,16,14,12,11,12,14,16,20,25,33,43,56,76,null],"soysauce":[122,110,108,107,104,104,104,104,97,96,96,96,96,96,96,96,96,96,95,96,null],"spam":[80,59,37,26,19,12,10,10,11,12,13,14,18,25,48,74,88,133,136,146,null],"sparklingwater":[104,24,18,20,20,22,24,27,30,32,36,39,42,46,50,54,58,63,68,74,null],"spinach":[74,66,29,28,28,34,36,46,51,184,10,16,70,68,24,25,30,40,65,127,null],"strawberries":[114,60,47,38,32,28,24,21,18,16,14,13,12,11,11,14,30,134,142,154,null],"sugar":[128,107,93,72,28,14,10,10,12,14,16,19,23,28,33,40,48,52,52,66,120],"sugarcereal":[26,22,22,14,12,11,12,20,20,20,21,22,23,25,27,30,34,38,42,48,60],"sushi":[null,106,99,64,52,35,22,21,18,12,13,11,12,14,18,18,23,27,30,30,null],"sweetpot":[90,64,52,46,39,32,30,26,19,14,12,11,12,12,16,20,26,32,40,78,null],"sweettea":[95,91,93,94,96,97,71,72,72,72,74,75,77,78,79,80,80,81,82,83,null],"swiss":[200,18,16,14,14,12,12,11,11,10,10,10,11,12,12,14,16,18,22,27,75],"tacoseasoning":[108,95,81,72,64,52,40,28,26,14,16,12,14,24,25,30,48,54,68,66,149],"tea":[104,66,52,51,52,52,53,54,56,48,30,20,14,11,11,12,18,26,39,62,104],"tilapia":[105,87,80,74,70,47,46,44,41,22,34,30,24,18,22,19,10,22,25,56,null],"tomatoes":[194,75,78,77,46,30,22,16,13,12,11,10,11,12,14,16,20,25,30,38,77],"tortillachips":[172,136,90,58,58,49,28,19,42,40,12,14,21,29,37,66,66,68,126,134,null],"trailmix":[111,108,44,51,48,46,51,22,20,21,44,39,40,27,40,30,29,38,52,54,114],"triscuit":[62,15,12,12,12,12,12,11,12,12,12,12,12,12,12,12,12,12,12,12,227],"tuna":[209,112,114,116,114,100,34,18,10,12,16,19,22,26,29,30,42,46,52,160,196],"turkeybacon":[114,106,53,46,48,48,33,32,35,32,34,28,14,11,10,12,18,28,36,41,null],"turkeyburger":[138,109,99,60,42,31,23,18,15,12,11,12,13,16,20,27,41,69,130,144,168],"v8":[136,108,108,108,108,109,109,110,110,110,38,26,36,35,34,36,42,57,86,182,201],"veggieburger":[132,85,67,56,48,44,42,42,42,42,24,16,12,24,34,38,42,47,58,68,136],"vegoil":[116,112,114,104,96,97,99,102,104,103,101,98,98,98,98,98,98,98,97,98,140],"vinegar":[172,160,150,156,158,158,158,158,57,41,34,33,27,22,20,20,24,30,38,50,78],"waffles":[88,76,69,62,54,46,40,34,28,23,17,12,11,18,29,40,49,60,72,83,null],"walnuts":[82,60,54,46,36,30,25,21,18,16,14,13,11,10,13,20,30,40,58,180,null],"water":[126,113,111,102,98,96,97,97,97,97,97,96,96,96,96,96,96,96,96,98,122],"watermelon":[124,72,54,42,32,24,19,16,12,12,11,12,14,16,21,27,34,44,56,74,119],"wheatbread":[104,72,52,42,35,28,24,19,15,14,12,12,11,12,14,18,22,27,34,43,104],"whitebread":[128,106,102,80,78,76,76,55,52,51,51,28,25,24,24,16,13,11,11,12,13],"whiterice":[99,78,62,48,40,33,26,16,10,12,14,16,20,24,30,36,46,59,76,86,null],"wholechicken":[188,172,110,96,76,58,44,34,25,18,16,16,14,12,11,11,14,21,30,94,130],"wine":[null,11,11,11,11,11,11,172,174,177,168,156,156,158,162,168,178,220,226,232,null],"wwpasta":[164,64,30,23,20,17,16,14,15,18,20,16,12,11,11,14,22,30,41,56,null],"yogurtflav":[134,20,14,14,14,13,12,12,12,11,16,32,32,32,33,34,34,36,41,54,null],"zucchini":[89,66,57,58,60,64,68,66,50,36,25,18,11,12,12,16,27,30,32,178,null]};
 const ATLAS_KEYS = Object.keys(PHOTO_BOX);
 const ATLAS_AT = Object.fromEntries(ATLAS_KEYS.map((k, i) => [k, i]));
 // ===== Objects, and how they move =====
@@ -1507,11 +1540,15 @@ function renderDock(landing){
   const total = cartTotal(), budget = S.cart.budget, over = !!budget && total > budget;
   if (kind === "tray"){
     const items = S.cart.items, n = items.length;
-    if (!$("#tray")) dock.innerHTML = `<button class="tray" id="tray" data-act="gocart"><span class="discs" id="discs"></span><span class="n" id="trayN"></span><span class="tot"><small id="trayBud"></small><span class="dmv" id="trayTotal"></span></span></button>`;
+    if (!$("#tray")) dock.innerHTML = `<button class="tray" id="tray" data-act="gocart"><span class="discs" id="discs"></span><span class="n" id="trayN"></span><span class="tot"><small id="trayBud"></small><span class="dmv" id="trayTotal"></span></span></button><span id="trayPg"></span>`;
     const discs = $("#discs"), sig = items.slice(-DISC_N).map(i => i.id).join("|") + "#" + (landing || "");
     if (discs.dataset.sig !== sig){ discs.innerHTML = discsHTML(items, landing); discs.dataset.sig = sig; }
     $("#trayN").textContent = plural(n, "item");
-    $("#trayBud").innerHTML = budget ? `${over ? `<b class="c3">${esc(money(total - budget))}</b> over` : "of " + esc(moneyShort(budget))}<br>budget` : "no<br>budget";
+    // the budget is the orange price-gun label stuck on the tray's rim (tap it to change the trip);
+    // beside the total: what's left, or how far over
+    $("#trayBud").innerHTML = budget ? (over ? `<b class="c3">${esc(money(total - budget))}</b><br>over` : `<b>${esc(money(budget - total))}</b><br>left`) : "no<br>budget";
+    const pg = $("#trayPg"), bk = budget ? String(budget) : "";
+    if (pg.dataset.b !== bk){ pg.dataset.b = bk; pg.innerHTML = budget ? `<button class="pgbtn trpg" data-act="trip" aria-label="Budget ${esc(money(budget))}. Change the person, store or budget">${priceGun(moneyShort(budget), 26, -5)}</button>` : ""; fitStickers(pg); }
     const shown = TRAY_HOLD != null ? TRAY_HOLD : total, len = moneyDigits(Math.max(shown, total)).length;
     dmSet($("#trayTotal"), shown, moneyDigits, len <= 5 ? 3.6 : len === 6 ? 3.1 : 2.7, over && TRAY_HOLD == null ? "c3" : "ink", v => `Total ${money(v)}`);
     $("#tray").setAttribute("aria-label", `Open the list: ${plural(n, "item")}, ${money(total)}${budget ? over ? `, ${money(total - budget)} over the budget` : `, ${money(budget - total)} left in the budget` : ""}`);
@@ -1561,9 +1598,14 @@ function buildShop(){
     if (act === "decitem"){ changeQty(S.ui.itemId, -1); }
     if (act === "finish") openFinishModal();
     if (act === "addperson") openProfileModal(null);
+    if (act === "trip") openTripSheet();
   });
   let rt = 0;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (S.ui.tab === "shop" && (S.ui.view === "store" || !ready()) && FLOWER && Math.abs(stageWidth() - FLOWER.W) > 2) renderShop(); }, 150); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => {
+    if (S.ui.tab !== "shop") return;
+    if ((S.ui.view === "store" || !ready()) && FLOWER && Math.abs(stageWidth() - FLOWER.W) > 2) renderShop();
+    else if (S.ui.view === "item" && STAGE_W && Math.abs(stageWidth() - STAGE_W) > 2) renderShop();
+  }, 150); });
 }
 function quickAddProfile(preset){
   const id = uid("p"); const p = {...preset, conds:{...preset.conds}, allergies:[...(preset.allergies||[])], created:Date.now()};
@@ -1724,7 +1766,7 @@ function renderAisle(sc, p, st){
     <h1 class="h1">${esc(shortCat(cat))}</h1>
     ${aislesHTML(cat)}
     <div id="shelves">${items.length ? groups.map(([t, g, k]) => !g.length ? "" : `<section class="sec sec-${k}">
-      <div class="sech"><b>${esc(t)}</b><span>${g.length}</span>${k === "avoid" ? `<button class="tog" data-act="avoid" aria-expanded="${!hide}">${hide ? "Show" : "Hide"}</button>` : ""}</div>
+      <div class="sech"><b>${esc(t)}</b><span>${g.length}</span>${k === "avoid" ? `<button class="key sm latch${hide ? " down" : ""}" data-act="avoid" aria-pressed="${hide}"><i class="led"></i>Hide</button>` : ""}</div>
       ${k === "avoid" && hide ? "" : shelvesHTML(g, m, st, qty)}</section>`).join("")
       : `<div class="empty"><p>Nothing in this aisle at ${esc(st.name)}.</p><p class="small">Add a food under Settings → Foods you added.</p></div>`}</div>
   </div>`;
@@ -1776,19 +1818,59 @@ function swapFor(f, g, p){
   const key = photoKey(f); if (!key || g.lvl === 0) return null;
   return FOODS.filter(x => x.id !== f.id && PHOTO[x.id] === key).map(x => ({x, g:gradeFood(x, p)})).filter(o => o.g.lvl < g.lvl).sort((a, b) => a.g.lvl - b.g.lvl || a.x.na - b.x.na)[0] || null;
 }
+// The details the instruments don't show — serving, package, the other nutrients — are written on the stage as
+// callouts, each with a thin line that ends on the product's own outline.
+function calloutData(f, st, ins){
+  const shown = new Set(ins.map(x => x.k));
+  const out = [{k:"Serving", v:f.serving}, {k:"Sold as", v:String(unitFor(f, st)).replace(/^per\s+/, "per ")}];
+  const nut = [["Sodium", f.na, "mg"], ["Fluid", f.fl, "mL"], ["Potassium", f.k, "mg"], ["Carbs", f.carb, "g"], ["Sugar", f.sugar, "g"], ["Fiber", f.fiber, "g"], ["Protein", f.prot, "g"], ["Sat fat", f.sf, "g"]]
+    .filter(([k, v]) => !shown.has(k) && !(k === "Fluid" && !v));
+  for (let i = 0; i < nut.length && out.length < 5; i += 2){
+    const pair = nut.slice(i, i + 2);
+    out.push({k:pair.map(x => x[0]).join(" · "), v:pair.map(x => `${(+x[1]).toLocaleString("en-US")} ${x[2]}`).join(" · ")});
+  }
+  return out;
+}
+let STAGE_W = 0;
+function stageHTML(f, p, st, ins){
+  const key = photoKey(f), box = key && PHOTO_BOX[key], edge = key && PHOTO_EDGE[key], price = priceFor(f, st);
+  const sticker = (style) => `<button class="pgbtn" data-act="fixprice" style="${style || ""}" aria-label="Price ${esc(money(price))} ${esc(unitFor(f, st))}. Fix the price">${priceGun(money(price), 34, 7)}</button>`;
+  if (!box || !edge){
+    STAGE_W = 0;
+    return `<div class="stage solo" id="stage"><span class="pool" aria-hidden="true"></span><span class="obj">${cutHTML(f, "", ' id="stageImg"')}</span>${sticker()}</div>`;
+  }
+  const W = stageWidth(), H = 280; STAGE_W = W;
+  const P = Math.round(Math.min(240, W * .6)), L = W - P - 8, T = Math.round((H - P) / 2) - 6, s = P / 256;
+  const [x0, y0, x1, y1] = box;
+  const at = t => { let i = Math.round(t * 20); for (let d = 0; d <= 20; d++){ for (const j of [i - d, i + d]) if (j >= 0 && j <= 20 && edge[j] != null) return edge[j]; } return x0; };
+  const items = calloutData(f, st, ins), n = items.length;
+  const pins = items.map((it, i) => { const t = n === 1 ? .5 : .16 + .7 * i / (n - 1); return {x:L + at(t) * s + 5, y:T + (y0 + (y1 - y0) * t) * s}; });
+  const colR = Math.max(16 + 76, Math.min(16 + 132, Math.min(...pins.map(q => q.x)) - 26)), colW = colR - 16;
+  const ys = items.map((it, i) => n === 1 ? H / 2 : H * .15 + H * .7 * i / (n - 1));
+  const lines = pins.map((q, i) => `<path d="M${colR + 6} ${ys[i].toFixed(1)}L${q.x.toFixed(1)} ${q.y.toFixed(1)}"/><circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="2.6"/>`).join("");
+  const cx = L + (x0 + x1) / 2 * s, pw = Math.min(Math.max(160, (x1 - x0) * s * 1.25), 2 * (W - cx) - 2);
+  const stR = Math.max(16, W - (L + x1 * s) - 22), stT = Math.max(4, T + y0 * s - 16);
+  return `<div class="stage lab" id="stage" style="height:${H}px">
+    <span class="pool" aria-hidden="true" style="left:${cx.toFixed(1)}px;width:${pw.toFixed(0)}px"></span>
+    ${cutHTML(f, "", ` id="stageImg" style="left:${L}px;top:${T}px;width:${P}px;height:${P}px"`)}
+    <svg class="leaders" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${lines}</svg>
+    ${items.map((it, i) => `<span class="co" style="top:${ys[i].toFixed(1)}px;width:${colW}px"><small>${esc(it.k)}</small><b>${esc(it.v)}</b></span>`).join("")}
+    ${sticker(`right:${stR.toFixed(0)}px;top:${stT.toFixed(0)}px`)}
+  </div>`;
+}
 function renderItem(sc, p, st){
-  const f = foodById(S.ui.itemId), g = gradeFood(f, p), ins = instrumentsFor(f, p), price = priceFor(f, st);
+  const f = foodById(S.ui.itemId), g = gradeFood(f, p), ins = instrumentsFor(f, p);
   const main = f.name.replace(/\s*\(.*?\)/, ""), extra = (f.name.match(/\((.*?)\)/) || [])[1];
   const sw = swapFor(f, g, p), goods = g.goods.filter(t => !/^(Low sodium|Sodium-free)/.test(t));
   const first = g.reasons[0], rest = g.reasons.slice(1);
+  const stage = stageHTML(f, p, st, ins), labelled = STAGE_W > 0;
   const shown = new Set(ins.map(x => x.k));
-  const facts = [["Sodium", f.na + " mg"], ["Fluid", f.fl ? f.fl + " mL" : ""], ["Potassium", f.k + " mg"], ["Carbs", f.carb + " g"], ["Sugar", f.sugar + " g"], ["Fiber", f.fiber + " g"], ["Protein", f.prot + " g"], ["Sat fat", f.sf + " g"]]
+  const facts = labelled ? "" : [["Sodium", f.na + " mg"], ["Fluid", f.fl ? f.fl + " mL" : ""], ["Potassium", f.k + " mg"], ["Carbs", f.carb + " g"], ["Sugar", f.sugar + " g"], ["Fiber", f.fiber + " g"], ["Protein", f.prot + " g"], ["Sat fat", f.sf + " g"]]
     .filter(([k, v]) => v && !shown.has(k)).map(([k, v]) => `${esc(k)} ${esc(v)}`).join(" · ");
   sc.innerHTML = `<div class="view itemv">
-    <div class="stage" id="stage"><span class="pool" aria-hidden="true"></span><span class="obj">${cutHTML(f, "", ' id="stageImg"')}</span>
-      <button class="pgbtn" data-act="fixprice" aria-label="Price ${esc(money(price))} ${esc(unitFor(f, st))}. Fix the price">${priceGun(money(price), 34, 7)}</button></div>
+    ${stage}
     <h1 class="pname">${esc(main)}${extra ? ` <span>${esc(extra)}</span>` : ""}</h1>
-    <p class="serv">Per ${esc(f.serving)} · ${esc(shortCat(f.cat))} · ${esc(unitFor(f, st))}</p>
+    <p class="serv">${labelled ? `${esc(shortCat(f.cat))} · ${esc(st.name)}` : `Per ${esc(f.serving)} · ${esc(shortCat(f.cat))} · ${esc(unitFor(f, st))}`}</p>
     ${instHTML(ins[0], true)}
     ${ins.length > 1 ? `<div class="insts">${ins.slice(1).map(x => instHTML(x, false)).join("")}</div>` : ""}
     <div class="verdict"><b class="c${g.lvl}">${esc(lvWord(g.lvl, p))}</b><span>${esc(first ? first.text : `Fits ${p.name}'s diet order.`)}</span></div>
@@ -1797,8 +1879,8 @@ function renderItem(sc, p, st){
       ${goods.length ? `<li><i class="dot c0"></i>${esc(goods.join(" · "))}</li>` : ""}
       ${g.infos.map(t => `<li class="info"><i class="dot"></i>${esc(t)}</li>`).join("")}</ul>` : ""}
     ${sw ? swapHTML(sw, p) : ""}
-    <p class="facts">Per ${esc(f.serving)}${facts ? " · " + facts : ""}. Typical values — check the real label.</p>
-    <div class="links"><button data-act="fixprice">Fix price</button>${f.builtin ? "" : `<button data-act="editfood">Edit food</button>`}</div>
+    <p class="facts">${labelled ? "" : `Per ${esc(f.serving)}${facts ? " · " + facts : ""}. `}Typical values for a generic version — check the real label.</p>
+    <div class="keys"><button class="key" data-act="fixprice">Fix price</button>${f.builtin ? "" : `<button class="key" data-act="editfood">Edit food</button>`}</div>
   </div>`;
 }
 function swapHTML(sw, p){
@@ -1844,7 +1926,7 @@ function showSearch(){
 }
 function renderSearch(sc){
   sc.innerHTML = `<div class="view searchv">
-    <div class="sfield"><input id="q" type="search" placeholder="Search foods" value="${esc(S.ui.q)}" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Search all foods">${S.ui.q ? `<button data-act="clearq" aria-label="Clear the search">Clear</button>` : ""}</div>
+    <div class="sfield"><input id="q" type="search" placeholder="Search foods" value="${esc(S.ui.q)}" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Search all foods">${S.ui.q ? `<button class="key sm" data-act="clearq" aria-label="Clear the search">Clear</button>` : ""}</div>
     <p class="sub" id="qcount"></p>
     <div id="results" class="results"></div>
   </div>`;
@@ -1854,7 +1936,7 @@ function renderResults(){
   const box = $("#results"); if (!box) return;
   const p = activeProfile(), st = activeStore(), m = metricFor(p), q = S.ui.q.trim().toLowerCase();
   const clear = $("#screen-shop .sfield [data-act=clearq]");
-  if (!!q !== !!clear){ const sf = $("#screen-shop .sfield"); if (q && !clear) sf.insertAdjacentHTML("beforeend", `<button data-act="clearq" aria-label="Clear the search">Clear</button>`); else if (clear) clear.remove(); }
+  if (!!q !== !!clear){ const sf = $("#screen-shop .sfield"); if (q && !clear) sf.insertAdjacentHTML("beforeend", `<button class="key sm" data-act="clearq" aria-label="Clear the search">Clear</button>`); else if (clear) clear.remove(); }
   if (!q){ $("#qcount").textContent = "Type a food — milk, soup, bread, chicken."; box.innerHTML = aislesHTML(null); return; }
   const hits = foodsAt(st).filter(f => f.name.toLowerCase().includes(q) || f.cat.toLowerCase().includes(q) || shortCat(f.cat).toLowerCase().includes(q))
     .map(f => ({f, g:gradeFood(f, p)})).sort((a, b) => a.g.lvl - b.g.lvl || a.f.name.localeCompare(b.f.name));
@@ -1979,17 +2061,18 @@ function renderCart(){
         <span class="p">${esc(money(i.qty * i.price))}</span>
       </button>
       ${open ? `<div class="exp"><div class="rocker sm"><button data-act="dec" aria-label="One less ${esc(nm)}">−</button><span>${i.qty}</span><button data-act="inc" aria-label="One more ${esc(nm)}">+</button></div>
-        <button class="lnk" data-act="editprice">Change price</button>${f ? `<button class="lnk" data-act="view">See product</button>` : ""}<button class="lnk danger" data-act="remove">Remove</button></div>` : ""}
+        <button class="key sm danger" data-act="remove">Remove</button>
+        <div class="exk"><button class="key sm" data-act="editprice">Change price</button>${f ? `<button class="key sm" data-act="view">See product</button>` : ""}</div></div>` : ""}
     </div>`;
   };
   sc.innerHTML = `<div class="view listv">
     <h1 class="h1">List</h1>
-    <button class="sub who" data-act="trip">${avatarHTML(p)}<b>${esc(p.name)}</b> · ${esc(st ? st.name : "")} · <u>Change</u></button>
+    <p class="sub who">${avatarHTML(p)}<b>${esc(p.name)}</b> · ${esc(st ? st.name : "")}</p>
     <div class="meter"><span class="dmv" id="listTotal"></span><em>total</em>
-      ${budget ? `<button class="pgbtn" data-act="trip" aria-label="Budget ${esc(money(budget))}. Change it">${priceGun(money(budget), 40, -6)}</button>` : `<button class="setb" data-act="trip">Set a budget</button>`}</div>
+      ${budget ? `<button class="pgbtn" data-act="trip" aria-label="Budget ${esc(money(budget))}. Change it">${priceGun(money(budget), 40, -6)}</button>` : `<button class="key setb" data-act="trip">Set a budget</button>`}</div>
     <p class="left">${remainHTML(total, budget)} · ${got.length} of ${items.length} in the cart</p>
     ${avoid.length ? `<p class="warn"><i class="dot c3"></i>Marked Avoid for ${esc(p.name)}: ${esc(avoid.map(x => x.f.name).join(", "))}</p>` : ""}
-    <div class="keys"><button class="lnk" data-act="checkall">${items.every(i => i.got) ? "Uncheck all" : "Check all"}</button>${S.ui.confirm === "clearcart" ? "" : `<button class="lnk" data-act="clearask">Clear list</button>`}</div>
+    <div class="keys"><button class="key latch${items.every(i => i.got) ? " down" : ""}" data-act="checkall" aria-pressed="${items.every(i => i.got)}"><i class="led"></i>Check all</button><button class="key" data-act="trip">Change trip</button>${S.ui.confirm === "clearcart" ? "" : `<button class="key danger" data-act="clearask">Clear list</button>`}</div>
     ${S.ui.confirm === "clearcart" ? `<div class="confirm"><span>Clear the whole list? This doesn't save a trip.</span><span class="row"><button class="btn sm danger" data-act="clear">Clear it</button><button class="btn sm" data-act="cancel">Keep</button></span></div>` : ""}
     <div class="grp"><b>To get</b><span>${todo.length}</span></div>
     ${todo.length ? todo.map(row).join("") : `<p class="note">Everything's in the cart.</p>`}
@@ -2081,11 +2164,11 @@ function renderHistory(){
           ${open ? `<div class="tdet">${t.note ? `<p class="tnote">${esc(t.note)}</p>` : ""}${bought.map(i => line(i)).join("")}
             ${missed.length ? `<div class="tsub">Not bought</div>${missed.map(i => line(i, true)).join("")}` : ""}
             <div class="tl tot"><span>Receipt total</span><span>${esc(money(t.total))}</span></div>
-            <div class="tacts"><button class="btn sm primary" data-act="reuse" data-id="${esc(t.id)}">Shop this list again</button>
-              ${S.ui.confirm === "trip:" + t.id ? `<span class="confirm inline"><span>Delete this trip?</span><button class="btn sm danger" data-act="del" data-id="${esc(t.id)}">Delete</button><button class="btn sm" data-act="cancel">Keep</button></span>` : `<button class="lnk danger" data-act="delask" data-id="${esc(t.id)}">Delete</button>`}</div></div>` : ""}
+            <div class="tacts"><button class="key sm primary" data-act="reuse" data-id="${esc(t.id)}">Shop this list again</button>
+              ${S.ui.confirm === "trip:" + t.id ? `<span class="confirm inline"><span>Delete this trip?</span><button class="btn sm danger" data-act="del" data-id="${esc(t.id)}">Delete</button><button class="btn sm" data-act="cancel">Keep</button></span>` : `<button class="key sm danger" data-act="delask" data-id="${esc(t.id)}">Delete</button>`}</div></div>` : ""}
         </div>`;
       }).join("")}`).join("")}
-    ${S.ui.confirm === "alltrips" ? `<div class="confirm"><span>Delete ${plural(trips.length, "saved trip")}${who}? This can't be undone.</span><span class="row"><button class="btn sm danger" data-act="clearall">Delete</button><button class="btn sm" data-act="cancel">Keep</button></span></div>` : `<div class="foot"><button class="lnk danger" data-act="clearask">Clear ${S.ui.histPerson === "all" ? "all trips" : "this person's trips"}</button></div>`}
+    ${S.ui.confirm === "alltrips" ? `<div class="confirm"><span>Delete ${plural(trips.length, "saved trip")}${who}? This can't be undone.</span><span class="row"><button class="btn sm danger" data-act="clearall">Delete</button><button class="btn sm" data-act="cancel">Keep</button></span></div>` : `<div class="foot"><button class="key danger" data-act="clearask">Clear ${S.ui.histPerson === "all" ? "all trips" : "this person's trips"}</button></div>`}
   </div>`;
 }
 // ===== People (profiles / diet orders) =====
@@ -2110,7 +2193,7 @@ function renderPeople(){
         ${n ? `<span class="pstrip" aria-hidden="true">${cartFor(p.id).items.slice(-9).reverse().map(i => foodById(i.id)).filter(Boolean).map(f => spriteHTML(f)).join("")}</span>` : ""}
         <div class="orders">${r.length ? r.map(hudHTML).join("") : `<span class="hud">No diet order yet</span>`}</div>
         <p class="pcount">${n} on the list · ${plural(t, "trip")}</p>
-        <div class="pacts"><button class="lnk" data-act="edit" data-id="${esc(p.id)}">Edit diet order</button>${cur ? "" : `<button class="lnk strong" data-act="shop" data-id="${esc(p.id)}">Shop for ${esc(p.name)} ›</button>`}</div>
+        <div class="pacts"><button class="key sm" data-act="edit" data-id="${esc(p.id)}">Edit diet order</button>${cur ? "" : `<button class="key sm" data-act="shop" data-id="${esc(p.id)}">Shop for ${esc(p.name)}</button>`}</div>
       </div>`; }).join("")
     : `<div class="empty"><p><b>No one yet.</b></p><div class="choices"><button class="choice" data-act="grandma"><b>Grandma</b><span>2 g sodium · 1,500 mL fluid · breathing</span></button><button class="choice" data-act="add"><b>Someone else</b><span>Set their diet order</span></button></div></div>`}
   </div>`;
@@ -2133,7 +2216,7 @@ function openProfileModal(id){
     </div>
     <div class="field"><label>Allergies</label><div class="chips wrap" id="pfAll">${ALLERGENS.map(a => `<button type="button" class="chip ${allergies.has(a.id) ? "on" : ""}" data-a="${a.id}">${esc(a.name)}</button>`).join("")}</div></div>
     <div class="row"><button class="btn primary grow" id="pfSave">${id ? "Save changes" : "Add person"}</button><button class="btn" id="pfCancel">Cancel</button></div>
-    ${id ? `<div id="pfDelWrap"><button class="lnk danger" id="pfDelAsk">Delete ${esc(p.name)}</button></div>` : ""}`);
+    ${id ? `<div id="pfDelWrap"><button class="key danger" id="pfDelAsk">Delete ${esc(p.name)}</button></div>` : ""}`);
   $("#pfConds").addEventListener("change", e => {
     const row = e.target.closest(".cond"); if (!row) return; const cb = row.querySelector("input[type=checkbox]"); const prm = row.querySelector(".param");
     row.classList.toggle("on", cb.checked); if (prm) prm.hidden = !cb.checked;
@@ -2213,15 +2296,15 @@ function renderMore(){
       <p class="small">Night is the default. Day is lighter for bright stores; Auto follows the phone.</p>
     </section>
     <section class="set">
-      <div class="seth"><b>Stores</b><button class="lnk" data-act="addstore">Add a store</button></div>
+      <div class="seth"><b>Stores</b><button class="key sm" data-act="addstore">Add a store</button></div>
       ${stores.length ? stores.map(s => `<div class="srow"><span class="grow"><b>${esc(s.name)}</b><small>${s.type === "warehouse" ? "Warehouse club · bulk sizes and prices" : "Grocery"}${s.note ? ` · ${esc(s.note)}` : ""}</small></span>
-        ${S.ui.confirm === "store:" + s.id ? `<span class="confirm inline"><span>Remove?</span><button class="btn sm danger" data-act="delstore" data-id="${esc(s.id)}">Remove</button><button class="btn sm" data-act="cancel">Keep</button></span>` : `<button class="lnk" data-act="editstore" data-id="${esc(s.id)}">Edit</button><button class="lnk danger" data-act="delstoreask" data-id="${esc(s.id)}">Remove</button>`}</div>`).join("") : `<p class="small">No stores yet.</p>`}
+        ${S.ui.confirm === "store:" + s.id ? `<span class="confirm inline"><span>Remove?</span><button class="btn sm danger" data-act="delstore" data-id="${esc(s.id)}">Remove</button><button class="btn sm" data-act="cancel">Keep</button></span>` : `<button class="key sm" data-act="editstore" data-id="${esc(s.id)}">Edit</button><button class="key sm danger" data-act="delstoreask" data-id="${esc(s.id)}">Remove</button>`}</div>`).join("") : `<p class="small">No stores yet.</p>`}
       ${presets.length ? `<div class="chips wrap">${presets.map(p => `<button class="chip" data-act="preset" data-id="${p.id}">+ ${esc(p.name)}</button>`).join("")}</div>` : ""}
     </section>
     <section class="set">
-      <div class="seth"><b>Foods you added</b><button class="lnk" data-act="addfood">Add a food</button></div>
+      <div class="seth"><b>Foods you added</b><button class="key sm" data-act="addfood">Add a food</button></div>
       ${foods.length ? foods.map(f => `<div class="srow">${thumbHTML(normFood(f), "sm")}<span class="grow"><b>${esc(f.name)}</b><small>${esc(f.cat)} · ${esc(f.serving)} · ${+f.na||0} mg sodium</small></span>
-        ${S.ui.confirm === "food:" + f.id ? `<span class="confirm inline"><span>Delete?</span><button class="btn sm danger" data-act="delfood" data-id="${esc(f.id)}">Delete</button><button class="btn sm" data-act="cancel">Keep</button></span>` : `<button class="lnk" data-act="editfood" data-id="${esc(f.id)}">Edit</button><button class="lnk danger" data-act="delfoodask" data-id="${esc(f.id)}">Delete</button>`}</div>`).join("") : `<p class="small">${FOODS.length} built-in foods. Not there? Type the numbers off the Nutrition Facts label and it gets graded like everything else.</p>`}
+        ${S.ui.confirm === "food:" + f.id ? `<span class="confirm inline"><span>Delete?</span><button class="btn sm danger" data-act="delfood" data-id="${esc(f.id)}">Delete</button><button class="btn sm" data-act="cancel">Keep</button></span>` : `<button class="key sm" data-act="editfood" data-id="${esc(f.id)}">Edit</button><button class="key sm danger" data-act="delfoodask" data-id="${esc(f.id)}">Delete</button>`}</div>`).join("") : `<p class="small">${FOODS.length} built-in foods. Not there? Type the numbers off the Nutrition Facts label and it gets graded like everything else.</p>`}
     </section>
     ${/^https?:$/.test(location.protocol) && !/claude/.test(location.host) ? `<section class="set"><a class="srow go" href="start.html"><span class="grow"><b>How to use this · add it to your Home Screen</b><small>A one-page guide you can send along with the link</small></span><span class="chev" aria-hidden="true">›</span></a></section>` : ""}
     <section class="set">
@@ -2232,7 +2315,7 @@ function renderMore(){
       <button class="srow go" data-act="export"><span class="grow"><b>Export trip history</b><small>CSV for a spreadsheet</small></span><span class="chev" aria-hidden="true">›</span></button>
       <input type="file" id="restoreFile" accept="application/json,.json" hidden>
       <div id="exportBox"></div>
-      ${S.ui.confirm === "reset" ? `<div class="confirm"><span>Erase every person, list, store and trip on this device? Back up first if you want a copy.</span><span class="row"><button class="btn sm danger" data-act="reset">Erase everything</button><button class="btn sm" data-act="cancel">Keep</button></span></div>` : `<button class="lnk danger" data-act="resetask">Erase everything on this device</button>`}
+      ${S.ui.confirm === "reset" ? `<div class="confirm"><span>Erase every person, list, store and trip on this device? Back up first if you want a copy.</span><span class="row"><button class="btn sm danger" data-act="reset">Erase everything</button><button class="btn sm" data-act="cancel">Keep</button></span></div>` : `<button class="key danger" data-act="resetask">Erase everything on this device</button>`}
     </section>
     <p class="tiny">Typical label values and standard hospital diet rules. A shopping aid, not medical advice — the person's doctor or dietitian sets the real limits. Product photos: Adobe Stock.</p>
   </div>`;
