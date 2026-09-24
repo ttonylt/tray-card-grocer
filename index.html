@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Tray Card Grocer</title>
 <meta name="theme-color" content="#0B0B0A">
-<meta name="description" content="A grocery list that checks every food against a person's diet order — sodium, fluids, breathing and more — with real product photos. Made for Houston stores."><meta property="og:title" content="Tray Card Grocer"><meta property="og:description" content="Shop for someone with a diet order. Every food graded Fits / Small amounts / Avoid, with the reason."><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" href="icon-64.png"><link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-title" content="Tray Card">
+<meta name="description" content="A grocery list that checks every food against a person's diet order — sodium, fluids, breathing and more — with real product photos from the store you shop at."><meta property="og:title" content="Tray Card Grocer"><meta property="og:description" content="Shop for someone with a diet order. Every food graded Fits / Small amounts / Avoid, with the reason."><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" href="icon-64.png"><link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-title" content="Tray Card">
 <style>
 /* Black, Helvetica, real products. The store is one collage of every food; aisles are lit shelves with LED labels;
    a product opens on a stage with its numbers as dot-matrix instruments. One orange price-gun label per screen.
@@ -450,6 +450,53 @@ textarea.input{font:12px/1.4 ui-monospace,Menlo,monospace}
 .emojigrid button{font-family:var(--emoji);font-size:24px;min-height:40px;border-radius:10px;text-align:center}
 .emojigrid button.on{background:var(--ink2)}
 
+/* ---- A store's own shelves ---- */
+/* the chain's sprite sheet (96 px cells, 16 to a row), loaded when you shop at that chain */
+.sp.cs{background-image:var(--chain-atlas);background-size:calc(var(--s,32px) * 16) calc(var(--s,32px) * var(--chain-rows,12))}
+/* a store product's photo: its spot on the sheet shows first, the sharp cut-out lands on top of it */
+.cut.ch{background-image:var(--chain-atlas);background-repeat:no-repeat;background-size:1600% calc(100% * var(--chain-rows,12));
+  background-position:calc(var(--sx) * 100% / 15) calc(var(--sy) * 100% / max(1, var(--chain-rows,12) - 1))}
+/* while a chain's shelf is on its way the general photos step back; they never disappear */
+.ch-wait #screen-shop .sp:not(.cs),.ch-wait #screen-shop .zone .cut:not(.ch){opacity:.38;filter:grayscale(1);transition:opacity .35s,filter .35s}
+.chprog{display:inline-flex;align-items:center;gap:8px;margin-left:12px;vertical-align:middle;color:var(--grey)}
+.chprog i{display:block;width:66px;height:7px;background:radial-gradient(circle,var(--ok) 2.2px,transparent 2.6px) 0 50%/7px 7px repeat-x;
+  -webkit-mask:linear-gradient(90deg,#000 calc(var(--p,0) * 100%),rgba(0,0,0,.22) 0);mask:linear-gradient(90deg,#000 calc(var(--p,0) * 100%),rgba(0,0,0,.22) 0)}
+.chprog span{font-size:12px}
+/* before the size of the download is known, a lit band sweeps along the dots */
+.chprog[aria-valuenow="0"] i,.flwait[aria-valuenow="0"] i{-webkit-mask:linear-gradient(90deg,rgba(0,0,0,.22) 40%,#000 40% 60%,rgba(0,0,0,.22) 60%) 100% 0/300% 100%;mask:linear-gradient(90deg,rgba(0,0,0,.22) 40%,#000 40% 60%,rgba(0,0,0,.22) 60%) 100% 0/300% 100%;animation:chp 1.2s steps(10) infinite}
+@keyframes chp{from{-webkit-mask-position:100% 0;mask-position:100% 0}to{-webkit-mask-position:0% 0;mask-position:0% 0}}
+/* the same light, bigger, in the middle of the collage */
+.flwait{position:absolute;z-index:4;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 20px 14px;border-radius:16px;
+  background:rgba(var(--ground-rgb),.86);box-shadow:0 10px 40px rgba(0,0,0,.35);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s,visibility 0s .3s}
+.ch-slow .flwait{opacity:1;visibility:visible;transition:opacity .3s}
+.flwait i{display:block;width:120px;height:10px;background:radial-gradient(circle,var(--ok) 3px,transparent 3.5px) 0 50%/10px 10px repeat-x;
+  -webkit-mask:linear-gradient(90deg,#000 calc(var(--p,0) * 100%),rgba(0,0,0,.22) 0);mask:linear-gradient(90deg,#000 calc(var(--p,0) * 100%),rgba(0,0,0,.22) 0)}
+.flwait span{font-size:14px;line-height:1.2;color:var(--ink);white-space:nowrap}
+@media (max-width:380px){ .chprog span{display:none} }
+/* finding a store */
+.sheet .sfield{margin:4px 0 0}
+.sheet .sfield input{font-size:28px}
+.stres{margin-top:6px;border-top:1px solid var(--line)}
+.srow.st,.sheet .srow.go{grid-template-columns:minmax(0,1fr) auto;padding:12px 0;text-align:left}
+.srow.st b{display:block;font-weight:600;font-size:16px;line-height:1.2}
+.srow.st small{display:block;color:var(--grey);font-size:12px;margin-top:2px}
+.srow.st .mi{font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums;padding-left:10px}
+.srow.st .own{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--ink2)}
+.srow.st .own .led{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 7px var(--ok)}
+#stHint.busy::after{content:"";display:inline-block;width:18px;height:6px;margin-left:8px;background:radial-gradient(circle,var(--grey) 2px,transparent 2.4px) 0 50%/6px 6px repeat-x;animation:stdots 1s steps(3) infinite;vertical-align:middle}
+@keyframes stdots{from{width:6px}to{width:24px}}
+@media (prefers-reduced-motion: reduce){ #stHint.busy::after,.chprog i,.flwait i{animation:none!important} }
+
+/* scanning a package */
+.scanbox{position:relative;margin:10px 0;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3}
+.scanbox video{width:100%;height:100%;object-fit:cover;display:block}
+.scanbox .aim{position:absolute;left:10%;right:10%;top:27%;bottom:27%;border:2px solid rgba(255,255,255,.85);border-radius:12px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.scanhit{display:flex;gap:12px;align-items:center;margin:12px 0 4px}
+.scanhit img{width:64px;height:64px;object-fit:cover;border-radius:12px;background:var(--raise2);flex:none}
+.scanhit b{display:block;font-size:16px;line-height:1.2}
+.scanhit small{display:block;color:var(--grey);font-size:12px;margin-top:2px}
+#scPick .z .sp{--s:40px}
+
 /* ---- Moving things ---- */
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 96px);transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:20px;font-size:12px;font-weight:600;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
 #flyRoot{position:fixed;inset:0;pointer-events:none;z-index:80}
@@ -846,14 +893,27 @@ const photoKey = f => (f && !f.img && PHOTO[f.id]) || null;
 // Foods people add themselves show their own photo (square, rounded) or the icon they picked.
 function cutHTML(f, cls, attrs){
   const key = photoKey(f); attrs = attrs || "";
+  if (f && f.sc && f.sc.img) return `<img class="cut own ${cls || ""}" src="${esc(f.sc.img)}" alt="" draggable="false" referrerpolicy="no-referrer"${attrs}>`;
+  // the store's own product: its cut-out, with its spot on the store's sprite sheet showing until the photo arrives
+  if (f && f.ch){
+    const big = /\bbig\b/.test(cls || "");
+    return `<img class="cut ch ${cls || ""}" src="${big ? f.ch.img : f.ch.img.replace("/img/", "/sm/")}" alt="" decoding="async" draggable="false"${withSheetSpot(attrs, f.ch.i)}>`;
+  }
   if (key) return `<img class="cut ${cls || ""}" src="${PHOTO_BASE}${key}.webp" alt="" decoding="async" draggable="false"${attrs}>`;
   if (f.img) return `<img class="cut own ${cls || ""}" src="${esc(f.img)}" alt="" draggable="false"${attrs}>`;
   return `<span class="cut em ${cls || ""}"${attrs}><b>${foodEmoji(f)}</b></span>`;
+}
+// Where a product sits on a sprite sheet, added to whatever style the element already has.
+function withSheetSpot(attrs, i){
+  const v = `--sx:${i % 16};--sy:${i >> 4};`;
+  return /style="/.test(attrs || "") ? attrs.replace('style="', `style="${v}`) : `${attrs || ""} style="${v}"`;
 }
 // A product from the sprite sheet (every cut-out in one picture, 96 px each): the store collage, the tray, search rows.
 // The size comes from --s on the element or its parent.
 function spriteHTML(f, cls, attrs){
   const key = photoKey(f), at = key ? ATLAS_AT[key] : undefined; attrs = attrs || "";
+  if (f && f.sc && f.sc.img) return `<img class="sp own ${cls || ""}" src="${esc(f.sc.img)}" alt="" referrerpolicy="no-referrer"${attrs}>`;
+  if (f && f.ch) return `<i class="sp cs ${cls || ""}"${withSheetSpot(attrs, f.ch.i)}></i>`;
   if (at != null) return `<i class="sp ${cls || ""}" style="--sx:${at % 16};--sy:${at >> 4}"${attrs}></i>`;
   if (f.img) return `<img class="sp own ${cls || ""}" src="${esc(f.img)}" alt=""${attrs}>`;
   return `<i class="sp em ${cls || ""}"${attrs}>${foodEmoji(f)}</i>`;
@@ -947,6 +1007,16 @@ const rectOf = el => { if (!el) return null; const r = el.getBoundingClientRect(
 // be any width. The product's own box (PHOTO_BOX, in 256ths of the picture) is scaled to fill the zone and its
 // bottom edge sits exactly on the zone's bottom.
 function standHTML(f, r, attrs){
+  // a product someone scanned: its own photo, as taken
+  if (f && f.sc && f.sc.img) return `<span class="own-stand">${cutHTML(f, "", attrs)}</span>`;
+  // the store's own product: its small cut-out, standing on the shelf by its measured outline (sprite underneath until it loads)
+  if (f && f.ch && f.ch.box){
+    const [x0, y0, x1, y1] = f.ch.box, bw = x1 - x0, bh = y1 - y0;
+    const D = Math.min(.9 * 256 / bw, .92 * r * 256 / bh);
+    const left = .5 - (x0 + bw / 2) * D / 256, top = (r - y1 * D / 256) / r;
+    const st = ` style="height:auto;width:${(D * 100).toFixed(2)}%;left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%"`;
+    return `<img class="cut ch" src="${f.ch.img.replace("/img/", "/sm/")}" alt="" width="192" height="192" loading="lazy" decoding="async" draggable="false"${withSheetSpot(st + (attrs || ""), f.ch.i)}>`;
+  }
   const key = photoKey(f), b = key && PHOTO_BOX[key];
   if (!b) return `<span class="own-stand">${cutHTML(f, "", attrs)}</span>`;
   const [x0, y0, x1, y1] = b, bw = x1 - x0, bh = y1 - y0;
@@ -957,6 +1027,8 @@ function standHTML(f, r, attrs){
 
 // What travels: the sprite underneath (always loaded) and the full picture on top (covers it once it arrives).
 function flyerHTML(f){
+  if (f && f.sc && f.sc.img) return cutHTML(f);
+  if (f && f.ch) return spriteHTML(f) + `<img class="cut" src="${f.ch.img.replace("/img/", "/sm/")}" alt="">`;
   const key = photoKey(f);
   if (!key) return cutHTML(f);
   return spriteHTML(f) + `<img class="cut" src="${PHOTO_BASE}${key}.webp" alt="">`;
@@ -1024,6 +1096,416 @@ function dmSet(el, value, fmt, pitch, cls, label){
   el.dataset.raf = requestAnimationFrame(step);
 }
 const moneyDigits = n => money(n).slice(1);
+// Generated from the chain build: the grocery chains with their own shelves, and the store names that mean each one.
+// A banner is [store-name pattern, chain, the states where that name means this chain (or null for anywhere)].
+const CHAIN_VERSION = 1;
+const CHAIN_INFO = {"walmart":{"name":"Walmart","kind":"grocery","cat":"walmart"},"samsclub":{"name":"Sam's Club","kind":"warehouse","cat":"samsclub"},"costco":{"name":"Costco","kind":"warehouse","cat":"costco"},"bjs":{"name":"BJ's Wholesale Club","kind":"warehouse","cat":"bjs"},"target":{"name":"Target","kind":"grocery","cat":"target"},"kroger":{"name":"Kroger","kind":"grocery","cat":"kroger"},"kroger_az":{"name":"Fry's Food","kind":"grocery","cat":"kroger"},"kroger_west":{"name":"Smith's / City Market / Baker's","kind":"grocery","cat":"kroger"},"harristeeter":{"name":"Harris Teeter","kind":"grocery","cat":"harristeeter"},"roundys":{"name":"Pick 'n Save / Mariano's","kind":"grocery","cat":"roundys"},"albertsons":{"name":"Albertsons / Safeway","kind":"grocery","cat":"albertsons"},"heb":{"name":"H-E-B","kind":"grocery","cat":"heb"},"aldi":{"name":"Aldi","kind":"grocery","cat":"aldi"},"traderjoes":{"name":"Trader Joe's","kind":"grocery","cat":"traderjoes"},"wholefoods":{"name":"Whole Foods Market","kind":"grocery","cat":"wholefoods"},"publix":{"name":"Publix","kind":"grocery","cat":"publix"},"meijer":{"name":"Meijer","kind":"grocery","cat":"meijer"},"hyvee":{"name":"Hy-Vee","kind":"grocery","cat":"hyvee"},"wegmans":{"name":"Wegmans","kind":"grocery","cat":"wegmans"},"gianteagle":{"name":"Giant Eagle","kind":"grocery","cat":"gianteagle"},"foodlion":{"name":"Food Lion","kind":"grocery","cat":"foodlion"},"giant":{"name":"Giant","kind":"grocery","cat":"giant"},"stopshop":{"name":"Stop & Shop","kind":"grocery","cat":"stopshop"},"hannaford":{"name":"Hannaford","kind":"grocery","cat":"hannaford"},"shoprite":{"name":"ShopRite","kind":"grocery","cat":"shoprite"},"smartfinal":{"name":"Smart & Final","kind":"grocery","cat":"smartfinal"},"staterbros":{"name":"Stater Bros.","kind":"grocery","cat":"staterbros"},"winco":{"name":"WinCo Foods","kind":"grocery","cat":"winco"},"raleys":{"name":"Raley's","kind":"grocery","cat":"raleys"},"schnucks":{"name":"Schnucks","kind":"grocery","cat":"schnucks"},"tops":{"name":"Tops Markets","kind":"grocery","cat":"tops"},"weis":{"name":"Weis Markets","kind":"grocery","cat":"weis"},"bigy":{"name":"Big Y","kind":"grocery","cat":"bigy"},"winndixie":{"name":"Winn-Dixie","kind":"grocery","cat":"winndixie"},"brookshire":{"name":"Brookshire's","kind":"grocery","cat":"brookshire"},"ingles":{"name":"Ingles","kind":"grocery","cat":"ingles"},"pricechopper":{"name":"Price Chopper / Market 32","kind":"grocery","cat":"pricechopper"},"marketbasket":{"name":"Market Basket","kind":"grocery","cat":"marketbasket"},"lidl":{"name":"Lidl","kind":"grocery","cat":"lidl"},"sprouts":{"name":"Sprouts Farmers Market","kind":"grocery","cat":"sprouts"},"freshmarket":{"name":"The Fresh Market","kind":"grocery","cat":"freshmarket"},"lowesfoods":{"name":"Lowes Foods","kind":"grocery","cat":"lowesfoods"},"keyfood":{"name":"Key Food","kind":"grocery","cat":"keyfood"},"harmons":{"name":"Harmons","kind":"grocery","cat":"harmons"},"lunds":{"name":"Lunds & Byerlys","kind":"grocery","cat":"lunds"},"cub":{"name":"Cub","kind":"grocery","cat":"cub"},"familyfare":{"name":"Family Fare","kind":"grocery","cat":"familyfare"},"dollargeneral":{"name":"Dollar General","kind":"grocery","cat":"dollargeneral"},"familydollar":{"name":"Family Dollar","kind":"grocery","cat":"familydollar"},"dollartree":{"name":"Dollar Tree","kind":"grocery","cat":"dollartree"},"seveneleven":{"name":"7-Eleven","kind":"grocery","cat":"seveneleven"},"walgreens":{"name":"Walgreens","kind":"grocery","cat":"walgreens"},"cvs":{"name":"CVS","kind":"grocery","cat":"cvs"},"piggly":{"name":"Piggly Wiggly","kind":"grocery","cat":"piggly"},"savemart":{"name":"Save Mart / Lucky","kind":"grocery","cat":"savemart"},"amazonfresh":{"name":"Amazon Fresh","kind":"grocery","cat":"amazonfresh"},"foodtown":{"name":"Foodtown","kind":"grocery","cat":"foodtown"}};
+const CHAIN_BANNERS = [
+  [/\bwal ?-?mart\b|\bwalmart\b/i, "walmart", null],
+  [/\bsam'?s ?club\b|\bsams club\b/i, "samsclub", null],
+  [/\bcostco\b/i, "costco", null],
+  [/\bbj'?s wholesale/i, "bjs", null],
+  [/\btarget\b/i, "target", null],
+  [/\bkroger\b|\bralphs\b|food ?4 ?less|\bfoods ?co\b|fred meyer|king soopers|\bqfc\b|quality food centers|\bdillons\b|\bgerbes\b|\bjay ?c\b|ruler foods/i, "kroger", null],
+  [/\bfry'?s\b/i, "kroger_az", ["AZ"]],
+  [/\bsmith'?s\b|\bcity market\b|\bbaker'?s\b|\bpay ?less\b|\bowen'?s\b/i, "kroger_west", ["UT", "NV", "NM", "ID", "MT", "WY", "AZ", "CO", "NE", "IN"]],
+  [/harris teeter/i, "harristeeter", null],
+  [/pick ?'?n'? ?save|mariano'?s|metro market/i, "roundys", ["WI", "IL"]],
+  [/albertsons|safeway|\bvons\b|pavilions|randalls|tom thumb|jewel|\bacme markets?\b|shaw'?s|star market|united supermarkets|\bcarrs\b|haggen|andronico/i, "albertsons", null],
+  [/\bh ?-? ?e ?-? ?b\b|\bheb\b|central market|joe v'?s|mi tienda/i, "heb", ["TX"]],
+  [/\baldi\b/i, "aldi", null],
+  [/trader ?joe/i, "traderjoes", null],
+  [/whole ?foods/i, "wholefoods", null],
+  [/\bpublix\b/i, "publix", null],
+  [/\bmeijer\b/i, "meijer", null],
+  [/\bhy ?-? ?vee\b/i, "hyvee", null],
+  [/\bwegmans\b/i, "wegmans", null],
+  [/giant eagle|market district/i, "gianteagle", null],
+  [/food lion/i, "foodlion", null],
+  [/\bgiant\b(?! eagle)|martin'?s food/i, "giant", ["MD", "VA", "DC", "DE", "PA", "WV", "NJ"]],
+  [/stop ?(&|and) ?shop/i, "stopshop", null],
+  [/hannaford/i, "hannaford", null],
+  [/shop ?rite|price ?rite|the fresh grocer/i, "shoprite", null],
+  [/smart ?(&|and) ?final/i, "smartfinal", null],
+  [/\bstater\b/i, "staterbros", null],
+  [/\bwinco\b/i, "winco", null],
+  [/\braley'?s\b|\bbel air\b|nob hill foods/i, "raleys", ["CA", "NV"]],
+  [/schnucks/i, "schnucks", null],
+  [/\btops\b/i, "tops", ["NY", "PA", "VT"]],
+  [/\bweis\b/i, "weis", null],
+  [/\bbig y\b/i, "bigy", null],
+  [/winn ?-? ?dixie|\bharveys\b|fresco y m/i, "winndixie", null],
+  [/brookshire|super 1 foods/i, "brookshire", ["TX", "LA", "AR"]],
+  [/\bingles\b/i, "ingles", null],
+  [/price chopper|market 32/i, "pricechopper", ["NY", "PA", "VT", "MA", "CT", "NH"]],
+  [/market basket/i, "marketbasket", ["MA", "NH", "ME"]],
+  [/\blidl\b/i, "lidl", null],
+  [/\bsprouts\b/i, "sprouts", null],
+  [/the fresh market/i, "freshmarket", null],
+  [/lowe'?s foods?/i, "lowesfoods", null],
+  [/key food/i, "keyfood", null],
+  [/\bharmons\b/i, "harmons", ["UT"]],
+  [/\blunds\b|byerly/i, "lunds", ["MN"]],
+  [/\bcub\b|\bshoppers\b/i, "cub", ["MN", "IL", "MD", "VA"]],
+  [/family fare|d ?& ?w fresh market|martin'?s super market/i, "familyfare", ["MI", "IN", "NE", "ND", "SD", "MN", "IA"]],
+  [/dollar general/i, "dollargeneral", null],
+  [/family dollar/i, "familydollar", null],
+  [/dollar tree/i, "dollartree", null],
+  [/\b7 ?-? ?eleven\b/i, "seveneleven", null],
+  [/walgreens/i, "walgreens", null],
+  [/\bcvs\b/i, "cvs", null],
+  [/piggly wiggly/i, "piggly", null],
+  [/save ?mart|\blucky\b|food ?maxx/i, "savemart", ["CA", "NV"]],
+  [/amazon fresh/i, "amazonfresh", null],
+  [/food ?town/i, "foodtown", ["NJ", "NY", "PA", "CT"]],
+];
+// ===== A store's own shelves =====
+// The big grocery chains stock their own house brands, and every chain carries its own mix. When the store you're
+// shopping at belongs to a chain we know, the shelves show that chain's real products: photos from Open Food Facts
+// (cut out like the rest), label numbers from USDA FoodData Central or Open Food Facts, and grading uses those labels.
+// Any other store keeps the general photos. Nothing waits on the network: the general shelf is on screen at once,
+// the chain's shelf fills in as soon as it arrives (from the phone's cache after the first visit), and a progress
+// light appears only if that takes longer than a second.
+const CHAIN_DIR = "chains/";
+// Store shelves and the store directory live on the website next to the page; a copy opened from a file or inside
+// Claude can't fetch them, so it keeps the general photos and adds stores by name.
+const ONLINE_DATA = /^https?:$/.test(location.protocol) && !/claude|anthropic/.test(location.host);
+const CH = {key:null, status:"idle", data:null, rows:0, url:null, progress:0, err:null, started:0, timers:[], ready:{}};
+
+function detectChain(name, state){
+  const n = String(name || "").toLowerCase().replace(/[’`]/g, "'");
+  if (!n.trim()) return null;
+  for (const [re, key, states] of CHAIN_BANNERS){
+    if (re.test(n) && (!states || !state || states.includes(String(state).toUpperCase()))) return key;
+  }
+  return null;
+}
+// Which chain a store belongs to: its own setting if it has one (an empty string means "general shelves"),
+// a preset's setting (the Houston Food Town is not the New Jersey Foodtown), else by its name.
+function chainOf(store){
+  if (!store) return null;
+  if (store.chain !== undefined && store.chain !== null) return store.chain || null;
+  const pr = typeof STORE_PRESETS !== "undefined" && STORE_PRESETS.find(p => p.id === store.id && p.name === store.name);
+  if (pr && pr.chain !== undefined) return pr.chain || null;
+  return detectChain(store.name, store.state);
+}
+function chainKeyOf(store){ const k = chainOf(store), info = k && CHAIN_INFO[k]; return info ? info.cat : null; }
+const chainName = store => { const k = chainOf(store); return k && CHAIN_INFO[k] ? CHAIN_INFO[k].name : ""; };
+const chainReady = () => CH.status === "ready" && CH.data && CH.key && CH.key === chainKeyOf(activeStore());
+
+// ---- Loading a chain's shelf: its product list, then its sheet of photos ----
+function fetchWithProgress(url, onProgress){
+  return fetch(url, {cache:"force-cache"}).then(r => {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const total = +r.headers.get("content-length") || 0;
+    if (!r.body || !r.body.getReader || !total) return r.blob();
+    const reader = r.body.getReader(); const parts = []; let got = 0;
+    const pump = () => reader.read().then(({done, value}) => {
+      if (done) return new Blob(parts, {type:r.headers.get("content-type") || ""});
+      parts.push(value); got += value.length; onProgress(Math.min(1, got / total)); return pump();
+    });
+    return pump();
+  });
+}
+function chainTick(){
+  const st = activeStore(), key = ready() && ONLINE_DATA ? chainKeyOf(st) : null;
+  if (key === CH.key && CH.status !== "idle") return;
+  CH.timers.forEach(clearTimeout); CH.timers = [];
+  document.documentElement.classList.remove("ch-wait", "ch-slow");
+  if (CH.url){ try{ URL.revokeObjectURL(CH.url); }catch(e){} CH.url = null; }
+  CH.key = key; CH.data = null; CH.progress = 0; CH.err = null;
+  document.documentElement.style.removeProperty("--chain-atlas");
+  if (!key){ CH.status = "idle"; return; }
+  CH.status = "loading"; CH.started = performance.now();
+  // quiet at first; after a moment the general photos dim (waiting); after a second a progress light appears
+  CH.timers.push(setTimeout(() => { if (CH.status === "loading" && CH.key === key) document.documentElement.classList.add("ch-wait"); }, 350));
+  CH.timers.push(setTimeout(() => { if (CH.status === "loading" && CH.key === key){ document.documentElement.classList.add("ch-slow"); renderTop(); paintProgress(); } }, 1000));
+  const v = CHAIN_VERSION;
+  generalReady().then(() => fetch(`${CHAIN_DIR}${key}.json?v=${v}`, {cache:"force-cache"})).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(data => fetchWithProgress(`${CHAIN_DIR}${key}.webp?v=${v}`, p => { CH.progress = p; paintProgress(); }).then(blob => ({data, blob})))
+    .then(({data, blob}) => {
+      if (CH.key !== key) return;
+      const url = URL.createObjectURL(blob), img = new Image();
+      img.src = url;
+      return (img.decode ? img.decode() : Promise.resolve()).then(() => {
+        if (CH.key !== key){ URL.revokeObjectURL(url); return; }
+        CH.url = url; CH.data = data; CH.rows = Math.ceil(Object.keys(data.items).length / 16);
+        const root = document.documentElement;
+        root.style.setProperty("--chain-atlas", `url(${url})`); root.style.setProperty("--chain-rows", CH.rows);
+        CH.status = "ready"; CH.ready[key] = true;
+        CH.timers.forEach(clearTimeout); CH.timers = [];
+        chainArrived();
+      });
+    })
+    .catch(err => {
+      if (CH.key !== key) return;
+      CH.status = "error"; CH.err = String(err && err.message || err);
+      CH.timers.forEach(clearTimeout); CH.timers = [];
+      document.documentElement.classList.remove("ch-wait", "ch-slow");
+      if (S.ui.tab === "shop") render();
+    });
+}
+function paintProgress(){
+  ["chProg", "flWait"].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    el.style.setProperty("--p", CH.progress.toFixed(3));
+    el.setAttribute("aria-valuenow", Math.round(CH.progress * 100));
+  });
+}
+// The general photos come first (they're the sheet every store starts from), then the store's own: on a first visit
+// over a slow connection the collage fills with general photos instead of waiting empty for both.
+let GENERAL_SHEET = null;
+const generalReady = () => GENERAL_SHEET || (GENERAL_SHEET = new Promise(res => { const im = new Image(); im.onload = im.onerror = () => res(); im.src = "img/atlas.webp"; setTimeout(res, 5000); }));
+// The chain's products take their places: each one moves from where the general product stood to where the
+// store's product stands (grading may reorder the collage), so nothing jumps.
+function chainArrived(){
+  const root = document.documentElement;
+  const from = new Map();
+  if (S.ui.tab === "shop" && !reduceMotion()){
+    $$("#flower .it").forEach(el => { const x = FLOWER && FLOWER.items[+el.dataset.i]; if (x) from.set("f:" + x.f.id, el.getBoundingClientRect()); });
+    $$("#shelves .slot").forEach(el => from.set("s:" + el.dataset.id, el.getBoundingClientRect()));
+  }
+  root.classList.remove("ch-wait", "ch-slow");
+  render();
+  if (!from.size) return;
+  const t0 = performance.now();
+  $$("#flower .it").forEach((el, k) => {
+    const x = FLOWER && FLOWER.items[+el.dataset.i], a = x && from.get("f:" + x.f.id); if (!a || !el.animate) return;
+    const b = el.getBoundingClientRect(), dx = a.left - b.left, dy = a.top - b.top;
+    el.animate([{transform:`translate(${dx}px,${dy}px)`, opacity:.5}, {transform:"none", opacity:1}], {duration:520, delay:Math.min(240, k * 1.2), easing:"cubic-bezier(.2,.8,.2,1)", fill:"backwards"});
+  });
+  $$("#shelves .slot .zone .cut").forEach((el, k) => {
+    if (!el.animate || k > 30) return;
+    el.animate([{transform:"rotateY(80deg) scale(.96)", opacity:.3}, {transform:"none", opacity:1}], {duration:420, delay:k * 22, easing:"cubic-bezier(.2,.8,.2,1)", fill:"backwards"});
+  });
+  void t0;
+}
+
+// ---- A food, as this store sells it ----
+const CF_CACHE = new Map();
+function chainFood(f){
+  if (!f || !f.builtin) return f;
+  const st = activeStore(), sc = st && S.scans && S.scans[st.id] && S.scans[st.id][f.id];
+  if (sc) return scannedFood(f, sc, st);
+  if (!chainReady()) return f;
+  const it = CH.data.items[f.id]; if (!it) return f;
+  const ck = CH.key + ":" + f.id; const hit = CF_CACHE.get(ck); if (hit && hit.base === f) return hit.v;
+  const v = {...f, product:it.n, brand:it.b, serving:it.s || f.serving, label:it.src || "", code:it.c,
+    na:it.na != null ? it.na : f.na, k:it.k != null ? it.k : f.k, carb:it.carb != null ? it.carb : f.carb,
+    sugar:it.sug != null ? it.sug : f.sugar, fiber:it.fib != null ? it.fib : f.fiber, prot:it.prot != null ? it.prot : f.prot,
+    sf:it.sf != null ? it.sf : f.sf, typical:["na", "k", "carb", "sug", "fib", "prot", "sf"].filter(k => it[k] == null),
+    ch:{key:CH.key, i:it.i, box:it.box, edge:it.edge, img:`${CHAIN_DIR}img/${it.c}.webp?v=${CHAIN_VERSION}`}};
+  CF_CACHE.set(ck, {base:f, v});
+  return v;
+}
+
+// A product someone scanned at this store: its own photo (as taken, not cut out) and its label numbers.
+function scannedFood(f, it, st){
+  const ck = "scan:" + st.id + ":" + f.id + ":" + it.t; const hit = CF_CACHE.get(ck); if (hit && hit.base === f) return hit.v;
+  const v = {...f, product:it.n, brand:it.b, serving:it.s || f.serving, label:"off", code:it.c, scanned:true,
+    na:it.na != null ? it.na : f.na, k:it.k != null ? it.k : f.k, carb:it.carb != null ? it.carb : f.carb, sugar:it.sug != null ? it.sug : f.sugar,
+    fiber:it.fib != null ? it.fib : f.fiber, prot:it.prot != null ? it.prot : f.prot, sf:it.sf != null ? it.sf : f.sf,
+    typical:["na", "k", "carb", "sug", "fib", "prot", "sf"].filter(k => it[k] == null), sc:{img:it.img}};
+  CF_CACHE.set(ck, {base:f, v});
+  return v;
+}
+// ===== Finding a store =====
+// Type a store, a ZIP code or a city ("heb 77004", "Ralphs Los Angeles", "90011") and the stores nearby come up,
+// nearest first. The directory ships with the app as small map tiles (US grocery stores from All the Places, Overture
+// Maps and OpenStreetMap), so a search reads one or two tiny files and never waits on a live lookup service.
+const WHERE_DIR = "stores/";
+const WHERE_VERSION = 1;   // bump when the directory is rebuilt, so phones fetch the new files
+const WH = {tiles:new Map(), zips:new Map(), cities:new Map(), here:null, seq:0};
+const STATES = "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY PR".split(" ");
+const STATE_NAMES = {alabama:"AL", alaska:"AK", arizona:"AZ", arkansas:"AR", california:"CA", colorado:"CO", connecticut:"CT", delaware:"DE", florida:"FL", georgia:"GA", hawaii:"HI", idaho:"ID", illinois:"IL", indiana:"IN", iowa:"IA", kansas:"KS", kentucky:"KY", louisiana:"LA", maine:"ME", maryland:"MD", massachusetts:"MA", michigan:"MI", minnesota:"MN", mississippi:"MS", missouri:"MO", montana:"MT", nebraska:"NE", nevada:"NV", "new hampshire":"NH", "new jersey":"NJ", "new mexico":"NM", "new york":"NY", "north carolina":"NC", "north dakota":"ND", ohio:"OH", oklahoma:"OK", oregon:"OR", pennsylvania:"PA", "rhode island":"RI", "south carolina":"SC", "south dakota":"SD", tennessee:"TN", texas:"TX", utah:"UT", vermont:"VT", virginia:"VA", washington:"WA", "west virginia":"WV", wisconsin:"WI", wyoming:"WY", "puerto rico":"PR"};
+
+const getJSON = (url, cache) => { if (cache.has(url)) return cache.get(url); const p = fetch(url, {cache:"force-cache"}).then(r => r.ok ? r.json() : null).catch(() => null); cache.set(url, p); return p; };
+const tileKey = (lat, lon) => `${Math.floor(lat * 2) / 2}_${Math.floor(lon * 2) / 2}`;   // half-degree map tiles
+function milesBetween(a, b){
+  const R = 3958.8, rad = Math.PI / 180, dLat = (b[0] - a[0]) * rad, dLon = (b[1] - a[1]) * rad;
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+async function storesNear(center){
+  const [la, lo] = center, keys = [];
+  for (let dy = -.5; dy <= .5; dy += .5) for (let dx = -.5; dx <= .5; dx += .5) keys.push(tileKey(la + dy, lo + dx));
+  const lists = await Promise.all(keys.map(k => getJSON(`${WHERE_DIR}t/${k}.json?v=${WHERE_VERSION}`, WH.tiles)));
+  const out = [];
+  lists.forEach(l => (l || []).forEach(r => out.push({name:r[0], chain:r[1] || null, lat:r[2], lon:r[3], addr:r[4] || "", city:r[5] || "", state:r[6] || "", zip:r[7] || "", kind:r[8] || "g", mi:milesBetween(center, [r[2], r[3]])})));
+  return out;
+}
+async function zipCenter(zip){ const d = await getJSON(`${WHERE_DIR}z/${zip.slice(0, 2)}.json?v=${WHERE_VERSION}`, WH.zips); return d && d[zip] ? d[zip] : null; }
+async function cityCenter(words, state){
+  const name = words.join(" ").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim(); if (!name) return null;
+  const d = await getJSON(`${WHERE_DIR}c/${name[0]}.json?v=${WHERE_VERSION}`, WH.cities); if (!d) return null;
+  const hits = Object.entries(d).filter(([k]) => k.split("|")[0] === name && (!state || k.split("|")[1] === state.toLowerCase())).sort((a, b) => b[1][2] - a[1][2]);
+  return hits.length ? {c:[hits[0][1][0], hits[0][1][1]], state:hits[0][0].split("|")[1].toUpperCase()} : null;
+}
+// "heb 77004" / "Ralphs, Los Angeles CA" / "90011" / "kroger" -> where to look and what to look for
+async function parseWhere(text){
+  let t = String(text || "").trim(); const out = {name:"", center:null, place:"", state:null};
+  const zip = t.match(/\b(\d{5})(?:-\d{4})?\b/);
+  if (zip){ out.center = await zipCenter(zip[1]); out.place = zip[1]; t = t.replace(zip[0], " "); }
+  t = t.replace(/[,]/g, " ").replace(/\s+/g, " ").trim();
+  let words = t ? t.split(" ") : [];
+  // a state at the end ("TX", "Texas")
+  if (words.length){ const last = words[words.length - 1].toUpperCase(); if (STATES.includes(last) && words.length > 1){ out.state = last; words.pop(); } }
+  for (const [nm, ab] of Object.entries(STATE_NAMES)){ const n = nm.split(" ").length; if (words.length > n && words.slice(-n).join(" ").toLowerCase() === nm){ out.state = ab; words = words.slice(0, -n); break; } }
+  if (!out.center && words.length){
+    // the longest run of trailing words that is a city
+    for (let n = Math.min(4, words.length); n >= 1; n--){
+      const hit = await cityCenter(words.slice(-n), out.state);
+      if (hit){ out.center = hit.c; out.place = words.slice(-n).join(" "); out.state = out.state || hit.state; words = words.slice(0, -n); break; }
+    }
+  }
+  if (!out.center && WH.here){ out.center = WH.here; out.place = "you"; }
+  out.name = words.join(" ");
+  return out;
+}
+const normName = s => String(s || "").toLowerCase().replace(/[’'`]/g, "").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
+function nameScore(q, store){
+  if (!q) return 1;
+  const a = normName(q), b = normName(store.name), c = store.chain ? normName((CHAIN_INFO[store.chain] || {}).name) : "";
+  if (!a) return 1;
+  const qa = a.replace(/ /g, ""), bb = b.replace(/ /g, ""), cc = c.replace(/ /g, "");
+  if (bb.startsWith(qa) || (cc && cc.startsWith(qa))) return 3;
+  if (bb.includes(qa) || (cc && cc.includes(qa))) return 2;
+  const qchain = detectChain(q, store.state); if (qchain && CHAIN_INFO[qchain] && store.chain && CHAIN_INFO[store.chain] && CHAIN_INFO[qchain].cat === CHAIN_INFO[store.chain].cat) return 2;
+  return a.split(" ").every(w => b.includes(w)) ? 1.5 : 0;
+}
+async function findStores(text){
+  const seq = ++WH.seq;
+  if (!ONLINE_DATA) return {w:{name:String(text || "").replace(/\b\d{5}\b/, "").trim(), place:""}, list:[], offline:true};
+  const w = await parseWhere(text); if (seq !== WH.seq) return null;
+  if (!w.center) return {w, list:[], needPlace:true};
+  const all = await storesNear(w.center); if (seq !== WH.seq) return null;
+  const radius = w.name ? 60 : 25;
+  // places we only know as "a grocery store" with an unfamiliar name come up when you search for them by name
+  const list = all.filter(s => w.name || s.kind !== "x").map(s => ({s, k:nameScore(w.name, s)})).filter(x => x.k > 0 && x.s.mi <= radius)
+    .sort((a, b) => (b.k - a.k) || (a.s.mi - b.s.mi)).slice(0, 40).map(x => x.s)
+    .sort((a, b) => a.mi - b.mi).slice(0, w.name ? 20 : 30);
+  return {w, list};
+}
+function useMyLocation(){
+  return new Promise(res => {
+    if (!navigator.geolocation){ res(null); return; }
+    navigator.geolocation.getCurrentPosition(p => { WH.here = [p.coords.latitude, p.coords.longitude]; res(WH.here); }, () => res(null), {timeout:12000, maximumAge:600000, enableHighAccuracy:false});
+  });
+}
+// ===== Scanning a package =====
+// Any store, even one we know nothing about: point the camera at a product's barcode and the app looks it up in
+// Open Food Facts, asks which food it is, and from then on that store's shelf shows that product — its photo, its name
+// and its label numbers. Scans are saved on this phone with the store (and go into backups).
+const SCAN = {stream:null, timer:0, detector:null, zbar:null, busy:false, done:false};
+
+async function scanDecoder(){
+  if (SCAN.detector) return SCAN.detector;
+  if ("BarcodeDetector" in window){
+    try{
+      const fm = await BarcodeDetector.getSupportedFormats();
+      if (fm.some(f => /ean|upc/.test(f))){ const d = new BarcodeDetector({formats:fm.filter(f => /ean|upc/.test(f))}); SCAN.detector = async c => { const r = await d.detect(c); return r[0] && r[0].rawValue; }; return SCAN.detector; }
+    }catch(e){}
+  }
+  // iPhone Safari has no built-in barcode reader: use ZBar (compiled to WebAssembly), loaded only when you scan
+  const mod = SCAN.zbar || (SCAN.zbar = await import("https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.11.0/dist/index.js"));
+  SCAN.detector = async c => {
+    const ctx = c.getContext("2d", {willReadFrequently:true}); const img = ctx.getImageData(0, 0, c.width, c.height);
+    const r = await mod.scanImageData(img); const hit = r.find(x => /EAN|UPC/.test(x.typeName)); return hit ? hit.decode() : null;
+  };
+  return SCAN.detector;
+}
+function stopScan(){
+  clearTimeout(SCAN.timer); SCAN.timer = 0;
+  if (SCAN.stream){ SCAN.stream.getTracks().forEach(t => t.stop()); SCAN.stream = null; }
+}
+function openScanner(foodId){
+  if (!ONLINE_DATA){ toast("Scanning works on the website"); return; }
+  const st = activeStore(); if (!st) return;
+  SCAN.done = false;
+  openModal(`<div class="shead"><h2>Scan a package</h2><button class="btn sm" id="scClose">Done</button></div>
+    <p class="small">At ${esc(st.name)}. Hold the barcode inside the box.</p>
+    <div class="scanbox" id="scBox"><video id="scVid" playsinline muted></video><span class="aim" aria-hidden="true"></span></div>
+    <p class="small" id="scMsg" aria-live="polite">Starting the camera…</p>
+    <div class="field"><label for="scCode">Or type the numbers under the barcode</label>
+      <div class="row nowrap"><input id="scCode" class="input num grow" inputmode="numeric" pattern="[0-9]*" placeholder="0 41190 45814 2"><button class="btn" id="scGo">Look up</button></div></div>
+    <div id="scOut"></div>`);
+  const close = () => { stopScan(); closeModal(); };
+  $("#scClose").onclick = close;
+  $("#overlay").addEventListener("click", e => { if (e.target.id === "overlay") stopScan(); });
+  $("#scGo").onclick = () => { const c = $("#scCode").value.replace(/\D/g, ""); if (c.length >= 8) lookupCode(c, foodId); else $("#scMsg").textContent = "A barcode number has 8 to 13 digits."; };
+  const vid = $("#scVid"), msg = $("#scMsg");
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ msg.textContent = "This phone can't open the camera here — type the numbers instead."; $("#scBox").hidden = true; return; }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"environment", width:{ideal:1280}, height:{ideal:720}}, audio:false}).then(async stream => {
+    if (!$("#scVid")){ stream.getTracks().forEach(t => t.stop()); return; }
+    SCAN.stream = stream; vid.srcObject = stream; await vid.play().catch(() => {});
+    msg.textContent = "Looking for a barcode…";
+    let dec; try{ dec = await scanDecoder(); }catch(e){ msg.textContent = "The barcode reader didn't load — type the numbers instead."; return; }
+    const c = document.createElement("canvas");
+    const tick = async () => {
+      if (!SCAN.stream || SCAN.done) return;
+      const w = vid.videoWidth, h = vid.videoHeight;
+      if (w && h){
+        // read the middle band of the picture, where the box is
+        const bw = Math.round(w * .8), bh = Math.round(h * .45); c.width = bw; c.height = bh;
+        c.getContext("2d", {willReadFrequently:true}).drawImage(vid, (w - bw) / 2, (h - bh) / 2, bw, bh, 0, 0, bw, bh);
+        try{
+          const code = await dec(c);
+          if (code && /^\d{8,14}$/.test(code)){ SCAN.done = true; if (navigator.vibrate) try{ navigator.vibrate(30); }catch(e){} stopScan(); $("#scBox").hidden = true; lookupCode(code, foodId); return; }
+        }catch(e){}
+      }
+      SCAN.timer = setTimeout(tick, 180);
+    };
+    tick();
+  }).catch(() => { msg.textContent = "The camera is off for this site — type the numbers instead."; $("#scBox").hidden = true; });
+}
+// Open Food Facts -> which of our foods it is -> saved with the store
+async function lookupCode(code, foodId){
+  const msg = $("#scMsg"), out = $("#scOut"); if (!msg) return;
+  msg.textContent = `Looking up ${code}…`;
+  let p = null;
+  try{
+    const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=code,product_name,brands,image_front_small_url,image_front_url,serving_size,serving_quantity,nutriments,categories_tags`);
+    const d = await r.json(); if (d && d.status === 1) p = d.product;
+  }catch(e){ msg.textContent = "Couldn't reach Open Food Facts. Check the connection and try again."; return; }
+  if (!p || !p.product_name){ msg.textContent = `${code} isn't in Open Food Facts yet. You can add it as your own food in Settings.`; return; }
+  const n = p.nutriments || {}, sq = +p.serving_quantity || 0;
+  const per = (k, mg) => { let v = n[k + "_serving"]; if (v == null && n[k + "_100g"] != null && sq) v = n[k + "_100g"] * sq / 100; return v == null ? null : Math.round(v * (mg ? 1000 : 10)) / (mg ? 1 : 10); };
+  const item = {c:String(p.code || code), n:String(p.product_name).slice(0, 60), b:String(p.brands || "").split(",")[0].trim().slice(0, 30), img:p.image_front_small_url || p.image_front_url || "",
+    s:p.serving_size || "", na:per("sodium", true), k:per("potassium", true), carb:per("carbohydrates"), sug:per("sugars"), fib:per("fiber"), prot:per("proteins"), sf:per("saturated-fat"), t:Date.now()};
+  Object.keys(item).forEach(k => { if (item[k] === null) delete item[k]; });
+  const text = (p.product_name + " " + (p.categories_tags || []).join(" ").replace(/en:|-/g, " ")).toLowerCase();
+  const pick = foodId ? [FOODS.find(f => f.id === foodId)].filter(Boolean) : guessFoods(text).slice(0, 4);
+  msg.textContent = "";
+  out.innerHTML = `<div class="scanhit">${item.img ? `<img src="${esc(item.img)}" alt="">` : ""}<span><b>${esc(item.n)}</b><small>${esc(item.b)}${item.na != null ? ` · ${item.na} mg sodium per serving` : ""}</small></span></div>
+    <p class="small">${foodId ? "Use it for this food at this store?" : "Which food is it?"}</p>
+    <div class="pick" id="scPick">${pick.map(f => `<button data-id="${esc(f.id)}"><span class="z">${spriteHTML(f)}</span><span class="grow"><span class="lbl">${esc(f.name)}</span><span class="sub">${esc(shortCat(f.cat))}</span></span></button>`).join("")}</div>
+    ${foodId ? "" : `<button class="btn sm ghost" id="scOther">Something else…</button>`}`;
+  $("#scPick").addEventListener("click", e => { const b = e.target.closest("button[data-id]"); if (!b) return; saveScan(b.dataset.id, item); });
+  const o = $("#scOther"); if (o) o.onclick = () => { closeModal(); S.ui.q = item.n.split(" ").slice(0, 2).join(" "); showSearch(); toast("Pick the food, then Scan the package on it"); };
+}
+function saveScan(foodId, item){
+  const st = activeStore(); if (!st) return;
+  const cur = {...(S.scans[st.id] || {})}; cur[foodId] = item;
+  S.scans[st.id] = cur; CF_CACHE.clear(); Store.saveLocal(); closeModal();
+  const f = FOODS.find(x => x.id === foodId); toast(`${st.name}'s ${f ? f.name.toLowerCase() : "shelf"} now shows ${item.n}`);
+  render();
+}
+function forgetScan(foodId){
+  const st = activeStore(); if (!st || !S.scans[st.id]) return;
+  const cur = {...S.scans[st.id]}; delete cur[foodId]; S.scans[st.id] = cur; CF_CACHE.clear(); Store.saveLocal(); render();
+}
+// A first guess at which food a product is, from the words they share.
+const SCAN_SYN = {soda:"cola pop soft drink", broth:"stock", ketchup:"catsup", chips:"crisps", yogurt:"yoghurt", beans:"bean", tomatoes:"tomato"};
+function guessFoods(text){
+  const words = new Set(text.replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(w => w.length > 2));
+  const has = w => words.has(w) || words.has(w.replace(/s$/, "")) || words.has(w + "s");
+  return FOODS.map(f => {
+    const fw = (f.name + " " + (SCAN_SYN[f.id] || "")).toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(w => w.length > 2 && !["and", "the", "with", "regular", "fresh"].includes(w));
+    let s = fw.reduce((a, w) => a + (has(w) ? 1 : 0), 0) / Math.max(1, Math.sqrt(fw.length));
+    if (/no salt|unsalted|low sodium/.test(text) && /no salt|unsalted|low sodium|reduced sodium/.test(f.name.toLowerCase())) s += .8;
+    return {f, s};
+  }).filter(x => x.s > .3).sort((a, b) => b.s - a.s).map(x => x.f);
+}
 // ===== Conditions (diet orders) and the grading rules =====
 const CONDITIONS = [
   {id:"sodium", name:"Low sodium (heart failure, high blood pressure)", short:"Sodium", param:{label:"Daily sodium limit", unit:"mg", def:2000, min:500, max:4000, step:100}},
@@ -1273,7 +1755,7 @@ function instrumentsFor(f, p){
 // phone gets their own private copy — nothing is shared between users. Inside the app, every person you
 // shop for has their own list (cart) and their own trips.
 const S = {
-  profiles:{}, stores:{}, foods:{}, trips:{}, prices:{}, carts:{},
+  profiles:{}, stores:{}, foods:{}, trips:{}, prices:{}, carts:{}, scans:{},
   sel:{profileId:null},
   ui:{tab:"shop", view:"store", cat:"Produce", q:"", filter:"all", itemId:null, itemFrom:"store", scroll:{store:0, aisle:0, search:0},
       expanded:null, confirm:null, historyOpen:{}, histPerson:"all", theme:"paper", look:"night"},
@@ -1290,7 +1772,7 @@ Object.defineProperty(S, "cart", { get(){ const p = activeProfile(); return cart
 const STORE_PRESETS = [
   {id:"kroger", name:"Kroger", type:"grocery"}, {id:"heb", name:"H-E-B", type:"grocery"}, {id:"sams", name:"Sam's Club", type:"warehouse"},
   {id:"walmart", name:"Walmart", type:"grocery"}, {id:"costco", name:"Costco", type:"warehouse"}, {id:"aldi", name:"Aldi", type:"grocery"},
-  {id:"fiesta", name:"Fiesta Mart", type:"grocery"}, {id:"randalls", name:"Randalls", type:"grocery"}, {id:"foodtown", name:"Food Town", type:"grocery"},
+  {id:"fiesta", name:"Fiesta Mart", type:"grocery"}, {id:"randalls", name:"Randalls", type:"grocery"}, {id:"foodtown", name:"Food Town", type:"grocery", chain:""},
   {id:"joev", name:"Joe V's Smart Shop", type:"grocery"}, {id:"target", name:"Target", type:"grocery"}, {id:"wholefoods", name:"Whole Foods", type:"grocery"},
   {id:"sprouts", name:"Sprouts", type:"grocery"}, {id:"traderjoes", name:"Trader Joe's", type:"grocery"}
 ];
@@ -1333,11 +1815,11 @@ const LS_KEY_OLD = "traycard_v1";
 const LOOKS = ["night", "day", "auto"];
 const Store = {
   ok:true,
-  snapshot(){ return {v:2, profiles:S.profiles, stores:S.stores, foods:S.foods, trips:S.trips, prices:S.prices, carts:S.carts, sel:S.sel,
+  snapshot(){ return {v:2, profiles:S.profiles, stores:S.stores, foods:S.foods, trips:S.trips, prices:S.prices, carts:S.carts, scans:S.scans, sel:S.sel,
     ui:{cat:S.ui.cat, filter:S.ui.filter, theme:S.ui.theme, look:S.ui.look, view:S.ui.view === "aisle" ? "aisle" : "store"}}; },
   apply(d){
     if (!d || typeof d !== "object") return false;
-    ["profiles","stores","foods","trips","prices"].forEach(k => { S[k] = (d[k] && typeof d[k] === "object" && !Array.isArray(d[k])) ? d[k] : {}; });
+    ["profiles","stores","foods","trips","prices","scans"].forEach(k => { S[k] = (d[k] && typeof d[k] === "object" && !Array.isArray(d[k])) ? d[k] : {}; });
     S.carts = {};
     if (d.carts && typeof d.carts === "object") Object.keys(d.carts).forEach(k => { S.carts[k] = normalizeCart(d.carts[k]); });
     if (d.cart){ const c = normalizeCart(d.cart); S.carts[d.cart.profileId || "_none"] = c; S.sel.profileId = d.cart.profileId || null; } // old single-cart shape
@@ -1364,7 +1846,7 @@ const Store = {
   put(col, id, data){ S[col][id] = {...data, id}; this.saveLocal(); render(); },
   del(col, id){ delete S[col][id]; this.saveLocal(); render(); },
   saveCart(){ this.saveLocal(); render(); },
-  reset(){ try{ localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_KEY_OLD); }catch(e){} S.profiles = {}; S.stores = {}; S.foods = {}; S.trips = {}; S.prices = {}; S.carts = {}; S.sel.profileId = null; S.ui.histPerson = "all"; S.ui.view = "store"; render(); }
+  reset(){ try{ localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_KEY_OLD); }catch(e){} S.profiles = {}; S.stores = {}; S.foods = {}; S.trips = {}; S.prices = {}; S.carts = {}; S.scans = {}; S.sel.profileId = null; S.ui.histPerson = "all"; S.ui.view = "store"; render(); }
 };
 // Night (the default), Day, or follow the phone.
 const darkMQ = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
@@ -1387,9 +1869,9 @@ const storeList = () => Object.values(S.stores).sort((a,b) => (a.created||0) - (
 function activeProfile(){ const list = profileList(); if (!list.length) return null; return S.profiles[S.sel.profileId] || list[0]; }
 function activeStore(){ const list = storeList(); if (!list.length) return null; return S.stores[S.cart.storeId] || list[0]; }
 const ready = () => !!(activeProfile() && activeStore());
-function allFoods(){ return FOODS.concat(Object.values(S.foods).map(normFood)); }
+function allFoods(){ return FOODS.map(chainFood).concat(Object.values(S.foods).map(normFood)); }
 function normFood(f){ return {...f, tags:Array.isArray(f.tags) ? f.tags : String(f.tags||"").split(" ").filter(Boolean), na:+f.na||0, k:+f.k||0, carb:+f.carb||0, sugar:+f.sugar||0, fiber:+f.fiber||0, prot:+f.prot||0, sf:+f.sf||0, fl:+f.fl||0, price:+f.price||0, builtin:false}; }
-function foodById(id){ return FOODS.find(f => f.id === id) || (S.foods[id] ? normFood(S.foods[id]) : null); }
+function foodById(id){ const f = FOODS.find(x => x.id === id); return f ? chainFood(f) : (S.foods[id] ? normFood(S.foods[id]) : null); }
 function foodsAt(store){
   const wh = store && store.type === "warehouse";
   return allFoods().filter(f => {
@@ -1453,6 +1935,7 @@ function render(){
   renderDock();
   fitStickers($("#screen-" + S.ui.tab));
   syncTrap();
+  chainTick();
 }
 
 // ---- The top line: where you are on the left, Search and Menu on the right ----
@@ -1468,6 +1951,9 @@ function renderTop(){
     else if (t === "shop") to = "Store";
     left = `<button class="back" data-nav="back"><span aria-hidden="true">‹</span> ${esc(to)}</button>`;
   }
+  // while a store's own shelf is still coming in (only after a second), a progress light sits by the store name
+  if (t === "shop" && v !== "store" && ready() && CH.status === "loading" && document.documentElement.classList.contains("ch-slow"))
+    left += `<span class="chprog" id="chProg" role="progressbar" aria-label="Getting ${esc(chainName(st) || st.name)}'s shelves" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(CH.progress * 100)}" style="--p:${CH.progress.toFixed(3)}"><i></i><span>Getting ${esc(chainName(st) || st.name)}'s shelves</span></span>`;
   const search = t === "shop" && ready() && v !== "search" ? `<button data-nav="search">Search</button>` : "";
   $("#topbar").innerHTML = `<span class="l">${left}</span><span class="r">${search}<button data-nav="menu" aria-haspopup="dialog">Menu</button></span>`;
 }
@@ -1580,6 +2066,9 @@ function buildShop(){
       if (act === "avoid"){ S.ui.filter = S.ui.filter === "noavoid" ? "all" : "noavoid"; Store.saveLocal(); renderShop(); return; }
       if (act === "swap"){ openItem(b.dataset.id, "item", rectOf(b.querySelector(".sp"))); return; }
       if (act === "fixprice"){ openPriceModal(S.ui.itemId); return; }
+      if (act === "scan"){ openScanner(S.ui.itemId); return; }
+      if (act === "scanany"){ openScanner(null); return; }
+      if (act === "unscan"){ forgetScan(S.ui.itemId); toast("Back to the usual photo"); return; }
       if (act === "editfood"){ openFoodModal(S.ui.itemId); return; }
       if (act === "grandma"){ quickAddProfile(GRANDMA_PRESET); return; }
       if (act === "newperson"){ openProfileModal(null); return; }
@@ -1614,7 +2103,7 @@ function quickAddProfile(preset){
 function quickAddStore(presetId){
   const pr = STORE_PRESETS.find(s => s.id === presetId); if (!pr) return;
   if (S.stores[pr.id]) { toast(`${pr.name} is already in your stores`); return; }
-  Store.put("stores", pr.id, {name:pr.name, type:pr.type, note:"", created:Date.now()});
+  Store.put("stores", pr.id, {name:pr.name, type:pr.type, note:"", created:Date.now(), ...(pr.chain !== undefined ? {chain:pr.chain} : {})});
   if (!S.cart.storeId) { S.cart.storeId = pr.id; Store.saveCart(); }
   toast(`${pr.name} added`);
 }
@@ -1683,7 +2172,12 @@ function flowerHTML(list, p, W, cartIds){
   const items = all.map((x, i) => [x, i]).reverse().map(([x, i]) => `<span class="it l${x.g.lvl}${cartIds && cartIds.has(x.f.id) ? " in" : ""}" data-i="${i}" style="left:${(x.x - s / 2).toFixed(1)}px;top:${(x.y - s / 2).toFixed(1)}px">${spriteHTML(x.f)}</span>`).join("");
   return `<div class="flower" id="flower" style="height:${H}px;--s:${s}px" aria-hidden="true">
     <svg class="rings" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${rings.map(([r]) => `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}"/>`).join("")}${rings.map(([r, t]) => lab(r, t)).join("")}</svg>
-    ${items}<div class="loupe" id="loupe" hidden></div></div>`;
+    ${items}${ONLINE_DATA && ready() && chainKeyOf(activeStore()) && !chainReady() ? flowerWaitHTML(cx, cy) : ""}<div class="loupe" id="loupe" hidden></div></div>`;
+}
+// Shown (after a second) in the middle of the collage while the store's own shelf is still on its way.
+function flowerWaitHTML(cx, cy){
+  const st = activeStore(), nm = esc(chainName(st) || (st && st.name) || "the store");
+  return `<div class="flwait" id="flWait" role="progressbar" aria-label="Getting ${nm}'s shelves" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(CH.progress * 100)}" style="left:${cx.toFixed(1)}px;top:${cy.toFixed(1)}px;--p:${CH.progress.toFixed(3)}"><i></i><span>Getting ${nm}'s shelves</span></div>`;
 }
 const flowerEl = id => { if (!FLOWER) return null; const i = FLOWER.items.findIndex(x => x.f.id === id); return i < 0 ? null : $(`#flower .it[data-i="${i}"]`); };
 function renderStore(sc, p, st){
@@ -1739,7 +2233,7 @@ function wireFlower(el, open){
   });
   el.addEventListener("contextmenu", e => e.preventDefault());
 }
-function prefetch(f){ const k = photoKey(f); if (k){ const im = new Image(); im.src = PHOTO_BASE + k + ".webp"; } }
+function prefetch(f){ if (f && f.ch){ const im = new Image(); im.src = f.ch.img; return; } const k = photoKey(f); if (k){ const im = new Image(); im.src = PHOTO_BASE + k + ".webp"; } }
 
 // ---- An aisle: lit shelves, three products to a shelf, an LED label under each ----
 const SHELF_R = .94;   // product zone height / width
@@ -1816,7 +2310,7 @@ function instHTML(x, big){
 }
 function swapFor(f, g, p){
   const key = photoKey(f); if (!key || g.lvl === 0) return null;
-  return FOODS.filter(x => x.id !== f.id && PHOTO[x.id] === key).map(x => ({x, g:gradeFood(x, p)})).filter(o => o.g.lvl < g.lvl).sort((a, b) => a.g.lvl - b.g.lvl || a.x.na - b.x.na)[0] || null;
+  return FOODS.filter(x => x.id !== f.id && PHOTO[x.id] === key).map(chainFood).map(x => ({x, g:gradeFood(x, p)})).filter(o => o.g.lvl < g.lvl).sort((a, b) => a.g.lvl - b.g.lvl || a.x.na - b.x.na)[0] || null;
 }
 // The details the instruments don't show — serving, package, the other nutrients — are written on the stage as
 // callouts, each with a thin line that ends on the product's own outline.
@@ -1833,11 +2327,11 @@ function calloutData(f, st, ins){
 }
 let STAGE_W = 0;
 function stageHTML(f, p, st, ins){
-  const key = photoKey(f), box = key && PHOTO_BOX[key], edge = key && PHOTO_EDGE[key], price = priceFor(f, st);
+  const key = photoKey(f), box = f.ch ? f.ch.box : key && PHOTO_BOX[key], edge = f.ch ? f.ch.edge : key && PHOTO_EDGE[key], price = priceFor(f, st);
   const sticker = (style) => `<button class="pgbtn" data-act="fixprice" style="${style || ""}" aria-label="Price ${esc(money(price))} ${esc(unitFor(f, st))}. Fix the price">${priceGun(money(price), 34, 7)}</button>`;
   if (!box || !edge){
     STAGE_W = 0;
-    return `<div class="stage solo" id="stage"><span class="pool" aria-hidden="true"></span><span class="obj">${cutHTML(f, "", ' id="stageImg"')}</span>${sticker()}</div>`;
+    return `<div class="stage solo" id="stage"><span class="pool" aria-hidden="true"></span><span class="obj">${cutHTML(f, "big", ' id="stageImg"')}</span>${sticker()}</div>`;
   }
   const W = stageWidth(), H = 280; STAGE_W = W;
   const P = Math.round(Math.min(240, W * .6)), L = W - P - 8, T = Math.round((H - P) / 2) - 6, s = P / 256;
@@ -1852,7 +2346,7 @@ function stageHTML(f, p, st, ins){
   const stR = Math.max(16, W - (L + x1 * s) - 22), stT = Math.max(4, T + y0 * s - 16);
   return `<div class="stage lab" id="stage" style="height:${H}px">
     <span class="pool" aria-hidden="true" style="left:${cx.toFixed(1)}px;width:${pw.toFixed(0)}px"></span>
-    ${cutHTML(f, "", ` id="stageImg" style="left:${L}px;top:${T}px;width:${P}px;height:${P}px"`)}
+    ${cutHTML(f, "big", ` id="stageImg" style="left:${L}px;top:${T}px;width:${P}px;height:${P}px"`)}
     <svg class="leaders" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${lines}</svg>
     ${items.map((it, i) => `<span class="co" style="top:${ys[i].toFixed(1)}px;width:${colW}px"><small>${esc(it.k)}</small><b>${esc(it.v)}</b></span>`).join("")}
     ${sticker(`right:${stR.toFixed(0)}px;top:${stT.toFixed(0)}px`)}
@@ -1869,8 +2363,10 @@ function renderItem(sc, p, st){
     .filter(([k, v]) => v && !shown.has(k)).map(([k, v]) => `${esc(k)} ${esc(v)}`).join(" · ");
   sc.innerHTML = `<div class="view itemv">
     ${stage}
-    <h1 class="pname">${esc(main)}${extra ? ` <span>${esc(extra)}</span>` : ""}</h1>
-    <p class="serv">${labelled ? `${esc(shortCat(f.cat))} · ${esc(st.name)}` : `Per ${esc(f.serving)} · ${esc(shortCat(f.cat))} · ${esc(unitFor(f, st))}`}</p>
+    ${f.product ? `<h1 class="pname">${esc(f.product)}${f.brand ? ` <span>${esc(f.brand)}</span>` : ""}</h1>
+    <p class="serv">${esc(main)}${extra ? ` (${esc(extra)})` : ""} · ${esc(st.name)}</p>`
+    : `<h1 class="pname">${esc(main)}${extra ? ` <span>${esc(extra)}</span>` : ""}</h1>
+    <p class="serv">${labelled ? `${esc(shortCat(f.cat))} · ${esc(st.name)}` : `Per ${esc(f.serving)} · ${esc(shortCat(f.cat))} · ${esc(unitFor(f, st))}`}</p>`}
     ${instHTML(ins[0], true)}
     ${ins.length > 1 ? `<div class="insts">${ins.slice(1).map(x => instHTML(x, false)).join("")}</div>` : ""}
     <div class="verdict"><b class="c${g.lvl}">${esc(lvWord(g.lvl, p))}</b><span>${esc(first ? first.text : `Fits ${p.name}'s diet order.`)}</span></div>
@@ -1879,9 +2375,15 @@ function renderItem(sc, p, st){
       ${goods.length ? `<li><i class="dot c0"></i>${esc(goods.join(" · "))}</li>` : ""}
       ${g.infos.map(t => `<li class="info"><i class="dot"></i>${esc(t)}</li>`).join("")}</ul>` : ""}
     ${sw ? swapHTML(sw, p) : ""}
-    <p class="facts">${labelled ? "" : `Per ${esc(f.serving)}${facts ? " · " + facts : ""}. `}Typical values for a generic version — check the real label.</p>
-    <div class="keys"><button class="key" data-act="fixprice">Fix price</button>${f.builtin ? "" : `<button class="key" data-act="editfood">Edit food</button>`}</div>
+    <p class="facts">${labelled ? "" : `Per ${esc(f.serving)}${facts ? " · " + facts : ""}. `}${f.product ? labelNote(f) : "Typical values for a generic version — check the real label."}</p>
+    <div class="keys"><button class="key" data-act="fixprice">Fix price</button>${f.builtin ? (ONLINE_DATA ? `<button class="key" data-act="scan">${f.scanned ? "Scan again" : "Scan the package"}</button>` : "") + (f.scanned ? `<button class="key" data-act="unscan">Usual photo</button>` : "") : `<button class="key" data-act="editfood">Edit food</button>`}</div>
   </div>`;
+}
+// Where a store product's numbers come from.
+function labelNote(f){
+  const src = f.label === "usda" ? "USDA FoodData Central" : "Open Food Facts";
+  const typ = (f.typical || []).map(k => ({na:"sodium", k:"potassium", carb:"carbs", sug:"sugar", fib:"fiber", prot:"protein", sf:"saturated fat"})[k]).filter(Boolean);
+  return `Numbers from this product's label (${src}), per ${f.serving}.${typ.length ? ` Not on the label we have: ${typ.join(", ")} — typical values shown.` : ""} Recipes change, so check the package.`;
 }
 function swapHTML(sw, p){
   const m = metricFor(p), tv = tagValue(sw.x, sw.g, m), what = tv.unit === "mL" ? "fluid" : (m ? m.name.toLowerCase() : "sodium");
@@ -1926,7 +2428,7 @@ function showSearch(){
 }
 function renderSearch(sc){
   sc.innerHTML = `<div class="view searchv">
-    <div class="sfield"><input id="q" type="search" placeholder="Search foods" value="${esc(S.ui.q)}" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Search all foods">${S.ui.q ? `<button class="key sm" data-act="clearq" aria-label="Clear the search">Clear</button>` : ""}</div>
+    <div class="sfield"><input id="q" type="search" placeholder="Search foods" value="${esc(S.ui.q)}" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Search all foods">${S.ui.q ? `<button class="key sm" data-act="clearq" aria-label="Clear the search">Clear</button>` : ONLINE_DATA ? `<button class="key sm" data-act="scanany" aria-label="Scan a package's barcode">Scan</button>` : ""}</div>
     <p class="sub" id="qcount"></p>
     <div id="results" class="results"></div>
   </div>`;
@@ -2297,7 +2799,7 @@ function renderMore(){
     </section>
     <section class="set">
       <div class="seth"><b>Stores</b><button class="key sm" data-act="addstore">Add a store</button></div>
-      ${stores.length ? stores.map(s => `<div class="srow"><span class="grow"><b>${esc(s.name)}</b><small>${s.type === "warehouse" ? "Warehouse club · bulk sizes and prices" : "Grocery"}${s.note ? ` · ${esc(s.note)}` : ""}</small></span>
+      ${stores.length ? stores.map(s => `<div class="srow"><span class="grow"><b>${esc(s.name)}</b><small>${esc(chainName(s) ? chainName(s) + " products" : "General photos")} · ${s.type === "warehouse" ? "bulk sizes and prices" : "grocery"}${s.city ? ` · ${esc(s.city)}` : ""}${s.note ? ` · ${esc(s.note)}` : ""}</small></span>
         ${S.ui.confirm === "store:" + s.id ? `<span class="confirm inline"><span>Remove?</span><button class="btn sm danger" data-act="delstore" data-id="${esc(s.id)}">Remove</button><button class="btn sm" data-act="cancel">Keep</button></span>` : `<button class="key sm" data-act="editstore" data-id="${esc(s.id)}">Edit</button><button class="key sm danger" data-act="delstoreask" data-id="${esc(s.id)}">Remove</button>`}</div>`).join("") : `<p class="small">No stores yet.</p>`}
       ${presets.length ? `<div class="chips wrap">${presets.map(p => `<button class="chip" data-act="preset" data-id="${p.id}">+ ${esc(p.name)}</button>`).join("")}</div>` : ""}
     </section>
@@ -2331,22 +2833,71 @@ function renderGuide(){
   </div>`;
 }
 function openStoreModal(id){
-  const s = id ? S.stores[id] : {name:"", type:"grocery", note:""}; if (!s) return;
-  openModal(`<div class="shead"><h2>${id ? "Edit store" : "Add a store"}</h2></div>
-    <div class="field"><label for="stName">Store name</label><input id="stName" class="input" value="${esc(s.name)}" placeholder="Fiesta Mart on Bellaire"></div>
+  if (!id){ openStoreSearch(); return; }
+  const s = S.stores[id]; if (!s) return;
+  const own = detectChain(s.name, s.state), ownInfo = own && CHAIN_INFO[own];
+  let chain = s.chain !== undefined && s.chain !== null ? s.chain : (chainOf(s) || "");
+  openModal(`<div class="shead"><h2>Edit store</h2></div>
+    <div class="field"><label for="stName">Store name</label><input id="stName" class="input" value="${esc(s.name)}"></div>
+    ${s.addr || s.city ? `<p class="small">${esc([s.addr, s.city, s.state].filter(Boolean).join(", "))}</p>` : ""}
     <div class="field"><label>Kind</label><div class="seg" id="stType"><button data-t="grocery" class="${s.type !== "warehouse" ? "on" : ""}">Regular grocery</button><button data-t="warehouse" class="${s.type === "warehouse" ? "on" : ""}">Bulk club (Sam's, Costco)</button></div></div>
-    <div class="field"><label for="stNote">Note (optional)</label><input id="stNote" class="input" value="${esc(s.note || "")}" placeholder="Location, best day to go…"></div>
-    <div class="row"><button class="btn primary grow" id="stSave">${id ? "Save" : "Add store"}</button><button class="btn" id="stCancel">Cancel</button></div>`);
+    ${ownInfo ? `<div class="field"><label>Shelves</label><div class="seg" id="stShelf"><button data-c="${esc(own)}" class="${chain ? "on" : ""}">${esc(ownInfo.name)} products</button><button data-c="" class="${chain ? "" : "on"}">General photos</button></div></div>` : ""}
+    <div class="field"><label for="stNote">Note (optional)</label><input id="stNote" class="input" value="${esc(s.note || "")}" placeholder="Best day to go…"></div>
+    <div class="row"><button class="btn primary grow" id="stSave">Save</button><button class="btn" id="stCancel">Cancel</button></div>`);
   let type = s.type === "warehouse" ? "warehouse" : "grocery";
   $("#stType").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; type = b.dataset.t; $$("#stType button").forEach(x => x.classList.toggle("on", x === b)); });
+  const sh = $("#stShelf"); if (sh) sh.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; chain = b.dataset.c; $$("#stShelf button").forEach(x => x.classList.toggle("on", x === b)); });
   $("#stCancel").onclick = closeModal;
   $("#stSave").onclick = () => {
     const name = $("#stName").value.trim(); if (!name){ toast("Type the store's name"); return; }
-    const sid = id || (S.stores[slug(name)] ? uid("s") : slug(name));
-    Store.put("stores", sid, {name, type, note:$("#stNote").value.trim(), created:s.created || Date.now()});
-    if (!S.cart.storeId){ S.cart.storeId = sid; Store.saveCart(); }
-    closeModal(); toast(id ? "Saved" : `${name} added`);
+    Store.put("stores", id, {...s, name, type, note:$("#stNote").value.trim(), chain:ownInfo ? chain : (s.chain !== undefined ? s.chain : undefined)});
+    closeModal(); toast("Saved");
   };
+}
+// Adding a store: search by store, ZIP code or city; the nearest matches come up as you type.
+function openStoreSearch(prefill){
+  openModal(`<div class="shead"><h2>Add a store</h2></div>
+    <div class="field"><label for="stQ">Store and ZIP code, or a city</label>
+      <div class="sfield"><input id="stQ" class="input" type="search" value="${esc(prefill || "")}" placeholder="H-E-B 77004" autocomplete="off" autocapitalize="words" spellcheck="false"><button class="key sm" id="stHere" type="button">Near me</button></div></div>
+    <p class="small" id="stHint">Like “Kroger 77004”, “Ralphs Los Angeles” or just a ZIP code.</p>
+    <div class="stres" id="stRes" aria-live="polite"></div>
+    <button class="srow go" id="stByName" hidden><span class="grow"><b id="stByNameT"></b><small>Add it by name, without an address</small></span><span class="chev" aria-hidden="true">›</span></button>`);
+  const q = $("#stQ"), res = $("#stRes"), hint = $("#stHint"), byName = $("#stByName");
+  let found = [], timer = 0, slow = 0;
+  const addStore = st => {
+    const info = st.chain && CHAIN_INFO[st.chain];
+    const base = slug(`${st.name} ${st.city || st.zip || ""}`) || uid("s");
+    const sid = S.stores[base] ? uid("s") : base;
+    Store.put("stores", sid, {name:st.name, type:(info && info.kind === "warehouse") || st.kind === "w" ? "warehouse" : "grocery", note:"", created:Date.now(),
+      chain:st.chain || "", addr:st.addr || "", city:st.city || "", state:st.state || "", zip:st.zip || "", lat:st.lat, lon:st.lon});
+    S.cart.storeId = sid; S.cart.items.forEach(i => { const f = foodById(i.id); if (f) i.price = priceFor(f, S.stores[sid]); });
+    Store.saveCart(); closeModal(); toast(`${st.name} added`);
+  };
+  const draw = r => {
+    clearTimeout(slow); hint.classList.remove("busy");
+    const text = q.value.trim();
+    const w = r && r.w, nameOnly = (w && w.name) || text.replace(/\b\d{5}\b/, "").trim();
+    byName.hidden = !nameOnly; if (nameOnly) $("#stByNameT").textContent = `Add “${nameOnly}”`;
+    if (!text){ res.innerHTML = ""; hint.textContent = "Like “Kroger 77004”, “Ralphs Los Angeles” or just a ZIP code."; return; }
+    if (!r){ return; }
+    if (r.offline){ res.innerHTML = ""; hint.textContent = "Store search works on the website. Here, add the store by name."; return; }
+    if (r.needPlace){ res.innerHTML = ""; hint.textContent = "Add a ZIP code or city to see the stores near it — or tap Near me."; return; }
+    found = r.list;
+    hint.textContent = found.length ? `${found.length === 1 ? "1 store" : found.length + " stores"} near ${w.place === "you" ? "you" : w.place}` : `No stores found near ${w.place}. Check the spelling, or add it by name below.`;
+    res.innerHTML = found.map((st, k) => { const info = st.chain && CHAIN_INFO[st.chain];
+      return `<button class="srow st" data-k="${k}"><span class="grow"><b>${esc(st.name)}</b><small>${esc([st.addr, st.city].filter(Boolean).join(", ") || st.zip || "")}</small>${info ? `<span class="own"><i class="led"></i>${esc(info.name)} products</span>` : ""}</span><span class="mi">${st.mi < 10 ? st.mi.toFixed(1) : Math.round(st.mi)} mi</span></button>`; }).join("");
+  };
+  const run = () => {
+    clearTimeout(slow); slow = setTimeout(() => { hint.textContent = "Looking…"; hint.classList.add("busy"); }, 1000);
+    findStores(q.value).then(r => { if (r) draw(r); }).catch(() => { clearTimeout(slow); hint.textContent = "Couldn't search right now. You can add the store by name below."; });
+  };
+  q.addEventListener("input", () => { clearTimeout(timer); if (!q.value.trim()){ draw(null); return; } timer = setTimeout(run, 220); });
+  q.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); clearTimeout(timer); run(); q.blur(); } });
+  res.addEventListener("click", e => { const b = e.target.closest("button[data-k]"); if (b) addStore(found[+b.dataset.k]); });
+  byName.onclick = () => { const nm = ((q.value.replace(/\b\d{5}\b/, "").trim()) || "").replace(/\s+/g, " "); if (!nm) return; addStore({name:nm.replace(/\b\w/g, c => c.toUpperCase()), chain:detectChain(nm) || ""}); };
+  $("#stHere").onclick = () => { hint.textContent = "Finding you…"; useMyLocation().then(here => { if (!here){ hint.textContent = "Location is off. Type a ZIP code instead."; return; } run(); }); };
+  if (prefill) run();
+  if (window.innerWidth > 640) q.focus();
 }
 function openFoodModal(id){
   const f = id ? normFood(S.foods[id]) : {name:"", cat:"Pantry & Canned", serving:"", na:"", k:"", carb:"", sugar:"", fiber:"", prot:"", sf:"", fl:"", tags:[], price:"", unit:"", bp:"", bu:"", stores:[]};
@@ -2435,7 +2986,8 @@ async function exportCSV(){
 
 // ===== Guide content =====
 const GUIDE = [
-  {t:"How the colors work", b:`<p><span class="badge"><i class="dot c0"></i>Fits</span> fits every diet order the person has. In the store these foods sit in the middle of the collage.</p><p><span class="badge"><i class="dot c1"></i>Counts as fluid</span> fine to buy, but every sip comes out of the day's fluid allowance — the label shows how many millilitres.</p><p><span class="badge"><i class="dot c2"></i>Small amounts</span> a small portion once in a while, or a caution about medicines. Read the reason on the product.</p><p><span class="badge"><i class="dot c3"></i>Avoid</span> breaks a rule outright (very high sodium, an allergy, alcohol on a no-alcohol order). These are grey in the store; the product shows a swap when there is one.</p><p class="small">Numbers are typical values for a generic version of the food. Brands differ, so the app also tells you what to look for on the real label.</p>`},
+  {t:"How the colors work", b:`<p><span class="badge"><i class="dot c0"></i>Fits</span> fits every diet order the person has. In the store these foods sit in the middle of the collage.</p><p><span class="badge"><i class="dot c1"></i>Counts as fluid</span> fine to buy, but every sip comes out of the day's fluid allowance — the label shows how many millilitres.</p><p><span class="badge"><i class="dot c2"></i>Small amounts</span> a small portion once in a while, or a caution about medicines. Read the reason on the product.</p><p><span class="badge"><i class="dot c3"></i>Avoid</span> breaks a rule outright (very high sodium, an allergy, alcohol on a no-alcohol order). These are grey in the store; the product shows a swap when there is one.</p><p class="small">At the big chains the numbers come from the real product's label (see “Your store's own shelves”). Everywhere else they are typical values for a generic version of the food — brands differ, so the app also tells you what to look for on the real label.</p>`},
+  {t:"Your store's own shelves", b:`<p><b>Find your store:</b> Menu → This trip → + Store (or Other… when you start). Type the store and your ZIP code — “Kroger 77004”, “Ralphs Los Angeles” — or tap Near me, then tap your store.</p><p><b>Real products:</b> at about 50 chains — Walmart, Kroger and its stores (Ralphs, Food 4 Less, Fry's, King Soopers…), H-E-B, Albertsons and Safeway (Vons, Randalls, Tom Thumb…), Aldi, Target, Costco, Sam's Club, Trader Joe's, Whole Foods, Publix and more — the shelves fill with that chain's own products, mostly its house brand. The product page shows the real name and brand, and grades it with the numbers from its label.</p><p><b>Any other store</b> shows the general photos. Open a product and tap <b>Scan the package</b> to point the camera at its barcode; from then on that store's shelf shows the product you scanned, with its label numbers.</p><p><b>Loading:</b> the general shelf is on screen right away. A chain's shelf fills in a moment later — instantly after the first visit, because it stays on the phone. A small progress light appears only if it takes more than a second.</p><p><b>Prices</b> are still estimates. Fix any price once and the app remembers it for that store.</p><p class="small">Product photos and data: Open Food Facts contributors (CC BY-SA, ODbL) — cut out for this app and shared under the same license. Nutrition: USDA FoodData Central. Store locations: All the Places, Overture Maps Foundation and OpenStreetMap contributors. Products change; the package in your hand is always the final word.</p>`},
   {t:"2 g sodium diet (heart failure, blood pressure)", b:`<p>2 grams = 2,000 mg a day, spread over all meals and snacks. Most of the salt in a diet comes from packaged food, not the shaker.</p><ul><li><b>Low sodium</b> on a label means 140 mg or less per serving — the target for most items.</li><li><b>Very low</b> = 35 mg or less. <b>Sodium-free</b> = under 5 mg.</li><li><b>Reduced sodium</b> only means 25% less than the regular version — soy sauce and soups can still be very high.</li><li><b>No salt added</b> is the phrase to hunt for on canned vegetables, beans, tomatoes, broth and tuna.</li><li>Anything over 400 mg per serving (20% of the day) is a put-it-back item.</li></ul><p><b>Biggest offenders:</b> deli meat, bacon, sausage, hot dogs, canned soup, ramen, frozen dinners, pizza, cheese, pickles, olives, soy sauce, seasoning salts, bouillon, biscuits, boxed rice and pasta mixes.</p><p><b>Swaps:</b> fresh or frozen plain meat instead of deli; no-salt-added cans, or rinse regular canned beans and vegetables (drops sodium by about a third); Swiss or fresh mozzarella instead of cheddar or American; salt-free seasoning blends, garlic and onion powder, lemon, vinegar, pepper, fresh herbs for flavor.</p><p>Chicken, pork and shrimp are sometimes injected with salt water — the package says "enhanced" or "contains up to 15% solution". Buy plain.</p>`},
   {t:"1,500 mL fluid restriction", b:`<p>Everything that is liquid at room temperature counts, not just water: coffee, tea, milk, juice, soda, soup and broth, nutrition shakes, ice (half its volume), ice cream, sherbet, popsicles, Jell-O, pudding, yogurt, gravy, creamer.</p><div class="kv"><b>1 cup / 8 fl oz</b><span>240 mL</span><b>1 fl oz</b><span>30 mL</span><b>16.9 oz water bottle</b><span>500 mL — a third of the day</span><b>12 oz can</b><span>355 mL</span><b>Popsicle</b><span>about 75 mL</span><b>Jell-O or pudding cup</b><span>about 100 mL</span><b>Scoop of ice cream</b><span>about 120 mL</span><b>Bowl of soup</b><span>240–360 mL</span></div><p><b>Making it easier:</b> use small cups; spread fluids through the day; take pills with meal fluids instead of an extra glass; sugar-free hard candy or gum, a lemon wedge, or rinsing and spitting for a dry mouth; avoid salty food, which drives thirst.</p><p>Many heart-failure plans also ask for a daily morning weight. A gain of 2–3 lb in a day or 5 lb in a week usually means call the clinic — that is fluid, not fat.</p>`},
   {t:"Chronic respiratory failure / COPD", b:`<ul><li><b>Small, frequent meals</b> (5–6 a day). A full stomach pushes up on the diaphragm and makes breathing harder.</li><li><b>Skip gas-makers</b> and carbonated drinks: beans, cabbage, broccoli, cauliflower, Brussels sprouts, onions, corn, soda, sparkling water, fried food.</li><li><b>Protein at every meal</b> — eggs, chicken, fish, Greek yogurt, cottage cheese, protein shakes. Breathing burns calories, and the breathing muscles need protein.</li><li><b>Go easy on sugar and refined carbs.</b> Burning a big load of simple carbs produces extra carbon dioxide that tired lungs have to clear. Healthy fats (olive oil, avocado, nuts, fish) are a gentler fuel.</li><li><b>Salt</b> makes the body hold fluid, which strains breathing — the sodium rule helps here too.</li><li><b>Soft, easy-to-chew foods</b> on short-of-breath days; rest before meals, eat slowly, sit upright.</li><li>Fluids thin mucus, but a doctor's fluid restriction always wins over "drink more".</li><li>If on steroid pills or inhalers long term, calcium and vitamin D (milk, yogurt, fortified foods) protect the bones.</li></ul>`},
@@ -2470,6 +3022,7 @@ function boot(){
   const h = (location.hash || "").slice(1); if (TABS.includes(h)){ S.ui.tab = h; try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){} }
   window.addEventListener("hashchange", () => { const t = (location.hash || "").slice(1); if (TABS.includes(t) && t !== S.ui.tab) setTab(t); });
   render();
+  if ("serviceWorker" in navigator && location.protocol === "https:" && ONLINE_DATA) navigator.serviceWorker.register("sw.js").catch(() => {});
 }
 boot();
 </script></body></html>
